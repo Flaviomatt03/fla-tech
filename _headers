@@ -3,6 +3,6 @@
   X-Frame-Options: DENY
   Referrer-Policy: no-referrer
   Permissions-Policy: microphone=(self), camera=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://luerktuxluvftrkixbzk.supabase.co https://api.open-meteo.com; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.scdn.co; connect-src 'self' https://luerktuxluvftrkixbzk.supabase.co https://api.open-meteo.com https://api.spotify.com https://accounts.spotify.com; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'
 /sw.js
   Cache-Control: no-cache
