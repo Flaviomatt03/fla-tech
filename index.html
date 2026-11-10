@@ -1255,18 +1255,18 @@ async function showMusic(){
 async function musicCommand(raw){
   const t=norm(raw);
   if(!SP){PEND={kind:'music',apply:null};return'Per la musica devo prima collegare Spotify: ti apro Musica, tocca Collega Spotify.'}
-  const done=(msg,hl)=>{PEND={kind:'music',hl:hl||'[data-hl="now"]',apply:()=>{spRefresh()}};return msg};
+  const done=(msg,hl)=>{PEND={kind:'music',noOpen:true,hl:hl||'[data-hl="now"]',apply:()=>{setTimeout(spRefresh,600)}};return msg};
   try{
     if(/\b(che|quale) (canzone|brano|musica)|cosa sta suonando|cosa sento|chi canta|cosa sto ascoltando/.test(t)){await spRefresh();const n=spTitle();return done(n?'Stai ascoltando '+n.t+(n.a?', di '+n.a:'')+'.':'Non sta suonando niente.')}
     if(/\b(pausa|ferma|fermati|stop|stoppa)\b/.test(t)){await spDo(()=>spApi('/me/player/pause','PUT'));return done('Messa in pausa.')}
-    if(/\b(prossim\w*|salta|avanti|skip)\b/.test(t)){await spDo(()=>spApi('/me/player/next','POST'));return done('Passo al prossimo brano.')}
+    if(/\b(prossim\w*|salta|avanti|skip)\b/.test(t)||/\bcambia\b/.test(t)&&/\b(canzone|brano|musica|traccia)\b/.test(t)&&!/\b(con|in|su)\s+\w/.test(t.replace(/\b(canzone|brano|musica|traccia)\b/,''))){await spDo(()=>spApi('/me/player/next','POST'));return done('Passo al prossimo brano.')}
     if(/\b(preceden\w*|indietro)\b/.test(t)){await spDo(()=>spApi('/me/player/previous','POST'));return done('Torno al brano precedente.')}
     if(/\b(shuffle|casuale|mescola)\b/.test(t)){const off=/\b(togli|disattiva|spegni|senza|non)\b/.test(t);await spDo(()=>spApi('/me/player/shuffle?state='+!off,'PUT'));return done(off?'Riproduzione casuale spenta.':'Riproduzione casuale attiva.')}
     if(/\bvolume\b|\balza\b|\babbassa\b|piu forte|piu piano/.test(t)){
       let v=(t.match(/\d+/)||[])[0];await spRefresh();const c=(spNow&&spNow.device&&spNow.device.volume_percent)||50;
       v=v!=null?+v:(/alza|piu forte|aumenta/.test(t)?c+15:c-15);v=Math.max(0,Math.min(100,v));
       await spDo(()=>spApi('/me/player/volume?volume_percent='+v,'PUT'));return done('Volume al '+v+' per cento.')}
-    let m=t.match(/\b(?:metti|mettimi|riproduci|suona|suonami|fai partire|fammi sentire|ascolta|ascoltare|voglio sentire|voglio ascoltare)\s+(.*)$/);
+    let m=t.match(/\b(?:metti|mettimi|mettere|riproduci|suona|suonami|suonare|fai partire|far partire|fammi sentire|ascolta|ascoltare|voglio sentire|voglio ascoltare|cambia (?:con|in|su)|passa a|cerca)\s+(.*)$/);
     let q=m?m[1]:'';const hintPl=/\bplaylist\b/.test(t),hintTr=/\b(canzone|brano)\b/.test(t);
     q=q.replace(/\b(su|con|da) spotify\b/g,'').replace(/\b(la|il|lo|l|una|un|di|del|della|dei|alcune|un po di)\s+/g,' ').replace(/\b(playlist|canzone|brano|album|musica|spotify)\b/g,' ').replace(/\s+/g,' ').trim();
     if(!m||!q){await spDo(()=>spApi('/me/player/play','PUT'));return done('Riprendo la musica.')}
@@ -1277,6 +1277,8 @@ async function musicCommand(raw){
       if(best&&best[0]>=.99){await spPlay({context_uri:best[1].uri});return done('Parte la playlist '+best[1].name+'.')}}
     const R=await spSearch(q,hintPl?'playlist':hintTr?'track':'track,playlist,artist');
     if(hintPl&&R.playlists[0]){await spPlay({context_uri:R.playlists[0].uri});return done('Parte la playlist '+R.playlists[0].name+'.')}
+    const ar=R.artists.find(a=>{const n=norm(a.name);return words.length&&words.every(w=>n.includes(w))});
+    if(ar&&!hintTr){await spPlay({context_uri:ar.uri});return done('Parte '+ar.name+'.')}
     if(R.tracks[0]){const x=R.tracks[0];await spPlay({uris:[x.uri]});return done('Parte '+x.name+', di '+x.artists.map(a=>a.name).join(', ')+'.')}
     if(R.playlists[0]){await spPlay({context_uri:R.playlists[0].uri});return done('Parte la playlist '+R.playlists[0].name+'.')}
     return'Non trovo "'+q+'" su Spotify.'
@@ -1296,6 +1298,7 @@ function liveGo(){
   const cur=appOpen&&appEl&&('#'+appEl.id)===el;
   const run=()=>{try{p.apply&&p.apply()}catch{}if(p.hl)setTimeout(()=>flash(p.hl),150)};
   setTimeout(()=>{
+    if(p.noOpen&&!cur)return;
     closeSheet(true);
     if(cur){run();return}
     const go=()=>{openApp($(el),p.kind);setTimeout(run,p.kind==='fin'?2200:1150)};
@@ -1348,8 +1351,8 @@ async function moveCommand(raw){
 async function hubCommand(raw){
   const t=norm(raw).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'');
   const oc=openCmd(t);if(oc)return oc;
-  if(/\b(spotify|musica|playlist|canzone|canzoni|brano|brani|riproduci|suona|suonami|pausa|riprendi|volume|shuffle|casuale|mescola|prossima|prossimo|salta|stoppa)\b/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria)\b/.test(t))return await musicCommand(raw);
-  if(/^(metti|mettimi|suona|suonami|riproduci|fai partire|fammi sentire|ascolta|voglio sentire|voglio ascoltare)\b/.test(t)&&!/\d/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria|stipendio|entrata|ca)\b/.test(t))return await musicCommand(raw);
+  if(/\b(spotify|musica|playlist|canzone|canzoni|brano|brani|riproduci|suona|suonami|pausa|riprendi|volume|shuffle|casuale|mescola|prossima|prossimo|salta|stoppa|cambia (?:la )?(?:canzone|brano|musica))\b/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria)\b/.test(t))return await musicCommand(raw);
+  if(/^(?:(?:puoi|potresti|vorrei|per favore|dai|ora|adesso|mi|ti|ok|allora)\s+)*(metti|mettimi|mettere|suona|suonami|suonare|riproduci|fai partire|far partire|fammi sentire|ascolta|voglio sentire|voglio ascoltare|cambia con|cambia in|passa a)\b/.test(t)&&!/\d/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria|stipendio|entrata|ca)\b/.test(t))return await musicCommand(raw);
   if(/\bash\b|scheda|\bca\b|classe armatura|competenz|inventario|risors|dad[io] vita|ispirazione|salvezza contro la morte|sottoclasse|punti ferita|\bpf\b|focus|riposo (lungo|breve)|iniziativa|\b(tira|lancia)\b|\bdanni?\b|ferito|\bmi curo\b/.test(t)&&!/\b(task|taks|compito|compiti|quaderno|evento|appuntamento|calendario)\b/.test(t)&&!/\b(spes\w*|euro|speso|stipendio)\b/.test(t))return await ashCommand(raw);
   if(DELV.test(t)){const r=await delCommand(raw);if(r!==null)return r}
   if(/\b(sposta|spostare|spostami|rimanda|rinvia|posticipa|anticipa)\b/.test(t))return await moveCommand(raw);
