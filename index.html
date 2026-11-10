@@ -198,6 +198,8 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 .np{display:flex;gap:14px;align-items:center}.np img{width:84px;height:84px;border-radius:14px;object-fit:cover;background:var(--panel2);flex:none}.np b{display:block;font-size:17px;margin-bottom:3px}.np span{display:block;color:var(--dim);font-size:13px}
 .mbar{height:5px;border-radius:3px;background:var(--line);margin:14px 0}.mbar i{display:block;height:100%;border-radius:3px;background:var(--green)}
 .mctl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.mctl button{min-width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);font-size:18px;cursor:pointer;font-weight:800;color:inherit}.mctl .big{background:var(--green);border-color:var(--green);color:#06281a;width:58px;height:58px}.mctl .on{background:var(--green);color:#06281a}
+.mctl button{transition:transform .28s cubic-bezier(.3,1.5,.5,1),background .3s,box-shadow .3s,color .3s}.mctl button:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.12)}.mctl button:active{transform:scale(.88);transition-duration:.08s}
+.mrow{transition:transform .25s cubic-bezier(.3,1.4,.5,1),background .25s,box-shadow .25s}.mrow:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}.mrow:active{transform:scale(.975);transition-duration:.08s}.mbar i{transition:width 1s linear}
 .mrow{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}.mrow i{color:var(--dim);font-size:12px;font-style:normal;margin-left:4px}
 .mus .empty{padding:14px;color:var(--dim)}
 .nbk{flex:1;overflow:auto;padding:4px 16px 36px;width:100%}
@@ -1224,9 +1226,13 @@ function listsHtml(){
     R.artists.map(x=>'<button class="rw mrow" data-m="ctx" data-u="'+esc(x.uri)+'"><span>◉ '+esc(x.name)+' <i>artista</i></span></button>').join('')+
     R.playlists.map(x=>'<button class="rw mrow" data-m="ctx" data-u="'+esc(x.uri)+'"><span>☰ '+esc(x.name)+' <i>playlist</i></span></button>').join('')+(R.tracks.length+R.artists.length+R.playlists.length?'':'<div class="empty">Nessun risultato.</div>')+'</div>'}
   if(spDev.length&&!(spNow&&spNow.device))h+='<h4 class="ahh">Dispositivi</h4><div class="lst">'+spDev.map(d=>'<button class="rw mrow" data-m="dev" data-u="'+esc(d.id)+'"><span>'+esc(d.name)+' <i>'+esc(d.type)+'</i></span></button>').join('')+'</div>';
-  h+='<h4 class="ahh">Le tue playlist</h4><div class="lst"><button class="rw mrow" data-m="liked"><span>♥ Brani che ti piacciono</span></button>'+(spPl?spPl.map(p=>'<button class="rw mrow" data-m="ctx" data-u="'+esc(p.uri)+'"><span>'+esc(p.name)+' <i>'+p.tracks.total+' brani</i></span></button>').join(''):'<div class="empty">Carico…</div>')+'</div>';
+  h+='<h4 class="ahh">Le tue playlist</h4><div class="lst"><button class="rw mrow" data-m="liked"><span>♥ Brani che ti piacciono</span></button>'+(spPl?(spPl.length?'':'<div class="empty">Nessuna playlist trovata sul tuo account.</div>')+spPl.map(p=>'<button class="rw mrow" data-m="ctx" data-u="'+esc(p.uri)+'"><span>'+esc(p.name)+' '+(((p.items&&p.items.total)||(p.tracks&&p.tracks.total))?'<i>'+((p.items&&p.items.total)||p.tracks.total)+' brani</i>':'')+'</span></button>').join(''):'<div class="empty">Carico…</div>')+'</div>';
   return h}
-const paintNow=()=>{const e=$('#musn');if(e)e.innerHTML=nowHtml()},paintLists=()=>{const e=$('#musl');if(e)e.innerHTML=listsHtml()};
+let nowKey='',listKey='';
+const paintNow=(force)=>{const e=$('#musn');if(!e)return;const h=nowHtml(),k=h.replace(/<div class="mbar">.*?<\/div>/,'');
+  if(!force&&k===nowKey){const n=spTitle(),i=e.querySelector('.mbar i');if(i&&n&&n.d)i.style.width=Math.min(100,Math.round(n.p/n.d*100))+'%';return}
+  nowKey=k;e.innerHTML=h};
+const paintLists=()=>{const e=$('#musl');if(!e)return;let h;try{h=listsHtml()}catch(er){h='<div class="acd" style="color:var(--dim)">Non riesco a mostrare le playlist: '+esc(er.message)+'</div>'}if(h===listKey)return;listKey=h;const y=$('#mus')?$('#mus').scrollTop:0;e.innerHTML=h;if($('#mus'))$('#mus').scrollTop=y};
 async function spLoadPl(){if(!SP)return;try{const j=await spApi('/me/playlists?limit=50');spPl=(j.items||[]).filter(Boolean)}catch(e){spPl=[];spMsg=spErr(e)}paintLists()}
 async function spPlay(body){await spDo(()=>spApi('/me/player/play','PUT',body));setTimeout(spRefresh,900)}
 async function spSearch(q,types){const j=await spApi('/search?limit=5&type='+(types||'track,artist,playlist')+'&q='+encodeURIComponent(q));return{tracks:((j.tracks||{}).items||[]).filter(Boolean),artists:((j.artists||{}).items||[]).filter(Boolean),playlists:((j.playlists||{}).items||[]).filter(Boolean)}}
@@ -1237,7 +1243,7 @@ async function showMusic(){
     try{
       if(m==='login'){await spLogin();return}
       spMsg='';
-      if(m==='pp'){if(spPP())await spDo(()=>spApi('/me/player/pause','PUT'));else await spDo(()=>spApi('/me/player/play','PUT'));setTimeout(spRefresh,500)}
+      if(m==='pp'){const was=spPP();if(spNow){spNow.is_playing=!was;paintNow()}await spDo(()=>spApi(was?'/me/player/pause':'/me/player/play','PUT'));setTimeout(spRefresh,600)}
       else if(m==='next'){await spDo(()=>spApi('/me/player/next','POST'));setTimeout(spRefresh,700)}
       else if(m==='prev'){await spDo(()=>spApi('/me/player/previous','POST'));setTimeout(spRefresh,700)}
       else if(m==='shuf'){await spDo(()=>spApi('/me/player/shuffle?state='+!(spNow&&spNow.shuffle_state),'PUT'));setTimeout(spRefresh,500)}
