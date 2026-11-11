@@ -181,7 +181,7 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 .rollb{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);transform:translate(-50%,30px);opacity:0;pointer-events:none;max-width:calc(100vw - 32px);padding:14px 20px;border-radius:20px;background:var(--tx);color:var(--bg);font-size:16px;text-align:center;box-shadow:var(--shadow);transition:.3s;z-index:9}
 .rollb.show{opacity:1;transform:translate(-50%,0)}.rollb span{font-size:26px;font-weight:800}.rollb small{display:block;opacity:.7;font-size:12px}
 #web{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0;transition:opacity 1.4s;fill:none;stroke:var(--tx);stroke-linecap:round}
-#hub.open #web{opacity:1;transition-delay:1s}
+#web{display:none!important}
 #web circle{stroke-width:1;opacity:.07}#web line{stroke-width:1;opacity:.11}#web .nb{opacity:.06}
 .rcard{padding:16px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
 .rtx{font-size:17px;font-weight:700;line-height:1.4;margin-bottom:14px}
@@ -195,6 +195,14 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 .qd{width:calc(var(--s)*.8);height:calc(var(--s)*1.02);background:linear-gradient(90deg,rgba(0,0,0,.1) 0 9px,transparent 9px),var(--mint);color:var(--mint-d);border-radius:8px 22px 22px 8px;box-shadow:var(--shadow);padding-left:8px}
 #appwrap.mint:not(.on){background:var(--mint)}
 #appwrap.green:not(.on){background:var(--green)}
+#appwrap.peach:not(.on){background:#f3b58a}
+.ap{width:calc(var(--s)*.7);height:calc(var(--s)*.7);background:radial-gradient(circle at 30% 25%,#fbd3b6 0,#f1a977 70%);color:#4a2410;font-size:12px;font-weight:800;letter-spacing:.06em;gap:5px;align-content:center;justify-items:center;border-radius:0;box-shadow:none;clip-path:polygon(100.00% 50.00%,98.64% 54.26%,95.17% 57.96%,91.05% 61.00%,87.87% 63.78%,86.53% 67.03%,86.81% 71.25%,87.57% 76.31%,87.41% 81.39%,85.36% 85.36%,81.39% 87.41%,76.31% 87.57%,71.25% 86.81%,67.03% 86.53%,63.78% 87.87%,61.00% 91.05%,57.96% 95.17%,54.26% 98.64%,50.00% 100.00%,45.74% 98.64%,42.04% 95.17%,39.00% 91.05%,36.22% 87.87%,32.97% 86.53%,28.75% 86.81%,23.69% 87.57%,18.61% 87.41%,14.64% 85.36%,12.59% 81.39%,12.43% 76.31%,13.19% 71.25%,13.47% 67.03%,12.13% 63.78%,8.95% 61.00%,4.83% 57.96%,1.36% 54.26%,0.00% 50.00%,1.36% 45.74%,4.83% 42.04%,8.95% 39.00%,12.13% 36.22%,13.47% 32.97%,13.19% 28.75%,12.43% 23.69%,12.59% 18.61%,14.64% 14.64%,18.61% 12.59%,23.69% 12.43%,28.75% 13.19%,32.97% 13.47%,36.22% 12.13%,39.00% 8.95%,42.04% 4.83%,45.74% 1.36%,50.00% 0.00%,54.26% 1.36%,57.96% 4.83%,61.00% 8.95%,63.78% 12.13%,67.03% 13.47%,71.25% 13.19%,76.31% 12.43%,81.39% 12.59%,85.36% 14.64%,87.41% 18.61%,87.57% 23.69%,86.81% 28.75%,86.53% 32.97%,87.87% 36.22%,91.05% 39.00%,95.17% 42.04%,98.64% 45.74%)}
+#hub.open .shape.ap{animation:bob 6.5s ease-in-out calc(1.6s + var(--i)*.7s) infinite,wavy 4.2s ease-in-out infinite}
+@keyframes wavy{0%,100%{clip-path:polygon(100.00% 50.00%,98.64% 54.26%,95.17% 57.96%,91.05% 61.00%,87.87% 63.78%,86.53% 67.03%,86.81% 71.25%,87.57% 76.31%,87.41% 81.39%,85.36% 85.36%,81.39% 87.41%,76.31% 87.57%,71.25% 86.81%,67.03% 86.53%,63.78% 87.87%,61.00% 91.05%,57.96% 95.17%,54.26% 98.64%,50.00% 100.00%,45.74% 98.64%,42.04% 95.17%,39.00% 91.05%,36.22% 87.87%,32.97% 86.53%,28.75% 86.81%,23.69% 87.57%,18.61% 87.41%,14.64% 85.36%,12.59% 81.39%,12.43% 76.31%,13.19% 71.25%,13.47% 67.03%,12.13% 63.78%,8.95% 61.00%,4.83% 57.96%,1.36% 54.26%,0.00% 50.00%,1.36% 45.74%,4.83% 42.04%,8.95% 39.00%,12.13% 36.22%,13.47% 32.97%,13.19% 28.75%,12.43% 23.69%,12.59% 18.61%,14.64% 14.64%,18.61% 12.59%,23.69% 12.43%,28.75% 13.19%,32.97% 13.47%,36.22% 12.13%,39.00% 8.95%,42.04% 4.83%,45.74% 1.36%,50.00% 0.00%,54.26% 1.36%,57.96% 4.83%,61.00% 8.95%,63.78% 12.13%,67.03% 13.47%,71.25% 13.19%,76.31% 12.43%,81.39% 12.59%,85.36% 14.64%,87.41% 18.61%,87.57% 23.69%,86.81% 28.75%,86.53% 32.97%,87.87% 36.22%,91.05% 39.00%,95.17% 42.04%,98.64% 45.74%)}50%{clip-path:polygon(90.00% 50.00%,91.01% 53.59%,93.46% 57.66%,95.88% 62.29%,96.70% 67.00%,95.04% 71.00%,91.14% 73.75%,86.15% 75.31%,81.54% 76.46%,78.28% 78.28%,76.46% 81.54%,75.31% 86.15%,73.75% 91.14%,71.00% 95.04%,67.00% 96.70%,62.29% 95.88%,57.66% 93.46%,53.59% 91.01%,50.00% 90.00%,46.41% 91.01%,42.34% 93.46%,37.71% 95.88%,33.00% 96.70%,29.00% 95.04%,26.25% 91.14%,24.69% 86.15%,23.54% 81.54%,21.72% 78.28%,18.46% 76.46%,13.85% 75.31%,8.86% 73.75%,4.96% 71.00%,3.30% 67.00%,4.12% 62.29%,6.54% 57.66%,8.99% 53.59%,10.00% 50.00%,8.99% 46.41%,6.54% 42.34%,4.12% 37.71%,3.30% 33.00%,4.96% 29.00%,8.86% 26.25%,13.85% 24.69%,18.46% 23.54%,21.72% 21.72%,23.54% 18.46%,24.69% 13.85%,26.25% 8.86%,29.00% 4.96%,33.00% 3.30%,37.71% 4.12%,42.34% 6.54%,46.41% 8.99%,50.00% 10.00%,53.59% 8.99%,57.66% 6.54%,62.29% 4.12%,67.00% 3.30%,71.00% 4.96%,73.75% 8.86%,75.31% 13.85%,76.46% 18.46%,78.28% 21.72%,81.54% 23.54%,86.15% 24.69%,91.14% 26.25%,95.04% 29.00%,96.70% 33.00%,95.88% 37.71%,93.46% 42.34%,91.01% 46.41%)}}
+.gr{display:grid;grid-template-columns:repeat(2,9px);gap:4px}.gr i{width:9px;height:9px;border-radius:3px;background:#4a2410;display:block}
+.apps{flex:1;overflow:auto;padding:18px;max-width:560px;margin:0 auto;width:100%}.agrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.atile{aspect-ratio:1;border:0;border-radius:28px;background:var(--panel);box-shadow:0 8px 22px rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font:800 16px var(--sans);color:inherit;cursor:pointer;transition:transform .3s cubic-bezier(.3,1.5,.5,1),box-shadow .3s}.atile:hover{transform:translateY(-3px)}.atile:active{transform:scale(.92);transition-duration:.08s}.atile svg{width:46px;height:46px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.atile.wa svg{color:#3d9a6b}.atile.ig svg{color:#c2557a}.atile.ch svg{color:#4a86c8}.atile.rb svg{color:#d08a3c}
+.ahint{color:var(--dim);font-size:12.5px;text-align:center;margin-top:18px;line-height:1.5}
 .mu{width:calc(var(--s)*.62);height:calc(var(--s)*.62);background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--green) 70%,#fff) 0,var(--green) 60%);color:#06281a;font-size:12.5px;box-shadow:var(--shadow);gap:3px;align-content:center;justify-items:center}
 #hub.open .shape.mu{animation:bob 6s ease-in-out calc(1.6s + var(--i)*.7s) infinite,blob 5.5s ease-in-out infinite}
 .mu::after{content:'';position:absolute;inset:0;border-radius:inherit;border:2px solid var(--green);opacity:0;pointer-events:none;animation:ring 3.2s ease-out infinite}
@@ -291,7 +299,7 @@ body:not(.wk) #hub .eye{transform:none!important}
 #sheet.vh{max-height:46dvh}#sheet.vh .hint{display:none}#sheetbg.vh{background:transparent}
 @keyframes flash{0%{box-shadow:0 0 0 0 transparent}15%,70%{box-shadow:0 0 0 4px var(--blue),0 0 28px 6px var(--blue)}100%{box-shadow:0 0 0 0 transparent}}
 .flash{animation:flash 2.6s ease}
-@media (prefers-reduced-motion:reduce){.eq i,#hub.open .shape.mu,.mu::after{animation:none!important}.aura *,.core{animation:none!important}.tri svg,.mic.live,#hub.open .shape{animation:none}*{transition-duration:.01s!important}}
+@media (prefers-reduced-motion:reduce){.eq i,#hub.open .shape.mu,.mu::after{animation:none!important}#hub.open .shape.ap{animation:none!important}.aura *,.core{animation:none!important}.tri svg,.mic.live,#hub.open .shape{animation:none}*{transition-duration:.01s!important}}
 
 /* ---------- desktop ---------- */
 @media (min-width:760px){
@@ -345,6 +353,7 @@ body:not(.wk) #hub .eye{transform:none!important}
     <button class="shape re" id="re-cal" data-act="cal" style="--i:2;--x:-24;--y:28" aria-label="Apri Calendario">Calendario</button>
     <button class="shape qd" id="qd-task" data-act="task" style="--i:4;--x:0;--y:-33" aria-label="Apri il Quaderno">Quaderno</button>
     <button class="shape mu" id="mu-music" data-act="music" style="--i:5;--x:3;--y:28" aria-label="Apri Musica"><span class="eq h"><i></i><i></i><i></i><i></i><i></i></span><span>Musica</span></button>
+    <button class="shape ap" id="ap-app" data-act="apps" style="--i:6;--x:31;--y:-32" aria-label="Apri App"><span class="gr"><i></i><i></i><i></i><i></i></span><span>APP</span></button>
     <button class="shape ci" id="ci-ash" data-act="ash" style="--i:3;--x:26;--y:28" aria-label="Apri la scheda di Ash">Ash</button>
   </div>
 </section>
@@ -399,13 +408,13 @@ const rectInset=r=>'inset('+r.top+'px '+(innerWidth-r.right)+'px '+(innerHeight-
 function openApp(el,kind){
   if(appOpen)return;appOpen=true;appEl=el;document.body.classList.add('inapp');
   const w=$('#appwrap'),r=el.getBoundingClientRect();
-  w.classList.toggle('pink',kind==='cal');w.classList.toggle('lilac',kind==='meteo');w.classList.toggle('beige',kind==='ash');w.classList.toggle('mint',kind==='task');w.classList.toggle('green',kind==='music');w.classList.toggle('full',kind==='task');w.classList.remove('on');w.style.display='block';w.style.transition='none';w.style.clipPath=rectInset(r);
+  w.classList.toggle('pink',kind==='cal');w.classList.toggle('lilac',kind==='meteo');w.classList.toggle('beige',kind==='ash');w.classList.toggle('mint',kind==='task');w.classList.toggle('green',kind==='music');w.classList.toggle('peach',kind==='apps');w.classList.toggle('full',kind==='task');w.classList.remove('on');w.style.display='block';w.style.transition='none';w.style.clipPath=rectInset(r);
   $('#root').innerHTML='<div class="auth"><div class="empty">Carico…</div></div>';
   w.getBoundingClientRect();
   requestAnimationFrame(()=>{w.style.transition='clip-path .65s cubic-bezier(.65,0,.2,1),background .5s .25s';w.style.clipPath='inset(0px 0px 0px 0px round 0px)';w.classList.add('on')});
   setTimeout(()=>{if(appOpen){w.style.clipPath='none';w.style.transition=''}},720);
   try{history.pushState({a:1},'')}catch{}
-  if(kind==='cal')showCal();else if(kind==='meteo')showMeteo();else if(kind==='ash')showAsh();else if(kind==='task')showTasks();else if(kind==='music')showMusic();else if(!S)showLogin();else afterLogin();
+  if(kind==='cal')showCal();else if(kind==='meteo')showMeteo();else if(kind==='ash')showAsh();else if(kind==='task')showTasks();else if(kind==='music')showMusic();else if(kind==='apps')showApps();else if(!S)showLogin();else afterLogin();
 }
 function doClose(){
   if(!appOpen)return;clearInterval(spPoll);document.body.classList.remove('inapp');appOpen=false;closeSheet();
@@ -1256,7 +1265,7 @@ function nowHtml(){
     '<div class="mmeta"><div class="mtt"><b>'+esc(n?n.t:'Niente in riproduzione')+'</b>'+(spPP()?'<span class="eq"><i></i><i></i><i></i><i></i></span>':'')+'</div><span>'+esc(n?n.a:'Apri Spotify su un dispositivo e scegli una playlist')+'</span></div>'+
     (n&&n.d?'<div class="mbar"><i style="width:'+Math.min(100,Math.round(n.p/n.d*100))+'%"></i></div>':'<div class="mbar"><i style="width:0"></i></div>')+
     '<div class="mctl"><button class="sm'+(spNow&&spNow.shuffle_state?' on':'')+'" data-m="shuf" aria-label="Casuale">⇄</button><button data-m="prev" aria-label="Precedente">⏮</button><button class="big" data-m="pp" aria-label="Play o pausa">'+(spPP()?'<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>')+'</button><button data-m="next" aria-label="Prossimo">⏭</button><span class="sm" style="visibility:hidden"></span></div>'+
-    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+' · v38</div>':'<div class="mdev">v42</div>')+'</div>'}
+    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+' · v38</div>':'<div class="mdev">v44</div>')+'</div>'}
 function trRow(m,u,img,t,sub,round){return'<button class="mrow2" data-m="'+m+'" data-u="'+esc(u)+'">'+spImg(img,round)+'<span class="mt"><b>'+esc(t)+'</b><small>'+esc(sub)+'</small></span><svg class="mp" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>'}
 function listsHtml(){
   let h='';if(spMsg)h+='<div class="mmsg">'+esc(spMsg)+(/^Non trovo un dispositivo/.test(spMsg)?'<div class="mfix"><button data-m="openapp">Apri Spotify</button>'+(spLast?'<button data-m="retry">Riprova</button>':'')+'</div>':'')+'</div>';
@@ -1385,6 +1394,24 @@ function toggleWake(){
   if(wake)wakeSet(false,'Ascolto spento',true);else wakeSet(true,'Ascolto attivo: di\u2019 \u201cHey Fla\u201d con l\u2019app aperta');
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden)wakeHalt();else{setTimeout(wakeStart,400);if(SP&&appOpen&&$('#mus'))setTimeout(async()=>{await spRefresh();if(spNow&&spNow.device&&/^Non trovo/.test(spMsg)&&spLast){spMsg='';try{await spPlay(spLast)}catch(e){spMsg=spErr(e)}paintLists()}},900)}});
+/* ---------- App (scorciatoie) ---------- */
+const APPL={whatsapp:{n:'WhatsApp',a:'intent://send/#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url='+encodeURIComponent('https://wa.me/')+';end',w:'https://web.whatsapp.com/'},
+ instagram:{n:'Instagram',a:'intent://www.instagram.com/#Intent;scheme=https;package=com.instagram.android;S.browser_fallback_url='+encodeURIComponent('https://www.instagram.com/')+';end',w:'https://www.instagram.com/'},
+ chrome:{n:'Chrome',a:'intent://www.google.com/#Intent;scheme=https;package=com.android.chrome;end',w:'https://www.google.com/'},
+ rubrica:{n:'Rubrica',a:'https://contacts.google.com/',w:'https://contacts.google.com/'}};
+function launchApp(id){const x=APPL[id];if(!x)return;location.href=/Android/i.test(navigator.userAgent)?x.a:x.w}
+const APPIC={whatsapp:'<svg viewBox="0 0 24 24"><path d="M4 20l1.4-4.2A8 8 0 1 1 8.4 18.8z"/><path d="M9 9.5c.3 2.3 2.2 4.2 4.5 4.5l1.3-1.3-1.8-1-.8.7c-.8-.4-1.4-1-1.8-1.8l.7-.8-1-1.8z"/></svg>',
+ instagram:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.8" cy="7.2" r=".6"/></svg>',
+ chrome:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.3 3.5 5.2 3.5 8.5s-1 6.2-3.5 8.5c-2.5-2.3-3.5-5.2-3.5-8.5s1-6.2 3.5-8.5z"/></svg>',
+ rubrica:'<svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><circle cx="12" cy="10" r="2.6"/><path d="M7.8 16.8c.7-2 2.2-3 4.2-3s3.5 1 4.2 3"/></svg>'};
+function showApps(){
+  $('#root').innerHTML='<header class="top">'+backBtn+'<div class="ttl">App</div><div class="hbtns"><button class="pill" data-act="hubvoice">Voce</button></div></header><div class="apps"><div class="agrid">'+
+    Object.keys(APPL).map(k=>'<button class="atile '+({whatsapp:'wa',instagram:'ig',chrome:'ch',rubrica:'rb'})[k]+'" data-app="'+k+'">'+APPIC[k]+APPL[k].n+'</button>').join('')+
+    '</div><div class="ahint">'+(/Android/i.test(navigator.userAgent)?'Aprono le app installate sul telefono. Se non partono, controlla che l’app sia installata. La Rubrica apre i contatti Google.':'Da PC aprono le versioni web.')+'</div></div>';
+  $('.apps').onclick=e=>{const b=e.target.closest('[data-app]');if(b)launchApp(b.dataset.app)}}
+function appCommand(t){const m=t.match(/\b(apri|aprimi|avvia|lancia|vai su|vai a|mostrami|fammi vedere)\b.*?\b(whatsapp|whats app|watsapp|zap|instagram|insta|chrome|rubrica|contatti)\b/);if(!m)return null;
+  const id=/whats|watsapp|zap/.test(m[2])?'whatsapp':/insta/.test(m[2])?'instagram':m[2]==='chrome'?'chrome':'rubrica';
+  PEND={kind:'apps',hl:'[data-app="'+id+'"]',apply:()=>launchApp(id)};return'Apro '+APPL[id].n+'.'}
 /* ---------- eliminare con la voce / il testo ---------- */
 const DELV=/\b(elimina|eliminare|elimini|eliminami|rimuovi|rimuovere|rimuovimi|cancella|cancellare|cancellami|togli|togliere|annulla|annullare|butta)\b/;
 const STOPD=new Set('elimina eliminare elimini eliminami rimuovi rimuovere rimuovimi cancella cancellare cancellami togli togliere annulla annullare butta il lo la le gli l un una uno dal dalla dallo del della dello di dei delle evento eventi appuntamento appuntamenti calendario agenda task taks compito compiti spesa spese quaderno per da a in nel sul sulla con che mio mia questo questa oggi domani dopodomani lunedi martedi mercoledi giovedi venerdi sabato domenica alle ultima ultimo euro'.split(' '));
@@ -1394,7 +1421,7 @@ function commit(kind,hl,fn){PEND={kind,hl,apply:fn}}
 function flash(sel){const e=sel&&document.querySelector(sel);if(!e)return;try{e.scrollIntoView({block:'center',behavior:'smooth'})}catch{}e.classList.remove('flash');void e.offsetWidth;e.classList.add('flash');setTimeout(()=>e.classList.remove('flash'),2800)}
 function liveGo(){
   const p=PEND;PEND=null;if(!p)return;
-  const el={fin:'#sq-finanze',cal:'#re-cal',meteo:'#ov-meteo',ash:'#ci-ash',task:'#qd-task',music:'#mu-music'}[p.kind];
+  const el={fin:'#sq-finanze',cal:'#re-cal',meteo:'#ov-meteo',ash:'#ci-ash',task:'#qd-task',music:'#mu-music',apps:'#ap-app'}[p.kind];
   const cur=appOpen&&appEl&&('#'+appEl.id)===el;
   const run=()=>{try{p.apply&&p.apply()}catch{}if(p.hl)setTimeout(()=>flash(p.hl),150)};
   setTimeout(()=>{
@@ -1405,7 +1432,7 @@ function liveGo(){
     if(appOpen){doClose();setTimeout(go,800)}else go();
   },cur?500:1000);
 }
-const APPS=[['cal',/\b(calendario|agenda)\b/,'il calendario'],['meteo',/\b(meteo|luna|radar)\b/,'il meteo'],['ash',/\b(ash|scheda)\b/,'la scheda di Ash'],['task',/\b(quaderno|quadernino|task|taks|compiti)\b/,'il quaderno'],['fin',/\bfinanze\b/,'Finanze'],['music',/\b(musica|spotify)\b/,'la musica']];
+const APPS=[['cal',/\b(calendario|agenda)\b/,'il calendario'],['meteo',/\b(meteo|luna|radar)\b/,'il meteo'],['ash',/\b(ash|scheda)\b/,'la scheda di Ash'],['task',/\b(quaderno|quadernino|task|taks|compiti)\b/,'il quaderno'],['fin',/\bfinanze\b/,'Finanze'],['music',/\b(musica|spotify)\b/,'la musica'],['apps',/\b(le app|applicazioni)\b/,'le app']];
 function openCmd(t){
   if(!/\b(apri|aprimi|vai|mostra|mostrami|portami|fammi vedere)\b/.test(t))return null;
   if(/\b(aggiungi|metti|segna|crea|inserisci)\b/.test(t))return null;
@@ -1451,6 +1478,7 @@ async function moveCommand(raw){
 async function hubCommand(raw){
   const t=norm(raw).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'');
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
+  const ac=appCommand(t);if(ac)return ac;
   const oc=openCmd(t);if(oc)return oc;
   if(/\b(spotify|musica|playlist|canzone|canzoni|brano|brani|riproduci|suona|suonami|pausa|riprendi|volume|shuffle|casuale|mescola|prossima|prossimo|salta|stoppa|cambia (?:la )?(?:canzone|brano|musica))\b/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria)\b/.test(t))return await musicCommand(raw);
   if(/^(?:(?:puoi|potresti|vorrei|per favore|dai|ora|adesso|mi|ti|ok|allora)\s+)*(metti|mettimi|mettere|suona|suonami|suonare|riproduci|fai partire|far partire|fammi sentire|ascolta|voglio sentire|voglio ascoltare|cambia con|cambia in|passa a)\b/.test(t)&&!/\d/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria|stipendio|entrata|ca)\b/.test(t))return await musicCommand(raw);
@@ -1494,6 +1522,7 @@ document.addEventListener('click',async e=>{
   else if(a==='ash')openApp(t,'ash');
   else if(a==='task')openApp(t,'task');
   else if(a==='music')openApp(t,'music');
+  else if(a==='apps')openApp(t,'apps');
   else if(a==='rem')openRem();
   else if(a==='hubvoice')openVoice(true);
   else if(a==='theme')toggleTheme();
@@ -1535,7 +1564,7 @@ addEventListener('pointermove',e=>{
   clearTimeout(gzT);gzT=setTimeout(()=>{h.style.setProperty('--gx',0);h.style.setProperty('--gy',0)},3500)},{passive:true});
 /* ragnatela: fili sottilissimi tra triangolo e forme, seguono il movimento ma non girano */
 (function(){
-  const svg=$('#web'),NS='http://www.w3.org/2000/svg',ids=['sq-finanze','ov-meteo','ci-ash','re-cal','qd-task','mu-music'];
+  const svg=$('#web'),NS='http://www.w3.org/2000/svg',ids=['sq-finanze','ov-meteo','ci-ash','re-cal','qd-task','mu-music','ap-app'];
   const mk=(t,c)=>{const e=document.createElementNS(NS,t);if(c)e.setAttribute('class',c);svg.appendChild(e);return e};
   const rings=ids.map(()=>mk('circle')),spokes=ids.map(()=>mk('line')),links=ids.map(()=>mk('line','nb'));
   function tick(){
