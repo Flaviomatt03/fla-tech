@@ -213,6 +213,7 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 .mctl .big{width:68px;height:68px;background:var(--green);color:#06281a;box-shadow:0 10px 24px color-mix(in srgb,var(--green) 45%,transparent)}.mctl .big svg{width:28px;height:28px;fill:currentColor}
 .mctl button:hover{transform:translateY(-2px)}.mctl button:active{transform:scale(.88);transition-duration:.08s}
 .mvol{display:flex;align-items:center;gap:12px;margin:16px 6px 0}.mvol button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--panel);font-size:17px;font-weight:800;cursor:pointer;color:inherit;transition:transform .25s cubic-bezier(.3,1.5,.5,1)}.mvol button:active{transform:scale(.85);transition-duration:.08s}.vb{flex:1;height:5px;border-radius:3px;background:var(--line);overflow:hidden}.vb i{display:block;height:100%;background:var(--green);border-radius:3px;transition:width .4s}
+.mfix{display:flex;gap:8px;margin-top:12px}.mfix button{flex:1;border:0;border-radius:999px;padding:11px 14px;font:700 14px var(--sans);cursor:pointer;background:var(--green);color:#06281a;transition:transform .25s cubic-bezier(.3,1.5,.5,1)}.mfix button+button{background:var(--panel2);color:inherit}.mfix button:active{transform:scale(.93)}
 .mdev{text-align:center;color:var(--dim);font-size:12px;margin-top:10px}
 .mlogin{text-align:center;padding:36px 12px}.mlogin h3{margin:0 0 8px;font-size:22px}.mlogin p{color:var(--dim);margin:0 0 22px;font-size:14px}.mgo{border:0;border-radius:999px;background:var(--green);color:#06281a;font-weight:800;font-size:16px;padding:14px 28px;cursor:pointer;transition:transform .28s cubic-bezier(.3,1.5,.5,1)}.mgo:active{transform:scale(.94)}
 .msearch{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 6px 0 18px;margin:20px 0 4px;transition:box-shadow .25s,border-color .25s}.msearch:focus-within{border-color:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 25%,transparent)}.msb{width:44px;height:44px;border-radius:50%;border:0;background:var(--green);color:#06281a;display:grid;place-items:center;cursor:pointer;flex:none;margin:5px 0;box-shadow:0 6px 14px color-mix(in srgb,var(--green) 40%,transparent);transition:transform .28s cubic-bezier(.3,1.5,.5,1),box-shadow .3s}.msb:hover{transform:scale(1.06)}.msb:active{transform:scale(.86);transition-duration:.08s}.msb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}.msearch.busy .msb svg{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.msearch input{flex:1;border:0;background:transparent;font:inherit;padding:14px 0;outline:none;color:inherit;min-width:0}
@@ -1227,7 +1228,7 @@ async function spApi(path,method,body){
 }
 function spErr(e){
   if(e.message==='nologin')return'Spotify non è collegato: apri Musica e tocca Collega Spotify.';
-  if(e.status===404)return'Non trovo un dispositivo attivo: apri l’app Spotify sul telefono o sul PC, fai partire un brano qualsiasi e riprova.';
+  if(e.status===404)return'Non trovo un dispositivo attivo: Spotify non risulta aperto sul telefono. Tocca Apri Spotify, aspetta che si carichi e torna qui: riprovo da solo.';
   if(e.status===403)return'Spotify non permette questa azione ('+e.message+').';
   if(e.status===429)return'Spotify è occupato, riprova tra qualche secondo.';
   return'Spotify: '+e.message}
@@ -1257,7 +1258,7 @@ function nowHtml(){
     '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+'</div>':'')+'</div>'}
 function trRow(m,u,img,t,sub,round){return'<button class="mrow2" data-m="'+m+'" data-u="'+esc(u)+'">'+spImg(img,round)+'<span class="mt"><b>'+esc(t)+'</b><small>'+esc(sub)+'</small></span><svg class="mp" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>'}
 function listsHtml(){
-  let h='';if(spMsg)h+='<div class="mmsg">'+esc(spMsg)+'</div>';
+  let h='';if(spMsg)h+='<div class="mmsg">'+esc(spMsg)+(/^Non trovo un dispositivo/.test(spMsg)?'<div class="mfix"><button data-m="openapp">Apri Spotify</button>'+(spLast?'<button data-m="retry">Riprova</button>':'')+'</div>':'')+'</div>';
   if(!SP)return h;
   if(spRes){const R=spRes;h+='<h4 class="mh">Risultati</h4><div class="mlist">'+
     R.tracks.map(x=>trRow('tr',x.uri,x.album&&x.album.images,x.name,x.artists.map(a=>a.name).join(', '))).join('')+
@@ -1273,7 +1274,8 @@ const paintNow=(force)=>{const e=$('#musn');if(!e)return;const h=nowHtml(),k=h.r
   nowKey=k;e.innerHTML=h};
 const paintLists=()=>{const e=$('#musl');if(!e)return;let h;try{h=listsHtml()}catch(er){h='<div class="acd" style="color:var(--dim)">Non riesco a mostrare le playlist: '+esc(er.message)+'</div>'}if(h===listKey)return;listKey=h;const y=$('#mus')?$('#mus').scrollTop:0;e.innerHTML=h;if($('#mus'))$('#mus').scrollTop=y};
 async function spLoadPl(){if(!SP)return;try{const j=await spApi('/me/playlists?limit=50');spPl=(j.items||[]).filter(Boolean)}catch(e){spPl=[];spMsg=spErr(e)}paintLists()}
-async function spPlay(body){await spDo(()=>spApi('/me/player/play','PUT',body));setTimeout(spRefresh,900)}
+let spLast=null;
+async function spPlay(body){spLast=body;await spDo(()=>spApi('/me/player/play','PUT',body));setTimeout(spRefresh,900)}
 async function spSearch(q,types){const j=await spApi('/search?limit=5&type='+(types||'track,artist,playlist')+'&q='+encodeURIComponent(q));return{tracks:((j.tracks||{}).items||[]).filter(Boolean),artists:((j.artists||{}).items||[]).filter(Boolean),playlists:((j.playlists||{}).items||[]).filter(Boolean)}}
 async function showMusic(){
   $('#root').innerHTML='<header class="top">'+backBtn+'<div class="ttl">Musica</div><div class="hbtns"><button class="pill" data-act="hubvoice">Voce</button></div></header><div class="mus" id="mus"><div id="musn">'+nowHtml()+'</div>'+(SP?'<form id="musf" class="msearch" autocomplete="off"><input id="musq" placeholder="Cerca brano, artista o playlist" enterkeyhint="search"><button type="submit" class="msb" aria-label="Cerca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg></button></form>':'')+'<div id="musl">'+listsHtml()+'</div></div>';
@@ -1287,6 +1289,8 @@ async function showMusic(){
       else if(m==='prev'){await spDo(()=>spApi('/me/player/previous','POST'));setTimeout(spRefresh,700)}
       else if(m==='shuf'){await spDo(()=>spApi('/me/player/shuffle?state='+!(spNow&&spNow.shuffle_state),'PUT'));setTimeout(spRefresh,500)}
       else if(m==='vup'||m==='vdn'){const c=(spNow&&spNow.device&&spNow.device.volume_percent)||50;await spDo(()=>spApi('/me/player/volume?volume_percent='+Math.max(0,Math.min(100,c+(m==='vup'?15:-15))),'PUT'));setTimeout(spRefresh,500)}
+      else if(m==='openapp'){spBusy=false;location.href='spotify://';return}
+      else if(m==='retry'){if(spLast)await spPlay(spLast);spMsg=''}
       else if(m==='tr')await spPlay({uris:[u]});
       else if(m==='ctx')await spPlay({context_uri:u});
       else if(m==='liked'){const j=await spApi('/me/tracks?limit=50');const us=(j.items||[]).map(x=>x.track&&x.track.uri).filter(Boolean);if(us.length)await spPlay({uris:us});else spMsg='Non hai brani piaciuti.'}
@@ -1356,7 +1360,7 @@ function toggleWake(){
   if(!SR){toast('Questo browser non supporta l\u2019ascolto vocale.');return}
   if(wake)wakeSet(false,'Ascolto spento',true);else wakeSet(true,'Ascolto attivo: di\u2019 \u201cHey Fla\u201d con l\u2019app aperta');
 }
-document.addEventListener('visibilitychange',()=>{if(document.hidden)wakeHalt();else setTimeout(wakeStart,400)});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)wakeHalt();else{setTimeout(wakeStart,400);if(SP&&appOpen&&$('#mus'))setTimeout(async()=>{await spRefresh();if(spNow&&spNow.device&&/^Non trovo/.test(spMsg)&&spLast){spMsg='';try{await spPlay(spLast)}catch(e){spMsg=spErr(e)}paintLists()}},900)}});
 /* ---------- eliminare con la voce / il testo ---------- */
 const DELV=/\b(elimina|eliminare|elimini|eliminami|rimuovi|rimuovere|rimuovimi|cancella|cancellare|cancellami|togli|togliere|annulla|annullare|butta)\b/;
 const STOPD=new Set('elimina eliminare elimini eliminami rimuovi rimuovere rimuovimi cancella cancellare cancellami togli togliere annulla annullare butta il lo la le gli l un una uno dal dalla dallo del della dello di dei delle evento eventi appuntamento appuntamenti calendario agenda task taks compito compiti spesa spese quaderno per da a in nel sul sulla con che mio mia questo questa oggi domani dopodomani lunedi martedi mercoledi giovedi venerdi sabato domenica alle ultima ultimo euro'.split(' '));
