@@ -1213,8 +1213,10 @@ async function spCallback(){
   try{await spToken({client_id:SPID,grant_type:'authorization_code',code,redirect_uri:spRedir(),code_verifier:sv.v});try{localStorage.removeItem('flat_spv')}catch{}return true}
   catch(e){toast('Spotify: '+e.message);return false}
 }
+let spDevId=null;
 async function spApi(path,method,body){
   if(!SP)throw new Error('nologin');
+  if((method||'GET')!=='GET'&&/^\/me\/player\/(play|pause|next|previous|shuffle|volume)/.test(path)&&!/device_id=/.test(path)){const id=spDevId||(spNow&&spNow.device&&spNow.device.id);if(id)path+=(path.includes('?')?'&':'?')+'device_id='+encodeURIComponent(id)}
   if(Date.now()>SP.exp){try{await spToken({client_id:SPID,grant_type:'refresh_token',refresh_token:SP.rt})}catch{SP=null;lset('flat_sp',null);throw new Error('nologin')}}
   const r=await fetch('https://api.spotify.com/v1'+path,{method:method||'GET',headers:Object.assign({Authorization:'Bearer '+SP.at},body?{'Content-Type':'application/json'}:{}),body:body?JSON.stringify(body):undefined});
   if(r.status===204||r.status===202)return null;
@@ -1231,12 +1233,13 @@ function spErr(e){
   return'Spotify: '+e.message}
 async function spDo(fn){
   try{return await fn()}catch(e){
-    if(e.status!==404)throw e;
+    if(e.status!==404&&e.status!==403&&e.status!==502)throw e;
     const d=await spApi('/me/player/devices');spDev=(d&&d.devices)||[];
     if(!spDev.length)throw e;
-    const dv=spDev.find(x=>x.is_active)||spDev[0];
-    await spApi('/me/player','PUT',{device_ids:[dv.id],play:false});await new Promise(r=>setTimeout(r,700));
-    return await fn()}
+    const dv=spDev.find(x=>x.is_active)||spDev[0];spDevId=dv.id;
+    try{return await fn()}catch(e2){
+      await spApi('/me/player','PUT',{device_ids:[dv.id],play:true});await new Promise(r=>setTimeout(r,1200));
+      return await fn()}}
 }
 async function spRefresh(){
   try{spNow=await spApi('/me/player');spMsg=spMsg&&/^Non trovo/.test(spMsg)&&spNow?'':spMsg}catch(e){if(e.message==='nologin'){spNow=null}else spMsg=spErr(e)}
