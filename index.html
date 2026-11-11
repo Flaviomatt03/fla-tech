@@ -193,14 +193,33 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 .qd{width:calc(var(--s)*.8);height:calc(var(--s)*1.02);background:linear-gradient(90deg,rgba(0,0,0,.1) 0 9px,transparent 9px),var(--mint);color:var(--mint-d);border-radius:8px 22px 22px 8px;box-shadow:var(--shadow);padding-left:8px}
 #appwrap.mint:not(.on){background:var(--mint)}
 #appwrap.green:not(.on){background:var(--green)}
-.mu{width:calc(var(--s)*.56);height:calc(var(--s)*.56);font-size:13px;background:var(--green);color:#06281a;border-radius:50%;box-shadow:var(--shadow)}
-.mus{flex:1;overflow:auto;padding:4px 16px 120px;max-width:560px;margin:0 auto;width:100%}
-.np{display:flex;gap:14px;align-items:center}.np img{width:84px;height:84px;border-radius:14px;object-fit:cover;background:var(--panel2);flex:none}.np b{display:block;font-size:17px;margin-bottom:3px}.np span{display:block;color:var(--dim);font-size:13px}
-.mbar{height:5px;border-radius:3px;background:var(--line);margin:14px 0}.mbar i{display:block;height:100%;border-radius:3px;background:var(--green)}
-.mctl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.mctl button{min-width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);font-size:18px;cursor:pointer;font-weight:800;color:inherit}.mctl .big{background:var(--green);border-color:var(--green);color:#06281a;width:58px;height:58px}.mctl .on{background:var(--green);color:#06281a}
-.mctl button{transition:transform .28s cubic-bezier(.3,1.5,.5,1),background .3s,box-shadow .3s,color .3s}.mctl button:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.12)}.mctl button:active{transform:scale(.88);transition-duration:.08s}
-.mrow{transition:transform .25s cubic-bezier(.3,1.4,.5,1),background .25s,box-shadow .25s}.mrow:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}.mrow:active{transform:scale(.975);transition-duration:.08s}.mbar i{transition:width 1s linear}
-.mrow{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}.mrow i{color:var(--dim);font-size:12px;font-style:normal;margin-left:4px}
+.mu{width:calc(var(--s)*.62);height:calc(var(--s)*.62);background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--green) 70%,#fff) 0,var(--green) 60%);color:#06281a;font-size:12.5px;box-shadow:var(--shadow);gap:3px;align-content:center;justify-items:center}
+#hub.open .shape.mu{animation:bob 6s ease-in-out calc(1.6s + var(--i)*.7s) infinite,blob 5.5s ease-in-out infinite}
+.mu::after{content:'';position:absolute;inset:0;border-radius:inherit;border:2px solid var(--green);opacity:0;pointer-events:none;animation:ring 3.2s ease-out infinite}
+@keyframes ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
+@keyframes blob{0%,100%{border-radius:50% 50% 50% 50%/50% 50% 50% 50%}25%{border-radius:60% 40% 54% 46%/44% 58% 42% 56%}50%{border-radius:42% 58% 40% 60%/58% 42% 58% 42%}75%{border-radius:55% 45% 60% 40%/40% 55% 45% 60%}}
+.eq{display:inline-flex;align-items:flex-end;gap:3px;height:18px}.eq i{display:block;width:3.5px;border-radius:2px;background:currentColor;height:100%;transform-origin:bottom;animation:eqb 1s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:-.3s;animation-duration:.8s}.eq i:nth-child(3){animation-delay:-.6s;animation-duration:1.15s}.eq i:nth-child(4){animation-delay:-.15s;animation-duration:.9s}.eq i:nth-child(5){animation-delay:-.45s;animation-duration:1.05s}
+@keyframes eqb{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.eq.h{height:20px}.eq.big{height:42px;gap:6px;color:var(--green);margin-bottom:10px}.eq.big i{width:7px}
+#appwrap.green.on{background:linear-gradient(180deg,color-mix(in srgb,var(--green) 42%,var(--bg)) 0,var(--bg) 380px)}
+.mus{flex:1;overflow:auto;padding:6px 18px 120px;max-width:560px;margin:0 auto;width:100%}
+.mnow{padding:4px 0 6px}.mcov{width:min(64%,270px);aspect-ratio:1;margin:6px auto 18px;border-radius:20px;overflow:hidden;background:var(--panel2);box-shadow:0 18px 40px rgba(0,0,0,.28)}.mcov img{width:100%;height:100%;object-fit:cover;display:block}.mph{display:grid;place-items:center;height:100%;font-size:64px;color:var(--green)}
+.mmeta{text-align:center;padding:0 6px}.mtt{display:flex;gap:10px;align-items:center;justify-content:center}.mtt b{font-size:21px;line-height:1.2}.mtt .eq{height:16px;color:var(--green)}.mmeta>span{display:block;color:var(--dim);font-size:14px;margin-top:4px}
+.mbar{height:5px;border-radius:3px;background:var(--line);margin:18px 4px 14px;overflow:hidden}.mbar i{display:block;height:100%;border-radius:3px;background:var(--green);transition:width 1s linear}
+.mctl{display:flex;gap:14px;justify-content:center;align-items:center}.mctl button{width:48px;height:48px;border-radius:50%;border:0;background:transparent;font-size:20px;cursor:pointer;color:inherit;display:grid;place-items:center;transition:transform .28s cubic-bezier(.3,1.5,.5,1),background .3s,box-shadow .3s,color .3s}.mctl .sm{width:44px;height:44px;font-size:18px}.mctl .on{color:var(--green);background:color-mix(in srgb,var(--green) 18%,transparent)}
+.mctl .big{width:68px;height:68px;background:var(--green);color:#06281a;box-shadow:0 10px 24px color-mix(in srgb,var(--green) 45%,transparent)}.mctl .big svg{width:28px;height:28px;fill:currentColor}
+.mctl button:hover{transform:translateY(-2px)}.mctl button:active{transform:scale(.88);transition-duration:.08s}
+.mvol{display:flex;align-items:center;gap:12px;margin:16px 6px 0}.mvol button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--panel);font-size:17px;font-weight:800;cursor:pointer;color:inherit;transition:transform .25s cubic-bezier(.3,1.5,.5,1)}.mvol button:active{transform:scale(.85);transition-duration:.08s}.vb{flex:1;height:5px;border-radius:3px;background:var(--line);overflow:hidden}.vb i{display:block;height:100%;background:var(--green);border-radius:3px;transition:width .4s}
+.mdev{text-align:center;color:var(--dim);font-size:12px;margin-top:10px}
+.mlogin{text-align:center;padding:36px 12px}.mlogin h3{margin:0 0 8px;font-size:22px}.mlogin p{color:var(--dim);margin:0 0 22px;font-size:14px}.mgo{border:0;border-radius:999px;background:var(--green);color:#06281a;font-weight:800;font-size:16px;padding:14px 28px;cursor:pointer;transition:transform .28s cubic-bezier(.3,1.5,.5,1)}.mgo:active{transform:scale(.94)}
+.msearch{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0 16px;margin:20px 0 4px;transition:box-shadow .25s,border-color .25s}.msearch:focus-within{border-color:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 25%,transparent)}.msearch svg{width:20px;height:20px;fill:none;stroke:var(--dim);stroke-width:2;stroke-linecap:round;flex:none}.msearch input{flex:1;border:0;background:transparent;font:inherit;padding:14px 0;outline:none;color:inherit;min-width:0}
+.mh{margin:24px 2px 12px;font-size:19px}.mmsg{margin:14px 0;padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--dim);font-size:14px}
+.mlist{display:flex;flex-direction:column;gap:4px}.mrow2{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:8px;border:0;border-radius:14px;background:transparent;font:inherit;color:inherit;cursor:pointer;transition:transform .25s cubic-bezier(.3,1.4,.5,1),background .25s}.mrow2:hover{background:var(--panel)}.mrow2:active{transform:scale(.975);transition-duration:.08s}
+.th{width:48px;height:48px;border-radius:8px;object-fit:cover;flex:none;background:var(--panel2)}.th.rd{border-radius:50%}.th.ph{display:grid;place-items:center;color:var(--green);font-size:20px}.mt{flex:1;min-width:0}.mt b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mt small{display:block;color:var(--dim);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mp{width:22px;height:22px;fill:var(--green);flex:none}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.pcard{display:flex;flex-direction:column;gap:8px;text-align:left;border:0;background:transparent;font:inherit;color:inherit;cursor:pointer;padding:0;transition:transform .28s cubic-bezier(.3,1.4,.5,1)}.pcard:hover{transform:translateY(-3px)}.pcard:active{transform:scale(.95);transition-duration:.08s}
+.pimg{display:block;aspect-ratio:1;border-radius:16px;overflow:hidden;background:var(--panel2);box-shadow:0 8px 20px rgba(0,0,0,.18);display:grid;place-items:center}.pimg img{width:100%;height:100%;object-fit:cover;display:block}.pimg i{font-style:normal;font-size:40px;color:var(--green)}.pcard b{font-size:14px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pcard.liked .pimg{background:linear-gradient(135deg,var(--green),color-mix(in srgb,var(--green) 40%,#6a5acd))}.pcard.liked svg{width:44%;fill:#fff}
 .mus .empty{padding:14px;color:var(--dim)}
 .nbk{flex:1;overflow:auto;padding:4px 16px 36px;width:100%}
 .nbs{margin-bottom:6px}.nbm{display:block}
@@ -264,7 +283,7 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 #sheet.vh{max-height:46dvh}#sheet.vh .hint{display:none}#sheetbg.vh{background:transparent}
 @keyframes flash{0%{box-shadow:0 0 0 0 transparent}15%,70%{box-shadow:0 0 0 4px var(--blue),0 0 28px 6px var(--blue)}100%{box-shadow:0 0 0 0 transparent}}
 .flash{animation:flash 2.6s ease}
-@media (prefers-reduced-motion:reduce){.aura *,.core{animation:none!important}.tri svg,.mic.live,#hub.open .shape{animation:none}*{transition-duration:.01s!important}}
+@media (prefers-reduced-motion:reduce){.eq i,#hub.open .shape.mu,.mu::after{animation:none!important}.aura *,.core{animation:none!important}.tri svg,.mic.live,#hub.open .shape{animation:none}*{transition-duration:.01s!important}}
 
 /* ---------- desktop ---------- */
 @media (min-width:760px){
@@ -315,7 +334,7 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
     <button class="shape ov" id="ov-meteo" data-act="meteo" style="--i:1;--x:27;--y:-15" aria-label="Apri Meteo e Luna">Meteo e Luna</button>
     <button class="shape re" id="re-cal" data-act="cal" style="--i:2;--x:-24;--y:28" aria-label="Apri Calendario">Calendario</button>
     <button class="shape qd" id="qd-task" data-act="task" style="--i:4;--x:0;--y:-33" aria-label="Apri il Quaderno">Quaderno</button>
-    <button class="shape mu" id="mu-music" data-act="music" style="--i:5;--x:3;--y:28" aria-label="Apri Musica">Musica</button>
+    <button class="shape mu" id="mu-music" data-act="music" style="--i:5;--x:3;--y:28" aria-label="Apri Musica"><span class="eq h"><i></i><i></i><i></i><i></i><i></i></span><span>Musica</span></button>
     <button class="shape ci" id="ci-ash" data-act="ash" style="--i:3;--x:26;--y:28" aria-label="Apri la scheda di Ash">Ash</button>
   </div>
 </section>
@@ -1211,22 +1230,27 @@ async function spRefresh(){
   try{spNow=await spApi('/me/player');spMsg=spMsg&&/^Non trovo/.test(spMsg)&&spNow?'':spMsg}catch(e){if(e.message==='nologin'){spNow=null}else spMsg=spErr(e)}
   if($('#musn'))paintNow()}
 const spPP=()=>spNow&&spNow.is_playing;
-function spTitle(){const i=spNow&&spNow.item;if(!i)return null;const a=i.artists?i.artists.map(x=>x.name).join(', '):(i.show&&i.show.name)||'';return{t:i.name,a,img:((i.album&&i.album.images)||(i.images)||[]).slice(-2)[0],p:spNow.progress_ms,d:i.duration_ms}}
+function spTitle(){const i=spNow&&spNow.item;if(!i)return null;const a=i.artists?i.artists.map(x=>x.name).join(', '):(i.show&&i.show.name)||'';const im=((i.album&&i.album.images)||i.images||[])[0];return{t:i.name,a,img:im,p:spNow.progress_ms,d:i.duration_ms}}
+const spImg=(arr,round)=>arr&&arr.length?'<img class="th'+(round?' rd':'')+'" src="'+esc((arr[arr.length>1?arr.length-1:0]).url)+'" alt="" loading="lazy">':'<span class="th ph'+(round?' rd':'')+'">♪</span>';
 function nowHtml(){
-  if(!SP)return'<div class="acd"><h4 style="margin:0 0 6px">Collega Spotify</h4><p style="color:var(--dim);margin:0 0 12px;font-size:14px">Serve un solo accesso. Poi puoi scegliere le playlist e dare comandi a voce da Parla con me.</p><button class="abtn" data-m="login" style="background:var(--green);border-color:var(--green);color:#06281a">Collega Spotify</button></div>';
-  const n=spTitle(),dev=spNow&&spNow.device;
-  return'<div class="acd" data-hl="now"><div class="np">'+(n&&n.img?'<img src="'+esc(n.img.url)+'" alt="">':'<img alt="">')+'<div><b>'+esc(n?n.t:'Niente in riproduzione')+'</b><span>'+esc(n?n.a:'Apri Spotify su un dispositivo e scegli una playlist')+'</span>'+(dev?'<span>'+esc(dev.name)+' · volume '+(dev.volume_percent==null?'—':dev.volume_percent+'%')+'</span>':'')+'</div></div>'+
-    (n&&n.d?'<div class="mbar"><i style="width:'+Math.min(100,Math.round(n.p/n.d*100))+'%"></i></div>':'<div style="height:14px"></div>')+
-    '<div class="mctl"><button data-m="prev" aria-label="Precedente">⏮</button><button class="big" data-m="pp" aria-label="Play o pausa">'+(spPP()?'⏸':'▶')+'</button><button data-m="next" aria-label="Prossimo">⏭</button><button data-m="shuf" class="'+(spNow&&spNow.shuffle_state?'on':'')+'" aria-label="Casuale">⇄</button><button data-m="vdn" aria-label="Volume giù">−</button><button data-m="vup" aria-label="Volume su">+</button></div></div>'}
+  if(!SP)return'<div class="mlogin"><div class="eq big"><i></i><i></i><i></i><i></i><i></i></div><h3>Collega Spotify</h3><p>Un solo accesso. Poi scegli le playlist qui o dai comandi a voce da Parla con me.</p><button class="mgo" data-m="login">Collega Spotify</button></div>';
+  const n=spTitle(),dev=spNow&&spNow.device,vol=dev&&dev.volume_percent;
+  return'<div class="mnow" data-hl="now"><div class="mcov">'+(n&&n.img?'<img src="'+esc(n.img.url)+'" alt="">':'<div class="mph">♪</div>')+'</div>'+
+    '<div class="mmeta"><div class="mtt"><b>'+esc(n?n.t:'Niente in riproduzione')+'</b>'+(spPP()?'<span class="eq"><i></i><i></i><i></i><i></i></span>':'')+'</div><span>'+esc(n?n.a:'Apri Spotify su un dispositivo e scegli una playlist')+'</span></div>'+
+    (n&&n.d?'<div class="mbar"><i style="width:'+Math.min(100,Math.round(n.p/n.d*100))+'%"></i></div>':'<div class="mbar"><i style="width:0"></i></div>')+
+    '<div class="mctl"><button class="sm'+(spNow&&spNow.shuffle_state?' on':'')+'" data-m="shuf" aria-label="Casuale">⇄</button><button data-m="prev" aria-label="Precedente">⏮</button><button class="big" data-m="pp" aria-label="Play o pausa">'+(spPP()?'<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>')+'</button><button data-m="next" aria-label="Prossimo">⏭</button><span class="sm" style="visibility:hidden"></span></div>'+
+    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+'</div>':'')+'</div>'}
+function trRow(m,u,img,t,sub,round){return'<button class="mrow2" data-m="'+m+'" data-u="'+esc(u)+'">'+spImg(img,round)+'<span class="mt"><b>'+esc(t)+'</b><small>'+esc(sub)+'</small></span><svg class="mp" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>'}
 function listsHtml(){
-  let h='';if(spMsg)h+='<div class="acd" style="color:var(--dim);font-size:14px">'+esc(spMsg)+'</div>';
+  let h='';if(spMsg)h+='<div class="mmsg">'+esc(spMsg)+'</div>';
   if(!SP)return h;
-  if(spRes){const R=spRes;h+='<h4 class="ahh">Risultati</h4><div class="lst">'+
-    R.tracks.map(x=>'<button class="rw mrow" data-m="tr" data-u="'+esc(x.uri)+'"><span>♪ '+esc(x.name)+' <i>'+esc(x.artists.map(a=>a.name).join(', '))+'</i></span></button>').join('')+
-    R.artists.map(x=>'<button class="rw mrow" data-m="ctx" data-u="'+esc(x.uri)+'"><span>◉ '+esc(x.name)+' <i>artista</i></span></button>').join('')+
-    R.playlists.map(x=>'<button class="rw mrow" data-m="ctx" data-u="'+esc(x.uri)+'"><span>☰ '+esc(x.name)+' <i>playlist</i></span></button>').join('')+(R.tracks.length+R.artists.length+R.playlists.length?'':'<div class="empty">Nessun risultato.</div>')+'</div>'}
-  if(spDev.length&&!(spNow&&spNow.device))h+='<h4 class="ahh">Dispositivi</h4><div class="lst">'+spDev.map(d=>'<button class="rw mrow" data-m="dev" data-u="'+esc(d.id)+'"><span>'+esc(d.name)+' <i>'+esc(d.type)+'</i></span></button>').join('')+'</div>';
-  h+='<h4 class="ahh">Le tue playlist</h4><div class="lst"><button class="rw mrow" data-m="liked"><span>♥ Brani che ti piacciono</span></button>'+(spPl?(spPl.length?'':'<div class="empty">Nessuna playlist trovata sul tuo account.</div>')+spPl.map(p=>'<button class="rw mrow" data-m="ctx" data-u="'+esc(p.uri)+'"><span>'+esc(p.name)+' '+(((p.items&&p.items.total)||(p.tracks&&p.tracks.total))?'<i>'+((p.items&&p.items.total)||p.tracks.total)+' brani</i>':'')+'</span></button>').join(''):'<div class="empty">Carico…</div>')+'</div>';
+  if(spRes){const R=spRes;h+='<h4 class="mh">Risultati</h4><div class="mlist">'+
+    R.tracks.map(x=>trRow('tr',x.uri,x.album&&x.album.images,x.name,x.artists.map(a=>a.name).join(', '))).join('')+
+    R.artists.map(x=>trRow('ctx',x.uri,x.images,x.name,'Artista',true)).join('')+
+    R.playlists.map(x=>trRow('ctx',x.uri,x.images,x.name,'Playlist')).join('')+(R.tracks.length+R.artists.length+R.playlists.length?'':'<div class="empty">Nessun risultato.</div>')+'</div>'}
+  if(spDev.length&&!(spNow&&spNow.device))h+='<h4 class="mh">Dispositivi</h4><div class="mlist">'+spDev.map(d=>trRow('dev',d.id,null,d.name,d.type)).join('')+'</div>';
+  h+='<h4 class="mh">Le tue playlist</h4><div class="pgrid"><button class="pcard liked" data-m="liked"><span class="pimg"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3 5.5 6.2 5.5c2 0 3.2 1.1 3.8 2.2.6-1.1 1.8-2.2 3.8-2.2 3.2 0 5 3.1 3.7 6.3C19.5 16.4 12 21 12 21z"/></svg></span><b>Brani che ti piacciono</b></button>'+
+    (spPl?spPl.map(p=>'<button class="pcard" data-m="ctx" data-u="'+esc(p.uri)+'"><span class="pimg">'+(p.images&&p.images[0]?'<img src="'+esc(p.images[0].url)+'" alt="" loading="lazy">':'<i>♪</i>')+'</span><b>'+esc(p.name)+'</b></button>').join(''):'<div class="empty" style="grid-column:1/-1">Carico…</div>')+'</div>'+(spPl&&!spPl.length?'<div class="empty">Nessuna playlist trovata sul tuo account.</div>':'');
   return h}
 let nowKey='',listKey='';
 const paintNow=(force)=>{const e=$('#musn');if(!e)return;const h=nowHtml(),k=h.replace(/<div class="mbar">.*?<\/div>/,'');
@@ -1237,7 +1261,7 @@ async function spLoadPl(){if(!SP)return;try{const j=await spApi('/me/playlists?l
 async function spPlay(body){await spDo(()=>spApi('/me/player/play','PUT',body));setTimeout(spRefresh,900)}
 async function spSearch(q,types){const j=await spApi('/search?limit=5&type='+(types||'track,artist,playlist')+'&q='+encodeURIComponent(q));return{tracks:((j.tracks||{}).items||[]).filter(Boolean),artists:((j.artists||{}).items||[]).filter(Boolean),playlists:((j.playlists||{}).items||[]).filter(Boolean)}}
 async function showMusic(){
-  $('#root').innerHTML='<header class="top">'+backBtn+'<div class="ttl">Musica</div><div class="hbtns"><button class="pill" data-act="hubvoice">Voce</button></div></header><div class="mus" id="mus"><div id="musn">'+nowHtml()+'</div>'+(SP?'<form id="musf" class="hpa" autocomplete="off"><input id="musq" placeholder="Cerca brano, artista o playlist" enterkeyhint="search"><button type="submit">Cerca</button></form>':'')+'<div id="musl">'+listsHtml()+'</div></div>';
+  $('#root').innerHTML='<header class="top">'+backBtn+'<div class="ttl">Musica</div><div class="hbtns"><button class="pill" data-act="hubvoice">Voce</button></div></header><div class="mus" id="mus"><div id="musn">'+nowHtml()+'</div>'+(SP?'<form id="musf" class="msearch" autocomplete="off"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg><input id="musq" placeholder="Cerca brano, artista o playlist" enterkeyhint="search"></form>':'')+'<div id="musl">'+listsHtml()+'</div></div>';
   const R=$('#mus');
   R.onclick=async e=>{const b=e.target.closest('[data-m]');if(!b||spBusy)return;const m=b.dataset.m,u=b.dataset.u;spBusy=true;
     try{
