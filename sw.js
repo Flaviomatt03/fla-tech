@@ -1,4 +1,4 @@
-const C = 'flat-v41';
+const C = 'flat-v42';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {

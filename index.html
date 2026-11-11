@@ -1256,7 +1256,7 @@ function nowHtml(){
     '<div class="mmeta"><div class="mtt"><b>'+esc(n?n.t:'Niente in riproduzione')+'</b>'+(spPP()?'<span class="eq"><i></i><i></i><i></i><i></i></span>':'')+'</div><span>'+esc(n?n.a:'Apri Spotify su un dispositivo e scegli una playlist')+'</span></div>'+
     (n&&n.d?'<div class="mbar"><i style="width:'+Math.min(100,Math.round(n.p/n.d*100))+'%"></i></div>':'<div class="mbar"><i style="width:0"></i></div>')+
     '<div class="mctl"><button class="sm'+(spNow&&spNow.shuffle_state?' on':'')+'" data-m="shuf" aria-label="Casuale">⇄</button><button data-m="prev" aria-label="Precedente">⏮</button><button class="big" data-m="pp" aria-label="Play o pausa">'+(spPP()?'<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>')+'</button><button data-m="next" aria-label="Prossimo">⏭</button><span class="sm" style="visibility:hidden"></span></div>'+
-    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+' · v38</div>':'<div class="mdev">v41</div>')+'</div>'}
+    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+' · v38</div>':'<div class="mdev">v42</div>')+'</div>'}
 function trRow(m,u,img,t,sub,round){return'<button class="mrow2" data-m="'+m+'" data-u="'+esc(u)+'">'+spImg(img,round)+'<span class="mt"><b>'+esc(t)+'</b><small>'+esc(sub)+'</small></span><svg class="mp" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>'}
 function listsHtml(){
   let h='';if(spMsg)h+='<div class="mmsg">'+esc(spMsg)+(/^Non trovo un dispositivo/.test(spMsg)?'<div class="mfix"><button data-m="openapp">Apri Spotify</button>'+(spLast?'<button data-m="retry">Riprova</button>':'')+'</div>':'')+'</div>';
@@ -1371,7 +1371,7 @@ function wakeStart(){
   r.onresult=e=>{let heard='',hit=null,bye=false;
     for(let i=e.resultIndex;i<e.results.length;i++){const res=e.results[i];heard+=res[0].transcript;
       for(let k=0;k<res.length&&!bye;k++)if(/\bbuona ?notte\b/.test(norm(res[k].transcript)))bye=true;
-      for(let k=0;k<res.length&&!hit;k++){const m=norm(res[k].transcript).match(/\b(?:hey|ehi|ei|ey|hei|ehy|ehila|ok|oh|ciao|e)\s*(?:fl|fr)[a-z]{0,6}\b\s*(?:tech\b)?\s*(.*)$/)||norm(res[k].transcript).match(/\bfla\s?tech\b\s*(.*)$/);if(m)hit=m}}
+      for(let k=0;k<res.length&&!hit;k++){const nt=norm(res[k].transcript),m=nt.match(/\b(?:hey|ehi|ei|ey|hei|ehy|ehila|hay|eh)\b\s*(?:(?:fl|fr)[a-z]{0,6}\b)?\s*(?:tech\b)?\s*(.*)$/)||nt.match(/\b(?:ok|oh|ciao|e)\s*(?:fl|fr)[a-z]{0,6}\b\s*(?:tech\b)?\s*(.*)$/)||nt.match(/\bfla\s?tech\b\s*(.*)$/);if(m)hit=m}}
     if(!$('#sheet')||$('#sheet').style.display!=='block'){const c=$('#aicap');if(c){clearInterval(aiT);clearTimeout(aiH);c.textContent='Sento: '+heard.trim().slice(-60);c.classList.add('on');aiH=setTimeout(()=>c.classList.remove('on'),4000)}}
     if(bye){clearTimeout(wakeT);wakeSet(false,'Buonanotte Flavio.');return}
     if(hit){wakeRest=hit[hit.length-1]||'';clearTimeout(wakeT);wakeT=setTimeout(wakeFire,1200)}};
