@@ -407,18 +407,18 @@ html[data-style=reattore] .shape.ci{--ac:#E8CB82;--bc:rgba(232,203,130,.6)}
 html[data-style=reattore] .shape.qd{--ac:#C2E4D0;--bc:rgba(194,228,208,.6)}
 html[data-style=reattore] .shape.ap{--ac:#F3B58A;--bc:rgba(238,158,105,.6)}
 html[data-style=reattore] .shape.sq,html[data-style=reattore] .shape.ov{width:min(calc(var(--ux)*44),190px);height:calc(var(--uy)*13)}
-html[data-style=reattore] .shape.re,html[data-style=reattore] .shape.mu{width:min(calc(var(--ux)*44),190px);height:calc(var(--uy)*11)}
+html[data-style=reattore] .shape.ap,html[data-style=reattore] .shape.mu{width:min(calc(var(--ux)*44),190px);height:calc(var(--uy)*11)}
 html[data-style=reattore] .shape.sq{--x:-23!important;--y:-31!important}
 html[data-style=reattore] .shape.ov{--x:23!important;--y:-31!important}
-html[data-style=reattore] .shape.re{--x:-23!important;--y:25!important}
-html[data-style=reattore] .shape.mu{--x:23!important;--y:25!important}
-html[data-style=reattore] .shape.qd,html[data-style=reattore] .shape.ci,html[data-style=reattore] .shape.ap{--n:10px;width:min(calc(var(--ux)*28),120px);height:calc(var(--uy)*4.7);min-height:40px;padding:0 6px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bc)}
+html[data-style=reattore] .shape.mu{--x:-23!important;--y:25!important}
+html[data-style=reattore] .shape.ap{--x:23!important;--y:25!important}
+html[data-style=reattore] .shape.qd,html[data-style=reattore] .shape.ci,html[data-style=reattore] .shape.re{--n:10px;width:min(calc(var(--ux)*28),120px);height:calc(var(--uy)*4.7);min-height:40px;padding:0 6px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bc)}
 html[data-style=reattore] .shape.qd{--x:-30!important;--y:34.5!important}
 html[data-style=reattore] .shape.ci{--x:0!important;--y:34.5!important}
-html[data-style=reattore] .shape.ap{--x:30!important;--y:34.5!important}
-html[data-style=reattore] .shape.qd .nm,html[data-style=reattore] .shape.ci .nm,html[data-style=reattore] .shape.ap .nm{font-size:12.5px;letter-spacing:0;text-transform:none}
-html[data-style=reattore] .shape.qd .dt,html[data-style=reattore] .shape.ci .dt,html[data-style=reattore] .shape.ap .dt{display:none}
-html[data-style=reattore] .shape.ap .gr{grid-template-columns:repeat(2,6px);gap:3px}
+html[data-style=reattore] .shape.re{--x:30!important;--y:34.5!important}
+html[data-style=reattore] .shape.qd .nm,html[data-style=reattore] .shape.ci .nm,html[data-style=reattore] .shape.re .nm{font-size:12.5px;letter-spacing:0;text-transform:none}
+html[data-style=reattore] .shape.qd .dt,html[data-style=reattore] .shape.ci .dt,html[data-style=reattore] .shape.re .dt{display:none}
+html[data-style=reattore] .shape.ap .gr{grid-column:2;grid-row:1;grid-template-columns:repeat(2,6px);gap:3px}
 html[data-style=reattore] .shape.ap .gr i{width:6px;height:6px;background:var(--ac)}
 </style>
 </head>
@@ -469,7 +469,7 @@ html[data-style=reattore] .shape.ap .gr i{width:6px;height:6px;background:var(--
     <button class="shape qd" id="qd-task" data-act="task" style="--i:4;--x:0;--y:-33" aria-label="Apri il Quaderno"><svg class="ic" viewBox="0 0 24 24"><path d="M5 7l1.6 1.6L9.5 5.5M5 14l1.6 1.6 2.9-3.1M12.5 7.5H19M12.5 14.5H19"/></svg><span class="nm">Quaderno</span><span class="dt"></span></button>
     <button class="shape mu" id="mu-music" data-act="music" style="--i:5;--x:3;--y:28" aria-label="Apri Musica"><span class="eq h"><i></i><i></i><i></i><i></i><i></i></span><span class="nm">Musica</span><span class="dt"></span></button>
     <button class="shape up" id="up-app" data-act="refresh" style="--i:7;--x:-31;--y:-31" aria-label="Aggiorna FLA-Tech"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-    <button class="shape ap" id="ap-app" data-act="apps" style="--i:6;--x:31;--y:-32" aria-label="Apri App"><span class="gr"><i></i><i></i><i></i><i></i></span><span class="nm">APP</span></button>
+    <button class="shape ap" id="ap-app" data-act="apps" style="--i:6;--x:31;--y:-32" aria-label="Apri App"><span class="gr"><i></i><i></i><i></i><i></i></span><span class="nm">APP</span><span class="dt"></span></button>
     <button class="shape ci" id="ci-ash" data-act="ash" style="--i:3;--x:26;--y:28" aria-label="Apri la scheda di Ash"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l7.5 4.5v9L12 21l-7.5-4.5v-9z"/><path d="M12 8l4 7H8z"/></svg><span class="nm">Ash</span></button>
   </div>
 </section>
@@ -1560,6 +1560,7 @@ async function hubData(){
   try{paintRem()}catch{}
   try{const c=(typeof D!=='undefined'&&D.inc&&D.inc.length)?curCycle():null;hubSet('sq-finanze',c?eur(c.left):'Finanze',c?'restano nel ciclo':'tocca per aprire')}catch{}
   try{const r=REM[0];hubSet('re-cal',r?(r.time||remWhen(r)):'Libero',r?(r.time?remWhen(r)+' · ':'')+r.t:'niente in scadenza')}catch{}
+  try{const n=Object.keys(APPL).length;hubSet('ap-app',n+' app','pronte da aprire')}catch{}
   try{const n=spTitle();hubSet('mu-music',n?n.t:'Musica',n?(spPP()?'in riproduzione':'in pausa'):'tocca per aprire')}catch{}
   try{const r=REM[0],l=$('#liveln .ltx b');if(l)l.textContent=r?r.t+', '+remWhen(r).toLowerCase()+(r.time?' alle '+r.time:''):'Tutto tranquillo'}catch{}
   try{const j=await fetchMeteo(),c=j.current;hubSet('ov-meteo',Math.round(c.temperature_2m)+'°',wc(c.weather_code)[0])}catch{hubSet('ov-meteo','Meteo','tocca per aprire')}
