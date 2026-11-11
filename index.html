@@ -1214,7 +1214,7 @@ async function spCallback(){
   try{await spToken({client_id:SPID,grant_type:'authorization_code',code,redirect_uri:spRedir(),code_verifier:sv.v});try{localStorage.removeItem('flat_spv')}catch{}return true}
   catch(e){toast('Spotify: '+e.message);return false}
 }
-let spDevId=null;
+let spDevId=lget('flat_spdev');
 async function spApi(path,method,body){
   if(!SP)throw new Error('nologin');
   if((method||'GET')!=='GET'&&/^\/me\/player\/(play|pause|next|previous|shuffle|volume)/.test(path)&&!/device_id=/.test(path)){const id=spDevId||(spNow&&spNow.device&&spNow.device.id);if(id)path+=(path.includes('?')?'&':'?')+'device_id='+encodeURIComponent(id)}
@@ -1237,7 +1237,7 @@ async function spDo(fn){
     if(e.status!==404&&e.status!==403&&e.status!==502)throw e;
     const d=await spApi('/me/player/devices');spDev=(d&&d.devices)||[];
     if(!spDev.length)throw e;
-    const dv=spDev.find(x=>x.is_active)||spDev[0];spDevId=dv.id;
+    const dv=spDev.find(x=>x.id===spDevId)||spDev.find(x=>x.is_active)||spDev[0];spDevId=dv.id;
     try{return await fn()}catch(e2){
       await spApi('/me/player','PUT',{device_ids:[dv.id],play:true});await new Promise(r=>setTimeout(r,1200));
       return await fn()}}
@@ -1255,7 +1255,7 @@ function nowHtml(){
     '<div class="mmeta"><div class="mtt"><b>'+esc(n?n.t:'Niente in riproduzione')+'</b>'+(spPP()?'<span class="eq"><i></i><i></i><i></i><i></i></span>':'')+'</div><span>'+esc(n?n.a:'Apri Spotify su un dispositivo e scegli una playlist')+'</span></div>'+
     (n&&n.d?'<div class="mbar"><i style="width:'+Math.min(100,Math.round(n.p/n.d*100))+'%"></i></div>':'<div class="mbar"><i style="width:0"></i></div>')+
     '<div class="mctl"><button class="sm'+(spNow&&spNow.shuffle_state?' on':'')+'" data-m="shuf" aria-label="Casuale">⇄</button><button data-m="prev" aria-label="Precedente">⏮</button><button class="big" data-m="pp" aria-label="Play o pausa">'+(spPP()?'<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>')+'</button><button data-m="next" aria-label="Prossimo">⏭</button><span class="sm" style="visibility:hidden"></span></div>'+
-    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+' · v38</div>':'<div class="mdev">v39</div>')+'</div>'}
+    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+' · v38</div>':'<div class="mdev">v40</div>')+'</div>'}
 function trRow(m,u,img,t,sub,round){return'<button class="mrow2" data-m="'+m+'" data-u="'+esc(u)+'">'+spImg(img,round)+'<span class="mt"><b>'+esc(t)+'</b><small>'+esc(sub)+'</small></span><svg class="mp" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>'}
 function listsHtml(){
   let h='';if(spMsg)h+='<div class="mmsg">'+esc(spMsg)+(/^Non trovo un dispositivo/.test(spMsg)?'<div class="mfix"><button data-m="openapp">Apri Spotify</button>'+(spLast?'<button data-m="retry">Riprova</button>':'')+'</div>':'')+'</div>';
@@ -1264,7 +1264,7 @@ function listsHtml(){
     R.tracks.map(x=>trRow('tr',x.uri,x.album&&x.album.images,x.name,x.artists.map(a=>a.name).join(', '))).join('')+
     R.artists.map(x=>trRow('ctx',x.uri,x.images,x.name,'Artista',true)).join('')+
     R.playlists.map(x=>trRow('ctx',x.uri,x.images,x.name,'Playlist')).join('')+(R.tracks.length+R.artists.length+R.playlists.length?'':'<div class="empty">Nessun risultato.</div>')+'</div>'}
-  if(spDev.length&&!(spNow&&spNow.device))h+='<h4 class="mh">Dispositivi</h4><div class="mlist">'+spDev.map(d=>trRow('dev',d.id,null,d.name,d.type)).join('')+'</div>';
+  h+='<h4 class="mh">Dove ascoltare</h4><div class="mlist">'+(spDev.length?spDev.map(d=>trRow('dev',d.id,null,d.name+(d.id===spDevId?'  ✓':''),d.type+(d.is_active?' · attivo':''))).join(''):'<div class="empty">Nessun dispositivo Spotify acceso. Apri Spotify sul telefono o accendi la console.</div>')+'<button class="mrow2" data-m="devs"><span class="th ph">↻</span><span class="mt"><b>Aggiorna dispositivi</b></span></button></div>';
   h+='<h4 class="mh">Le tue playlist</h4><div class="pgrid"><button class="pcard liked" data-m="liked"><span class="pimg"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3 5.5 6.2 5.5c2 0 3.2 1.1 3.8 2.2.6-1.1 1.8-2.2 3.8-2.2 3.2 0 5 3.1 3.7 6.3C19.5 16.4 12 21 12 21z"/></svg></span><b>Brani che ti piacciono</b></button>'+
     (spPl?spPl.map(p=>'<button class="pcard" data-m="ctx" data-u="'+esc(p.uri)+'"><span class="pimg">'+(p.images&&p.images[0]?'<img src="'+esc(p.images[0].url)+'" alt="" loading="lazy">':'<i>♪</i>')+'</span><b>'+esc(p.name)+'</b></button>').join(''):'<div class="empty" style="grid-column:1/-1">Carico…</div>')+'</div>'+(spPl&&!spPl.length?'<div class="empty">Nessuna playlist trovata sul tuo account.</div>':'');
   return h}
@@ -1273,6 +1273,7 @@ const paintNow=(force)=>{const e=$('#musn');if(!e)return;const h=nowHtml(),k=h.r
   if(!force&&k===nowKey){const n=spTitle(),i=e.querySelector('.mbar i');if(i&&n&&n.d)i.style.width=Math.min(100,Math.round(n.p/n.d*100))+'%';return}
   nowKey=k;e.innerHTML=h};
 const paintLists=()=>{const e=$('#musl');if(!e)return;let h;try{h=listsHtml()}catch(er){h='<div class="acd" style="color:var(--dim)">Non riesco a mostrare le playlist: '+esc(er.message)+'</div>'}if(h===listKey)return;listKey=h;const y=$('#mus')?$('#mus').scrollTop:0;e.innerHTML=h;if($('#mus'))$('#mus').scrollTop=y};
+async function spLoadDev(){try{const d=await spApi('/me/player/devices');spDev=(d&&d.devices)||[]}catch{}paintLists()}
 async function spLoadPl(){if(!SP)return;try{const j=await spApi('/me/playlists?limit=50');spPl=(j.items||[]).filter(Boolean)}catch(e){spPl=[];spMsg=spErr(e)}paintLists()}
 let spLast=null;
 async function spPlay(body){spLast=body;await spDo(()=>spApi('/me/player/play','PUT',body));setTimeout(spRefresh,900)}
@@ -1294,12 +1295,13 @@ async function showMusic(){
       else if(m==='tr')await spPlay({uris:[u]});
       else if(m==='ctx')await spPlay({context_uri:u});
       else if(m==='liked'){const j=await spApi('/me/tracks?limit=50');const us=(j.items||[]).map(x=>x.track&&x.track.uri).filter(Boolean);if(us.length)await spPlay({uris:us});else spMsg='Non hai brani piaciuti.'}
-      else if(m==='dev'){await spApi('/me/player','PUT',{device_ids:[u],play:true});setTimeout(spRefresh,900)}
+      else if(m==='devs'){await spLoadDev()}
+      else if(m==='dev'){spDevId=u;lset('flat_spdev',u);try{await spApi('/me/player','PUT',{device_ids:[u],play:!!spPP()})}catch(e){}spMsg='';setTimeout(spRefresh,900);await spLoadDev()}
     }catch(er){spMsg=spErr(er);if(er.message==='nologin')showMusic();else if(er.status===404&&(m==='tr'||m==='ctx')&&/^spotify:/.test(u||'')){spBusy=false;paintLists();toast('Apro Spotify sul brano: premi play lì');setTimeout(()=>{location.href=u},600);return}}
     spBusy=false;paintLists()};
   const f=$('#musf');if(f)f.onsubmit=async e=>{e.preventDefault();const q=$('#musq').value.trim();if(!q)return;$('#musq').blur();f.classList.add('busy');try{spRes=await spSearch(q);spMsg=''}catch(er){spMsg=spErr(er)}f.classList.remove('busy');paintLists();const h=$('#musl .mh');if(h)h.scrollIntoView({behavior:'smooth',block:'start'})};
   clearInterval(spPoll);
-  if(SP){spLoadPl();spRefresh();spPoll=setInterval(()=>{if(!document.hidden&&appOpen)spRefresh()},5000)}
+  if(SP){spLoadPl();spLoadDev();spRefresh();let tk=0;spPoll=setInterval(()=>{if(!document.hidden&&appOpen){spRefresh();if(++tk%3===0)spLoadDev()}},5000)}
 }
 async function musicCommand(raw){
   const t=norm(raw);
