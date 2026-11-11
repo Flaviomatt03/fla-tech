@@ -1223,12 +1223,12 @@ async function spApi(path,method,body){
   if(r.status===204||r.status===202)return null;
   let j=null;try{j=await r.json()}catch{}
   if(r.status===401){SP=null;lset('flat_sp',null);throw new Error('nologin')}
-  if(!r.ok){const e=new Error((j&&j.error&&(j.error.message||j.error.reason))||('Errore '+r.status));e.status=r.status;throw e}
+  if(!r.ok){const e=new Error((j&&j.error&&(j.error.message||j.error.reason))||('Errore '+r.status));e.status=r.status;e.path=(method||'GET')+' '+path.split('?')[0];throw e}
   return j;
 }
 function spErr(e){
   if(e.message==='nologin')return'Spotify non è collegato: apri Musica e tocca Collega Spotify.';
-  if(e.status===404)return'Non trovo un dispositivo attivo: Spotify non risulta aperto sul telefono. Tocca Apri Spotify, aspetta che si carichi e torna qui: riprovo da solo. ('+e.message+')';
+  if(e.status===404)return'Non trovo un dispositivo attivo: Spotify non risulta aperto sul telefono. Tocca Apri Spotify, aspetta che si carichi e torna qui: riprovo da solo. ('+e.message+(e.path?' · '+e.path:'')+')';
   if(e.status===403)return'Spotify non permette questa azione ('+e.message+').';
   if(e.status===429)return'Spotify è occupato, riprova tra qualche secondo.';
   return'Spotify: '+e.message}
@@ -1255,7 +1255,7 @@ function nowHtml(){
     '<div class="mmeta"><div class="mtt"><b>'+esc(n?n.t:'Niente in riproduzione')+'</b>'+(spPP()?'<span class="eq"><i></i><i></i><i></i><i></i></span>':'')+'</div><span>'+esc(n?n.a:'Apri Spotify su un dispositivo e scegli una playlist')+'</span></div>'+
     (n&&n.d?'<div class="mbar"><i style="width:'+Math.min(100,Math.round(n.p/n.d*100))+'%"></i></div>':'<div class="mbar"><i style="width:0"></i></div>')+
     '<div class="mctl"><button class="sm'+(spNow&&spNow.shuffle_state?' on':'')+'" data-m="shuf" aria-label="Casuale">⇄</button><button data-m="prev" aria-label="Precedente">⏮</button><button class="big" data-m="pp" aria-label="Play o pausa">'+(spPP()?'<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>')+'</button><button data-m="next" aria-label="Prossimo">⏭</button><span class="sm" style="visibility:hidden"></span></div>'+
-    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+' · v38</div>':'<div class="mdev">v38</div>')+'</div>'}
+    '<div class="mvol"><button data-m="vdn" aria-label="Volume giù">−</button><div class="vb"><i style="width:'+(vol==null?0:vol)+'%"></i></div><button data-m="vup" aria-label="Volume su">+</button></div>'+(dev?'<div class="mdev">'+esc(dev.name)+' · v38</div>':'<div class="mdev">v39</div>')+'</div>'}
 function trRow(m,u,img,t,sub,round){return'<button class="mrow2" data-m="'+m+'" data-u="'+esc(u)+'">'+spImg(img,round)+'<span class="mt"><b>'+esc(t)+'</b><small>'+esc(sub)+'</small></span><svg class="mp" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>'}
 function listsHtml(){
   let h='';if(spMsg)h+='<div class="mmsg">'+esc(spMsg)+(/^Non trovo un dispositivo/.test(spMsg)?'<div class="mfix"><button data-m="openapp">Apri Spotify</button>'+(spLast?'<button data-m="retry">Riprova</button>':'')+'</div>':'')+'</div>';
@@ -1295,7 +1295,7 @@ async function showMusic(){
       else if(m==='ctx')await spPlay({context_uri:u});
       else if(m==='liked'){const j=await spApi('/me/tracks?limit=50');const us=(j.items||[]).map(x=>x.track&&x.track.uri).filter(Boolean);if(us.length)await spPlay({uris:us});else spMsg='Non hai brani piaciuti.'}
       else if(m==='dev'){await spApi('/me/player','PUT',{device_ids:[u],play:true});setTimeout(spRefresh,900)}
-    }catch(er){spMsg=spErr(er);if(er.message==='nologin')showMusic()}
+    }catch(er){spMsg=spErr(er);if(er.message==='nologin')showMusic();else if(er.status===404&&(m==='tr'||m==='ctx')&&/^spotify:/.test(u||'')){spBusy=false;paintLists();toast('Apro Spotify sul brano: premi play lì');setTimeout(()=>{location.href=u},600);return}}
     spBusy=false;paintLists()};
   const f=$('#musf');if(f)f.onsubmit=async e=>{e.preventDefault();const q=$('#musq').value.trim();if(!q)return;$('#musq').blur();f.classList.add('busy');try{spRes=await spSearch(q);spMsg=''}catch(er){spMsg=spErr(er)}f.classList.remove('busy');paintLists();const h=$('#musl .mh');if(h)h.scrollIntoView({behavior:'smooth',block:'start'})};
   clearInterval(spPoll);
