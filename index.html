@@ -1326,11 +1326,14 @@ function wakeFire(){const rest=wakeRest.trim();wakeHalt();wakeRest='';aiWake();o
 function wakeStart(){
   if(!SR||!wake||wrec||document.hidden||($('#sheet')&&$('#sheet').style.display==='block'))return;
   const r=new SR();r.lang='it-IT';r.continuous=true;r.interimResults=true;wrec=r;
-  r.onresult=e=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
-    const m=norm(t).match(/\b(?:hey|ehi|ei|hei|ehy|ok|oh|ciao)\s*(?:fla|flat|flo|fra|fle|flah)\b\s*(?:tech)?\s*(.*)$/);
-    if(m){wakeRest=m[1]||'';clearTimeout(wakeT);wakeT=setTimeout(wakeFire,1400)}};
+  r.maxAlternatives=4;
+  r.onresult=e=>{let heard='',hit=null;
+    for(let i=e.resultIndex;i<e.results.length;i++){const res=e.results[i];heard+=res[0].transcript;
+      for(let k=0;k<res.length&&!hit;k++){const m=norm(res[k].transcript).match(/\b(?:hey|ehi|ei|ey|hei|ehy|ehila|ok|oh|ciao|e)\s*(?:fl|fr)[a-z]{0,6}\b\s*(?:tech\b)?\s*(.*)$/)||norm(res[k].transcript).match(/\bfla\s?tech\b\s*(.*)$/);if(m)hit=m}}
+    if(!$('#sheet')||$('#sheet').style.display!=='block'){const c=$('#aicap');if(c){clearInterval(aiT);clearTimeout(aiH);c.textContent='Sento: '+heard.trim().slice(-60);c.classList.add('on');aiH=setTimeout(()=>c.classList.remove('on'),4000)}}
+    if(hit){wakeRest=hit[hit.length-1]||'';clearTimeout(wakeT);wakeT=setTimeout(wakeFire,1200)}};
   r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){wake=false;lset('flat_wake','off');paintWake();wrec=null;toast('Microfono negato: consentilo dalle impostazioni del browser.')}};
-  r.onend=()=>{wrec=null;if(wake)setTimeout(wakeStart,350)};
+  r.onend=()=>{wrec=null;if(wake)setTimeout(wakeStart,120)};
   try{r.start()}catch{wrec=null}
 }
 function toggleWake(){
