@@ -332,6 +332,22 @@ body:not(.wk) #hub .eye{transform:none!important}
 /* ---------- stile D&D ---------- */
 
 /* ---------- STILI HOME (Cambia stile) ---------- */
+.bgraph{margin:12px 0 4px;background:var(--bg);border:1px solid var(--line);border-radius:20px;overflow:hidden;position:relative}.bgraph svg{width:100%;height:auto;display:block}
+.bcap{text-align:center;font-size:12px;font-weight:700;color:var(--dim);padding:0 0 10px}
+.bgraph .bl{stroke-width:1.5;opacity:.75;stroke-dasharray:1;stroke-dashoffset:1;animation:bdraw .9s ease forwards;fill:none}
+@keyframes bdraw{to{stroke-dashoffset:0}}
+.bgraph .bn{animation:bpop .55s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes bpop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.bgraph .bt{animation:bbeat 3.2s ease-in-out infinite}
+@keyframes bbeat{50%{transform:scale(1.1)}}
+.bgraph text{font-family:var(--sans);font-weight:700}
+.brain{position:absolute;left:calc(50% + 108px);bottom:calc(env(safe-area-inset-bottom) + 32px);width:46px;height:46px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--tx);display:grid;place-items:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .4s;z-index:3;box-shadow:var(--shadow)}
+.brain svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#hub.open .brain{opacity:1;pointer-events:auto;transition-delay:.9s}
+.brain.dot::after{content:'';position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;background:#e5484d;border:2px solid var(--panel)}
+html[data-style=reattore] .brain{background:rgba(10,30,46,.85);border-color:rgba(110,200,245,.6);color:#8FDCFF;box-shadow:0 0 14px rgba(90,200,245,.25)}
+.bchips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 6px}.bchips .chipb{font-size:13px;padding:9px 12px}
+.brow{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-top:8px;border-radius:14px;background:var(--bg);border:1px solid var(--line);font-size:14px}.brow span{flex:1;min-width:0}.brow b{font-weight:700}.brow small{color:var(--dim)}.brow button{border:0;background:transparent;color:var(--dim);font-size:20px;cursor:pointer;padding:2px 8px}
 :root{--scal:polygon(100.00% 50.00%,98.64% 54.26%,95.17% 57.96%,91.05% 61.00%,87.87% 63.78%,86.53% 67.03%,86.81% 71.25%,87.57% 76.31%,87.41% 81.39%,85.36% 85.36%,81.39% 87.41%,76.31% 87.57%,71.25% 86.81%,67.03% 86.53%,63.78% 87.87%,61.00% 91.05%,57.96% 95.17%,54.26% 98.64%,50.00% 100.00%,45.74% 98.64%,42.04% 95.17%,39.00% 91.05%,36.22% 87.87%,32.97% 86.53%,28.75% 86.81%,23.69% 87.57%,18.61% 87.41%,14.64% 85.36%,12.59% 81.39%,12.43% 76.31%,13.19% 71.25%,13.47% 67.03%,12.13% 63.78%,8.95% 61.00%,4.83% 57.96%,1.36% 54.26%,0.00% 50.00%,1.36% 45.74%,4.83% 42.04%,8.95% 39.00%,12.13% 36.22%,13.47% 32.97%,13.19% 28.75%,12.43% 23.69%,12.59% 18.61%,14.64% 14.64%,18.61% 12.59%,23.69% 12.43%,28.75% 13.19%,32.97% 13.47%,36.22% 12.13%,39.00% 8.95%,42.04% 4.83%,45.74% 1.36%,50.00% 0.00%,54.26% 1.36%,57.96% 4.83%,61.00% 8.95%,63.78% 12.13%,67.03% 13.47%,71.25% 13.19%,76.31% 12.43%,81.39% 12.59%,85.36% 14.64%,87.41% 18.61%,87.57% 23.69%,86.81% 28.75%,86.53% 32.97%,87.87% 36.22%,91.05% 39.00%,95.17% 42.04%,98.64% 45.74%)}
 .shape .ic,.shape .dt{display:none}
 #rx,.liveln{display:none}
@@ -458,6 +474,7 @@ html[data-style=reattore] .shape.ap .gr i{width:6px;height:6px;background:var(--
   <div class="hintx">tocca il triangolo</div>
 
   <button class="parla" data-act="hubvoice" aria-label="Parla con me"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Parla con me</button>
+  <button class="brain" id="brainbtn" data-act="brain" aria-label="Cervello: insegnami le parole"><svg viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg></button>
   <div class="vtag" id="vtag"></div>
   <div class="liveln" id="liveln" data-act="rem"><span class="lic"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg></span><span class="ltx"><small>Prossimo</small><b>Tutto tranquillo</b></span></div>
 
@@ -1637,8 +1654,54 @@ async function moveCommand(raw){
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
 document.getElementById('vtag').textContent='v52'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
-async function hubCommand(raw){
+/* ---------- cervello: impara le parole che gli insegni ---------- */
+let BR=lget('flat_brain')||[],brainPend='';
+const brSave=()=>lset('flat_brain',BR.slice(0,300));
+const reEsc=x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function brainFind(t){for(const b of [...BR].sort((a,c)=>c.p.length-a.p.length)){if(t===b.p||new RegExp('(^| )'+reEsc(b.p)+'( |$)').test(t))return b.t}return null}
+function brainAdd(p,to){p=norm(p);to=(to||'').trim();if(!p||!to)return false;BR=BR.filter(b=>b.p!==p);BR.unshift({p,t:to});brSave();return true}
+function brainUnknown(raw){brainPend=raw;paintBrain();return'Non ho capito «'+raw+'». Tocca il cervello vicino a Parla con me e dimmi cosa intendevi: la prossima volta lo so.'}
+function paintBrain(){const b=$('#brainbtn');if(b)b.classList.toggle('dot',!!brainPend)}
+const BRFIN=/spes|stipend|entrat|euro|resta|rimane|rimasto|cicl|fiss|finanz|guadagn|annulla|ultima|totale|quanto|incass|pagat|comprat/;
+const BTG=[['Finanze','apri finanze'],['Meteo e Luna','apri meteo'],['Calendario','apri calendario'],['Quaderno','apri quaderno'],['Ash','apri ash'],['Musica','apri musica'],['App','apri le app']];
+function brainChips(){const o=BTG.slice();for(const k of Object.keys(APPL)){const n=APPL[k].n.toLowerCase();const c=[n,n+' samsung'].find(x=>APPL[k].re.test(x));if(c)o.push([APPL[k].n,'apri '+c])}return o}
+function brainList(){return BR.length?BR.map((b,i)=>'<div class="brow"><span><b>«'+esc(b.p)+'»</b><br><small>→ '+esc(b.t)+'</small></span><button data-bdel="'+i+'" aria-label="Dimentica">×</button></div>').join(''):'<div class="hint">Ancora niente. Quando non capisco una frase, la insegni qui.</div>'}
+let brainNew='';
+const BRCOL={'apri finanze':['Finanze','#f2d675'],'apri meteo':['Meteo e Luna','#d3c8f1'],'apri calendario':['Calendario','#f2b8c8'],'apri quaderno':['Quaderno','#bfe3cf'],'apri ash':['Ash','#e7d5ab'],'apri musica':['Musica','#7fc7a1'],'apri le app':['App','#f3b58a']};
+function brainGraph(){
+  const W=360,H=340,cx=180,cy=170,groups=new Map(),chips=brainChips();
+  for(const b of BR){let g=groups.get(b.t);if(!g){const m=BRCOL[b.t]||(()=>{const c=chips.find(x=>x[1]===b.t);return c?[c[0],'#c3dcf3']:[b.t.length>13?b.t.slice(0,12)+'…':b.t,'#e1e5eb']})();g={l:m[0],c:m[1],w:[]};groups.set(b.t,g)}g.w.push(b.p)}
+  const gs=[...groups.values()],n=gs.length,cl=(v,a,z)=>Math.max(a,Math.min(z,v));
+  let L='',N='',d=0;
+  const pw=t=>Math.min(16,t.length)*5.9+16,cut=t=>t.length>16?t.slice(0,15)+'…':t;
+  const pill=(x,y,t,fill,stroke,cls,dash,sw)=>{const w=pw(t),h=22;return'<g transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')"><g class="bn" style="animation-delay:'+(d*.07).toFixed(2)+'s"><rect x="'+(-w/2)+'" y="-11" width="'+w+'" height="'+h+'" rx="11" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+(sw||1.5)+'"'+(dash?' stroke-dasharray="3 3"':'')+'/><text text-anchor="middle" y="4" font-size="11" fill="'+(cls==='hub'?'#23272e':'var(--tx)')+'">'+esc(cut(t))+'</text></g></g>'};
+  const line=(x1,y1,x2,y2,c,dash)=>'<line class="bl" pathLength="1" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+c+'" style="animation-delay:'+(d*.07).toFixed(2)+'s"'+(dash?' stroke-dasharray="3 3"':'')+'/>';
+  gs.forEach((g,i)=>{
+    const a=-Math.PI/2+i*2*Math.PI/n,hx=cl(cx+72*Math.cos(a),pw(g.l)/2+4,W-pw(g.l)/2-4),hy=cy+72*Math.sin(a),k=g.w.length;
+    L+=line(cx,cy,hx,hy,g.c);d++;
+    const step=k>1?Math.min(.5,Math.min(1.1,2*Math.PI/n*.8)/(k-1)):0;
+    g.w.forEach((w,j)=>{const ang=a+(j-(k-1)/2)*step,R=142+(j%2)*18,ww=pw(w),wx=cl(cx+R*Math.cos(ang),ww/2+4,W-ww/2-4),wy=cl(cy+R*Math.sin(ang),14,H-14);
+      L+=line(hx,hy,wx,wy,g.c);d++;N+=pill(wx,wy,w,'var(--bg)',g.c,'w',false,w===norm(brainNew)?3:1.6)});
+    N+=pill(hx,hy,g.l,g.c,g.c,'hub');d++});
+  let P='';if(brainPend){const px=cx,py=H-16;P=line(cx,cy,px,py,'#98a0aa',true)+pill(px,py,'«'+brainPend+'»? ','var(--bg)','#98a0aa','w',true)}
+  const tri='<g transform="translate('+cx+','+cy+')"><g class="bt"><circle r="30" fill="url(#bgl)"/><path d="M0 -13L12 8H-12Z" fill="#a9d6ef" stroke="#a9d6ef" stroke-width="7" stroke-linejoin="round"/></g></g>';
+  const empty=n?'':'<text x="'+cx+'" y="'+(cy+52)+'" text-anchor="middle" font-size="12" fill="var(--dim)">Il cervello è vuoto: insegnagli una frase</text>';
+  const words=BR.length;
+  return'<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Il cervello di FLA-Tech"><defs><radialGradient id="bgl"><stop offset="0" stop-color="#a9d6ef" stop-opacity=".7"/><stop offset="1" stop-color="#a9d6ef" stop-opacity="0"/></radialGradient></defs>'+L+P+tri+N+empty+'</svg><div class="bcap">'+words+(words===1?' parola':' parole')+' · '+n+(n===1?' collegamento':' collegamenti')+'</div>'}
+function openBrain(){
+  const ch=brainChips();
+  openSheet('<h3>Cervello</h3><div class="hint">Insegnami una parola o una frase. Dimmi cosa intendi e dalla prossima volta lo so, senza aggiornare niente.</div><div class="bgraph" id="bgraph">'+brainGraph()+'</div>'+
+   '<div class="lab" style="margin-top:12px">Quando dico</div><input id="bph" value="'+esc(brainPend)+'" placeholder="es. fammi vedere il conto" autocomplete="off">'+
+   '<div class="lab" style="margin-top:14px">Apri</div><div class="bchips">'+ch.map((c,i)=>'<button class="chipb" data-bt="'+i+'">'+esc(c[0])+'</button>').join('')+'</div>'+
+   '<form id="bf"><div class="lab" style="margin-top:10px">oppure fai questo comando</div><input id="bto" placeholder="es. quanto resta" autocomplete="off"><button class="btn pri" style="margin-top:10px;width:100%">Salva</button></form>'+
+   '<div class="lab" style="margin-top:18px">Cosa so già</div><div id="bl">'+brainList()+'</div>');
+  const sh=$('#sheet'),learn=to=>{const p=$('#bph').value;if(!norm(p))return toast('Scrivi prima la frase');if(!brainAdd(p,to))return;brainNew=p;brainPend='';paintBrain();$('#bph').value='';$('#bto').value='';$('#bl').innerHTML=brainList();$('#bgraph').innerHTML=brainGraph();toast('Imparato')};
+  sh.onclick=e=>{const c=e.target.closest('[data-bt]'),d=e.target.closest('[data-bdel]');if(c)learn(ch[+c.dataset.bt][1]);else if(d){BR.splice(+d.dataset.bdel,1);brSave();$('#bl').innerHTML=brainList();$('#bgraph').innerHTML=brainGraph()}};
+  $('#bf').onsubmit=e=>{e.preventDefault();learn($('#bto').value)}}
+async function hubCommand(raw,inner){
   const t=norm(raw).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'');
+  if(!inner){const bl=brainFind(t);if(bl)return await hubCommand(bl,true)}
+  if(!inner&&/^(grazie|ok|va bene|perfetto|bene|ciao)$/.test(t))return'Ok.';
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
   const ac=appCommand(t);if(ac)return ac;
   const oc=openCmd(t);if(oc)return oc;
@@ -1651,6 +1714,7 @@ async function hubCommand(raw){
   if(/calendario|evento|appuntament|agenda|impegn|ricordami|\bcosa ho\b/.test(t))return calCommand(raw);
   if(/promemoria|scadenz|cosa devo fare|cosa ho da fare/.test(t))return remVoice();
   if(/\b(meteo|tempo|piove|piover[aà]?|pioggia|ombrello|temperatura|luna|lunare|nuvol\w*|sole|freddo|caldo|gradi|neve|vento)\b/.test(t)&&!/\b(spes\w*|euro|pagat\w*|speso)\b/.test(t))return await weatherCommand(raw);
+  if(!inner&&!BRFIN.test(t)&&!findAmount(t))return brainUnknown(raw);
   if(!S)return'Per inserire le finanze devi prima entrare una volta in Finanze con email, password e PIN.';
   let st;try{st=await rpc('pin_status')}catch{return'Sessione scaduta: apri Finanze e rientra.'}
   if(st!=='verified')return'Apri Finanze e inserisci il PIN, poi potrò scrivere le spese da qui.';
@@ -1660,6 +1724,7 @@ async function hubCommand(raw){
     closeSheet();tab=tb;openApp($('#sq-finanze'),'fin');return'Apro Finanze.';
   }
   const out=await command(raw);
+  if(!inner&&/^Non ho capito/.test(out))return brainUnknown(raw);
   if(/^(Aggiunta spesa|Stipendio registrato|Entrata registrata|Tolta)/.test(out))PEND={kind:'fin',apply:()=>setTab('spese')};
   return out;
 }
@@ -1687,6 +1752,7 @@ document.addEventListener('click',async e=>{
   else if(a==='apps')openApp(t,'apps');
   else if(a==='refresh')hardUpdate();
   else if(a==='toapps')showApps();
+  else if(a==='brain')openBrain();
   else if(a==='rem')openRem();
   else if(a==='hubvoice')openVoice(true);
   else if(a==='theme')toggleTheme();
