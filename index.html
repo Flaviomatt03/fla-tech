@@ -30,6 +30,7 @@ svg{display:block}
 #hub{position:fixed;inset:0;background:var(--bg);overflow:hidden;transition:background .4s}
 .tbtn{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--tx);display:grid;place-items:center;cursor:pointer;z-index:3}
 .tbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wkind{position:fixed;top:calc(env(safe-area-inset-top) + 4px);left:50%;transform:translateX(-50%);z-index:9;display:none;align-items:center;gap:6px;font:700 11px var(--sans);color:var(--dim);pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 10px}.wkind i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:wpulse 1.6s ease-in-out infinite}body.wk.inapp .wkind{display:flex}
 .wbtn{right:70px}.wdot{position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;background:var(--green);transform:scale(0);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}.wbtn.on{background:color-mix(in srgb,var(--green) 25%,var(--panel));border-color:var(--green)}.wbtn.on .wdot{transform:scale(1);animation:wpulse 1.6s ease-in-out infinite}@keyframes wpulse{50%{opacity:.35}}
 .tbtn .moon{display:none}
 html[data-theme=dark] .tbtn .sun{display:none}
@@ -280,6 +281,11 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 #hub[data-ai=listen] .shape,#hub[data-ai=think] .shape,#hub[data-ai=speak] .shape{opacity:.4}
 .aicap{position:absolute;left:50%;top:calc(50% - 3dvh + 104px);transform:translateX(-50%);width:min(86vw,320px);text-align:center;font-size:15px;line-height:1.45;color:var(--tx);opacity:0;transition:opacity .6s;pointer-events:none;z-index:1;min-height:44px}
 .aicap.on{opacity:.85}
+.wkrem{position:absolute;left:50%;top:calc(50% - 3dvh + 112px);transform:translateX(-50%);width:min(74vw,280px);text-align:center;font-size:12.5px;line-height:1.4;color:var(--dim);font-weight:600;opacity:0;transition:opacity .5s;pointer-events:none;z-index:1}
+body.wk #hub.open .wkrem{opacity:.95}#aicap.on~.wkrem,#hub[data-ai=listen] .wkrem,#hub[data-ai=speak] .wkrem{opacity:0!important}
+.core{transition:transform .5s cubic-bezier(.3,1.4,.5,1),opacity .5s}
+body:not(.wk) #hub .core{animation:none!important;transform:scale(1.9,.12)!important;opacity:.5!important;filter:none}
+body:not(.wk) #hub .eye{transform:none!important}
 #hub:not(.open) .aicap{opacity:0}
 #sheet.vh{max-height:46dvh}#sheet.vh .hint{display:none}#sheetbg.vh{background:transparent}
 @keyframes flash{0%{box-shadow:0 0 0 0 transparent}15%,70%{box-shadow:0 0 0 4px var(--blue),0 0 28px 6px var(--blue)}100%{box-shadow:0 0 0 0 transparent}}
@@ -326,6 +332,7 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
   </button>
 
   <div class="aicap" id="aicap" aria-live="polite"></div>
+  <div class="wkrem" id="wkrem"></div>
   <div class="hintx">tocca il triangolo</div>
 
   <button class="parla" data-act="hubvoice" aria-label="Parla con me"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Parla con me</button>
@@ -341,6 +348,7 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
   </div>
 </section>
 
+<div class="wkind"><i></i>Hey Fla attivo</div>
 <section id="appwrap"><div id="root"></div></section>
 <div id="sheetbg"></div>
 <div id="sheet"></div>
@@ -388,7 +396,7 @@ $('#sheetbg').addEventListener('click',closeSheet);
 let appOpen=false,appEl=null;
 const rectInset=r=>'inset('+r.top+'px '+(innerWidth-r.right)+'px '+(innerHeight-r.bottom)+'px '+r.left+'px round 32px)';
 function openApp(el,kind){
-  if(appOpen)return;appOpen=true;appEl=el;
+  if(appOpen)return;appOpen=true;appEl=el;document.body.classList.add('inapp');
   const w=$('#appwrap'),r=el.getBoundingClientRect();
   w.classList.toggle('pink',kind==='cal');w.classList.toggle('lilac',kind==='meteo');w.classList.toggle('beige',kind==='ash');w.classList.toggle('mint',kind==='task');w.classList.toggle('green',kind==='music');w.classList.toggle('full',kind==='task');w.classList.remove('on');w.style.display='block';w.style.transition='none';w.style.clipPath=rectInset(r);
   $('#root').innerHTML='<div class="auth"><div class="empty">Carico…</div></div>';
@@ -399,7 +407,7 @@ function openApp(el,kind){
   if(kind==='cal')showCal();else if(kind==='meteo')showMeteo();else if(kind==='ash')showAsh();else if(kind==='task')showTasks();else if(kind==='music')showMusic();else if(!S)showLogin();else afterLogin();
 }
 function doClose(){
-  if(!appOpen)return;clearInterval(spPoll);appOpen=false;closeSheet();
+  if(!appOpen)return;clearInterval(spPoll);document.body.classList.remove('inapp');appOpen=false;closeSheet();
   const w=$('#appwrap'),r=(appEl||$('#sq-finanze')).getBoundingClientRect();
   w.style.transition='none';w.style.clipPath='inset(0px 0px 0px 0px round 0px)';w.getBoundingClientRect();
   requestAnimationFrame(()=>{w.style.transition='clip-path .55s cubic-bezier(.65,0,.2,1),background .45s';w.classList.remove('on');w.style.clipPath=rectInset(r)});
@@ -859,6 +867,7 @@ const remWhen=(r)=>r.days===0?'Oggi':r.days===1?'Domani':r.days<0?'In ritardo':'
 function paintRem(){
   REM=buildRem();const near=REM.filter(r=>r.days<=1),st=$('#rstrip'),bd=$('#rbadge');
   if(bd){bd.textContent=near.length;bd.hidden=!near.length}
+  wkRem();
   if(st){if(near.length){st.hidden=false;st.textContent=near.slice(0,2).map(r=>remWhen(r)+': '+r.t+(r.time?' '+r.time:'')).join(' · ')+(near.length>2?' · +'+(near.length-2):'')}else st.hidden=true}
 }
 async function refreshRem(){
@@ -1143,9 +1152,9 @@ function tkDictate(){
   const SRc=window.SpeechRecognition||window.webkitSpeechRecognition,btn=$('#tmic'),ta=$('#tkt');
   if(!SRc){toast('Il microfono non è supportato da questo browser');return}
   if(tkRec){try{tkRec.stop()}catch{}return}
-  const r=new SRc();r.lang='it-IT';r.interimResults=false;r.continuous=true;tkRec=r;btn.textContent='⏹ Ferma';
+  wakeHalt();const r=new SRc();r.lang='it-IT';r.interimResults=false;r.continuous=true;tkRec=r;btn.textContent='⏹ Ferma';
   r.onresult=e=>{let s='';for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)s+=e.results[i][0].transcript+'\n';if(s&&ta)ta.value=(ta.value?ta.value.replace(/\s*$/,'\n'):'')+s};
-  r.onend=()=>{tkRec=null;const b=$('#tmic');if(b)b.textContent='🎤 Detta'};r.onerror=()=>{tkRec=null;const b=$('#tmic');if(b)b.textContent='🎤 Detta'};
+  r.onend=()=>{tkRec=null;const b=$('#tmic');if(b)b.textContent='🎤 Detta';setTimeout(wakeStart,500)};r.onerror=()=>{tkRec=null;const b=$('#tmic');if(b)b.textContent='🎤 Detta'};
   try{r.start()}catch{tkRec=null;btn.textContent='🎤 Detta'}
 }
 async function showTasks(){
@@ -1320,26 +1329,29 @@ async function musicCommand(raw){
 
 /* ---------- Hey Fla (ascolto con app aperta) ---------- */
 let wake=lget('flat_wake')==='on',wrec=null,wakeT=null,wakeRest='';
-const paintWake=()=>{const b=document.querySelector('.wbtn');if(b){b.classList.toggle('on',wake);b.setAttribute('aria-pressed',wake)}};
+function wkRem(){const e=$('#wkrem');if(!e)return;const l=(typeof REM!=='undefined'?REM:[]).slice(0,2);e.textContent=l.length?l.map(r=>remWhen(r)+': '+r.t+(r.time?' '+r.time:'')).join(' · '):'Nessun promemoria in arrivo'}
+const paintWake=()=>{wkRem();const b=document.querySelector('.wbtn');if(b){b.classList.toggle('on',wake);b.setAttribute('aria-pressed',wake)}document.body.classList.toggle('wk',wake)};
 function wakeHalt(){clearTimeout(wakeT);try{if(wrec){wrec.onend=null;wrec.onerror=null;wrec.abort()}}catch{}wrec=null}
 function wakeFire(){const rest=wakeRest.trim();wakeHalt();wakeRest='';aiWake();openVoice(true);if(rest){stopListen();const v=$('#vtr');if(v)v.textContent=rest;run(rest)}}
 function wakeStart(){
   if(!SR||!wake||wrec||document.hidden||($('#sheet')&&$('#sheet').style.display==='block'))return;
   const r=new SR();r.lang='it-IT';r.continuous=true;r.interimResults=true;wrec=r;
   r.maxAlternatives=4;
-  r.onresult=e=>{let heard='',hit=null;
+  r.onresult=e=>{let heard='',hit=null,bye=false;
     for(let i=e.resultIndex;i<e.results.length;i++){const res=e.results[i];heard+=res[0].transcript;
+      for(let k=0;k<res.length&&!bye;k++)if(/\bbuona ?notte\b/.test(norm(res[k].transcript)))bye=true;
       for(let k=0;k<res.length&&!hit;k++){const m=norm(res[k].transcript).match(/\b(?:hey|ehi|ei|ey|hei|ehy|ehila|ok|oh|ciao|e)\s*(?:fl|fr)[a-z]{0,6}\b\s*(?:tech\b)?\s*(.*)$/)||norm(res[k].transcript).match(/\bfla\s?tech\b\s*(.*)$/);if(m)hit=m}}
     if(!$('#sheet')||$('#sheet').style.display!=='block'){const c=$('#aicap');if(c){clearInterval(aiT);clearTimeout(aiH);c.textContent='Sento: '+heard.trim().slice(-60);c.classList.add('on');aiH=setTimeout(()=>c.classList.remove('on'),4000)}}
+    if(bye){clearTimeout(wakeT);wakeSet(false,'Buonanotte Flavio.');return}
     if(hit){wakeRest=hit[hit.length-1]||'';clearTimeout(wakeT);wakeT=setTimeout(wakeFire,1200)}};
   r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){wake=false;lset('flat_wake','off');paintWake();wrec=null;toast('Microfono negato: consentilo dalle impostazioni del browser.')}};
   r.onend=()=>{wrec=null;if(wake)setTimeout(wakeStart,120)};
   try{r.start()}catch{wrec=null}
 }
+function wakeSet(on,msg,silent){wake=on;lset('flat_wake',on?'on':'off');paintWake();if(on)wakeStart();else wakeHalt();if(msg){toast(msg);if(!on&&!silent)speak(msg)}}
 function toggleWake(){
-  if(!SR){toast('Questo browser non supporta l’ascolto vocale.');return}
-  wake=!wake;lset('flat_wake',wake?'on':'off');paintWake();
-  if(wake){toast('Ascolto attivo: di’ “Hey Fla” con l’app aperta');wakeStart()}else{wakeHalt();toast('Ascolto spento')}
+  if(!SR){toast('Questo browser non supporta l\u2019ascolto vocale.');return}
+  if(wake)wakeSet(false,'Ascolto spento',true);else wakeSet(true,'Ascolto attivo: di\u2019 \u201cHey Fla\u201d con l\u2019app aperta');
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden)wakeHalt();else setTimeout(wakeStart,400)});
 /* ---------- eliminare con la voce / il testo ---------- */
@@ -1407,6 +1419,7 @@ async function moveCommand(raw){
 /* ---------- Parla con me (dall'hub) ---------- */
 async function hubCommand(raw){
   const t=norm(raw).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'');
+  if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
   const oc=openCmd(t);if(oc)return oc;
   if(/\b(spotify|musica|playlist|canzone|canzoni|brano|brani|riproduci|suona|suonami|pausa|riprendi|volume|shuffle|casuale|mescola|prossima|prossimo|salta|stoppa|cambia (?:la )?(?:canzone|brano|musica))\b/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria)\b/.test(t))return await musicCommand(raw);
   if(/^(?:(?:puoi|potresti|vorrei|per favore|dai|ora|adesso|mi|ti|ok|allora)\s+)*(metti|mettimi|mettere|suona|suonami|suonare|riproduci|fai partire|far partire|fammi sentire|ascolta|voglio sentire|voglio ascoltare|cambia con|cambia in|passa a)\b/.test(t)&&!/\d/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria|stipendio|entrata|ca)\b/.test(t))return await musicCommand(raw);
