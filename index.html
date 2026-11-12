@@ -259,6 +259,7 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 .tbck{display:block;width:100%;text-align:left;margin:0 0 10px;padding:12px 14px;background:#f1e2bb;border:3px solid #1b130d;border-radius:14px;box-shadow:3px 3px 0 #1b130d;cursor:pointer;color:#1b130d}.tbck b{font:900 16px Georgia,serif}.tbck small{display:block;font:italic 700 12px Georgia,serif;opacity:.75}.tbck span{display:block;font:500 13px/1.4 Georgia,serif;margin-top:4px}
 .tbs1 .btn,.tbmod .btn,.tbbtns .btn{font:800 14px Georgia,serif;border:3px solid #1b130d;box-shadow:2px 2px 0 #1b130d;border-radius:99px;padding:9px 18px;background:#f1e2bb;color:#1b130d;margin:4px}.tbs1 .btn.pri,.tbmod .btn.pri,.tbbtns .btn.pri{background:#2f8f83;color:#fff}
 .tbmod{background:#f1e2bb;border:4px solid #1b130d;border-radius:16px;padding:18px;max-width:340px;text-align:center;font:600 15px/1.45 Georgia,serif;box-shadow:5px 5px 0 #000;color:#1b130d}.tbbtns{text-align:center;margin-top:12px}.tbov{z-index:400}.tblog{max-height:50vh;overflow:auto;text-align:left;margin:10px 0}.tblog p{margin:0 0 5px;font:500 13px Georgia,serif;border-bottom:1px dashed #1b130d55;padding-bottom:4px}
+.tbai{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:0 0 12px}.tbai span{width:100%;text-align:center;font:900 13px Georgia,serif;text-transform:uppercase;color:#1b130d}.tbai button{font:900 14px Georgia,serif;border:3px solid #1b130d;background:#2f8f83;color:#fff;border-radius:99px;padding:8px 16px;box-shadow:3px 3px 0 #1b130d;text-shadow:1px 1px 0 #1b130d;cursor:pointer}.tbai button:nth-of-type(1){background:#7fbf6a}.tbai button:nth-of-type(3){background:#c8402c}
 .tbgo{display:block;margin:0 auto 12px;font:900 16px Georgia,serif;text-transform:uppercase;border:4px solid #1b130d;background:#d6402f;color:#fff;border-radius:99px;padding:11px 26px;box-shadow:4px 4px 0 #1b130d;text-shadow:1px 1px 0 #1b130d;cursor:pointer}.tbgo:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #1b130d}
 .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gcard{position:relative;border:0;border-radius:26px;padding:18px 14px 16px;background:var(--gc);color:#33261a;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:150px;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.10)}.gcard:active{transform:scale(.97)}.gcard svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.gcard b{font-size:16px;margin-top:auto}.gcard span{font-size:12.5px;opacity:.75;line-height:1.3}.gcard i{position:absolute;top:12px;right:12px;font-style:normal;font-size:11px;font-weight:800;background:rgba(255,255,255,.55);padding:3px 9px;border-radius:99px}
 .atile svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -851,6 +852,39 @@ function render(scroll){
 }
 function setTab(t){tab=t;openRow=null;render(true)}
 
+
+/* ---------- scontrino da foto (OCR locale) ---------- */
+function rcParse(txt){
+  const L=String(txt||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const nums=l=>(l.match(/\d{1,5}[.,]\d{2}(?!\d)/g)||[]).map(x=>parseFloat(x.replace(',','.')));
+  let amount=0;const keyed=[];
+  L.forEach((l,i)=>{if(/total|importo|da pagare|pagato|saldo|contanti|carta|bancomat/i.test(l)&&!/subtotale|iva|resto/i.test(l)){let n=nums(l);if(!n.length&&L[i+1])n=nums(L[i+1]);keyed.push(...n)}});
+  const strong=[];L.forEach((l,i)=>{if(/total[ei]|da pagare|importo pagato/i.test(l)&&!/subtotal|iva/i.test(l)){let n=nums(l);if(!n.length&&L[i+1])n=nums(L[i+1]);strong.push(...n)}});
+  if(strong.length)amount=Math.max(...strong);else if(keyed.length)amount=Math.max(...keyed);else{const all=L.flatMap(nums);if(all.length)amount=Math.max(...all)}
+  let merchant='';for(const l of L.slice(0,8)){if(/^[^a-zA-Z]*$/.test(l))continue;if(/via |viale |piazza|p\.?\s?iva|tel|cod|www|scontrino|documento|\d{5}/i.test(l))continue;const w=l.replace(/[^A-Za-zÀ-ÿ&' .-]/g,'').trim();if(w.length>=3){merchant=w.replace(/\s+/g,' ').slice(0,28);break}}
+  merchant=merchant.toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase());
+  const t=txt.toLowerCase();let category='altro';
+  const map=[[/conad|coop|esselunga|lidl|eurospin|carrefour|supermerc|pam |md |despar|spesa|alimentar/,'spesa'],[/eni |q8|tamoil|ip |esso|benzin|diesel|carburant|gasolio/,'benzina'],[/ristor|pizz|bar |caff|osteria|trattor|pub |sushi|mcdonald|burger/,'uscite']];
+  for(const [r,c] of map)if(r.test(t)){category=c;break}
+  return{amount:amount?String(amount.toFixed(2)).replace('.',','):'',merchant,category}}
+let _tess=null;
+function rcLoad(){return _tess||(_tess=new Promise((ok,ko)=>{if(window.Tesseract)return ok(window.Tesseract);const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=()=>ok(window.Tesseract);s.onerror=()=>{_tess=null;ko(new Error('Per leggere lo scontrino serve internet'))};document.head.appendChild(s)}))}
+async function rcOcr(canvas,setMsg){const T=await rcLoad();setMsg('Leggo lo scontrino… (la prima volta scarica la lingua, ci mette un po’)');const r=await T.recognize(canvas,'ita',{logger:m=>{if(m.status==='recognizing text')setMsg('Leggo lo scontrino… '+Math.round(m.progress*100)+'%')}});return r.data.text}
+function rcShrink(src,w,h){const k=Math.min(1,1600/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);const x=c.getContext('2d');x.filter='grayscale(1) contrast(1.35)';x.drawImage(src,0,0,c.width,c.height);return c}
+async function rcFinish(canvas,setMsg){try{const txt=await rcOcr(canvas,setMsg);const r=rcParse(txt);closeScan();if(!r.amount){toast('Non ho trovato il totale, scrivilo a mano');formExpense({merchant:r.merchant,category:r.category});return}formExpense(r);toast('Controlla importo e descrizione')}catch(e){setMsg(e.message||'Errore di lettura');setTimeout(closeScan,2500)}}
+let _scan=null;
+function closeScan(){if(_scan){try{_scan.stream&&_scan.stream.getTracks().forEach(t=>t.stop())}catch(e){}_scan.el.remove();_scan=null}}
+async function scanReceipt(){
+  closeScan();const el=document.createElement('div');el.style.cssText='position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font:600 15px system-ui';
+  el.innerHTML='<video playsinline muted autoplay style="width:100%;flex:1;min-height:0;object-fit:cover"></video><div id="rcm" style="padding:10px 16px;text-align:center">Inquadra lo scontrino, bene illuminato</div><div style="display:flex;gap:12px;padding:0 0 22px"><button id="rcx" style="padding:12px 22px;border-radius:99px;border:0;font:700 15px system-ui">Annulla</button><button id="rcs" style="padding:12px 26px;border-radius:99px;border:0;background:#3ddc84;font:800 15px system-ui">Scatta</button><button id="rcf" style="padding:12px 18px;border-radius:99px;border:0;font:700 15px system-ui">Galleria</button></div><input id="rcfi" type="file" accept="image/*" hidden>';
+  document.body.appendChild(el);_scan={el,stream:null};const m=t=>{const q=el.querySelector('#rcm');if(q)q.textContent=t};
+  el.querySelector('#rcx').onclick=closeScan;
+  const fi=el.querySelector('#rcfi');el.querySelector('#rcf').onclick=()=>fi.click();
+  fi.onchange=()=>{const f=fi.files[0];if(!f)return;const im=new Image();im.onload=()=>{el.querySelectorAll('button').forEach(b=>b.disabled=true);rcFinish(rcShrink(im,im.naturalWidth,im.naturalHeight),m)};im.src=URL.createObjectURL(f)};
+  const v=el.querySelector('video');
+  try{const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920}},audio:false});if(!_scan)return st.getTracks().forEach(t=>t.stop());_scan.stream=st;v.srcObject=st}catch(e){m('Fotocamera non disponibile: usa "Galleria"')}
+  el.querySelector('#rcs').onclick=()=>{if(!v.videoWidth)return;el.querySelectorAll('button').forEach(b=>b.disabled=true);v.pause();rcFinish(rcShrink(v,v.videoWidth,v.videoHeight),m)};
+}
 /* ---------- moduli ---------- */
 function formExpense(pre){
   pre=pre||{};
@@ -858,7 +892,8 @@ function formExpense(pre){
   <label>Descrizione<input name="merchant" placeholder="es. benzina, Conad" value="${esc(pre.merchant||'')}"></label>
   <label>Categoria<select name="category">${CATS.map(c=>`<option ${c===(pre.category||'altro')?'selected':''}>${c}</option>`).join('')}</select></label>
   <div class="two"><label>Data<input type="date" name="spent_on" value="${today()}"></label><label>Conto<select name="account"><option value="">—</option>${ACCS.map(a=>`<option>${a}</option>`).join('')}</select></label></div>
-  <label class="chk"><input type="checkbox" name="is_fixed"> È una spesa fissa</label><button class="btn pri" type="submit">Salva spesa</button></form>`);
+  <label class="chk"><input type="checkbox" name="is_fixed"> È una spesa fissa</label><button class="btn pri" type="submit">Salva spesa</button><button class="btn" type="button" id="scanbtn" style="margin-top:8px">📷 Scansiona scontrino</button></form>`);
+  $('#scanbtn').onclick=()=>{closeSheet();scanReceipt()};
   $('#fx').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),amount=num(f.get('amount'));if(!amount){toast('Importo non valido');return}
     try{await addExpense({amount,merchant:String(f.get('merchant')).trim()||null,category:String(f.get('category')),account:String(f.get('account'))||null,spent_on:String(f.get('spent_on'))||today(),is_fixed:f.get('is_fixed')==='on'});closeSheet();toast('Spesa salvata')}catch(x){toast(x.message)}};
 }
@@ -1177,9 +1212,11 @@ async function refreshRem(){
 function openRem(){
   paintRem();
   const h=REM.length?REM.map(r=>'<div class="ev"><span class="tm" style="min-width:86px">'+remWhen(r)+'</span><span class="tx">'+esc(r.t)+(r.time?' · '+esc(r.time):'')+(r.kind==='task'?' <small style="color:var(--dim)">(task)</small>':'')+(r.kind==='spesa'?' <small style="color:var(--dim)">(spesa fissa'+(r.days<0?', registrata?':'')+(r.amt?' · '+eur(r.amt):'')+')</small>':'')+'</span></div>').join(''):'<div class="empty">Niente in scadenza nei prossimi 7 giorni.</div>';
-  openSheet('<h3>Promemoria</h3>'+h+(S?'':'<div class="syn">Entra in Finanze per vedere anche le spese fisse e gli eventi sincronizzati.</div>'));
+  const rl=RMS.slice().sort((a,b)=>a.at-b.at).map(r=>'<div class="ev"><span class="tm" style="min-width:86px">'+esc(rmWhenTxt(r.at))+'</span><span class="tx">'+esc(r.t)+'</span><button data-rmx="'+esc(r.id)+'" aria-label="Togli" style="border:0;background:none;font-size:20px;color:var(--dim)">×</button></div>').join('');
+  openSheet('<h3>Promemoria</h3>'+(rl?'<div class="lab">Avvisi programmati</div>'+rl+'<div class="lab" style="margin-top:14px">In agenda</div>':'')+h+(S?'':'<div class="syn">Entra in Finanze per vedere anche le spese fisse e gli eventi sincronizzati.</div>'));
+  $('#sheet').onclick=e=>{const x=e.target.closest('[data-rmx]');if(!x)return;const r=RMS.find(y=>y.id===x.dataset.rmx);if(r){rmDrop(r);RMS=RMS.filter(y=>y!==r);rmSave();openRem()}};
 }
-function remVoice(){paintRem();if(!REM.length)return'Non hai niente in scadenza nei prossimi sette giorni.';return REM.slice(0,5).map(r=>remWhen(r)+': '+r.t+(r.time?' alle '+r.time:'')).join('. ')+'.'}
+function remVoice(){paintRem();const ml=rmListTxt();const pre=ml.length?'Ti ricordo: '+ml.slice(0,4).join('; ')+'. ':'';if(!REM.length)return pre?pre.trim():'Non hai niente in scadenza nei prossimi sette giorni.';return pre+REM.slice(0,5).map(r=>remWhen(r)+': '+r.t+(r.time?' alle '+r.time:'')).join('. ')+'.'}
 
 /* ---------- Scheda di Ash ---------- */
 const AB=[['for','Forza'],['des','Destrezza'],['cos','Costituzione'],['int','Intelligenza'],['sag','Saggezza'],['car','Carisma']];
@@ -1781,6 +1818,7 @@ async function briefing(force){
   const n=new Date(),m=n.getHours()*60+n.getMinutes();
   if(!force){if(m<9*60+7||m>9*60+20)return;if(lget('flat_brief')===today())return}
   lset('flat_brief',today());
+  try{await ensureFin()}catch{}
   const p=['Buongiorno Flavio.'];
   try{const j=await fetchMeteo(),d=j.daily;p.push('Oggi a '+PLACE+': '+wc(d.weather_code[0])[0].toLowerCase()+', tra '+Math.round(d.temperature_2m_min[0])+' e '+Math.round(d.temperature_2m_max[0])+' gradi, pioggia al '+d.precipitation_probability_max[0]+' per cento.')}catch{}
   try{paintRem();const o=REM.filter(r=>r.days<=0);
@@ -1996,9 +2034,9 @@ function showCards(){
   let body='';
   if(cgT==='reg')body='<div class="cgreg">'+CGR.map((r,k)=>'<details'+(k===0?' open':'')+'><summary>'+esc(r[0])+'</summary><p>'+esc(r[1])+'</p></details>').join('')+'</div>';
   else{const L=cgItems(),tot=L.reduce((a,x)=>a+(x.cp||1),0);body='<div class="cgcount">'+L.length+' carte diverse · '+(cgT==='cmd'?'una scelta per partita':tot+' nel mazzo')+'</div><div class="cggrid">'+L.map(cgCard).join('')+'</div>'}
-  $('#root').innerHTML='<header class="top"><button class="pill" data-gb="1">‹ Minigiochi</button><div class="ttl">Card Game</div><div class="hbtns"></div></header><div class="apps cgp"><div class="cgtitle">Fantasy <span>contro</span> Inferi</div><button class="tbgo" data-play="2" style="background:#2f8f83">Contro il telefono</button><button class="tbgo" data-play="1">Gioca in due</button><div class="cgfac"><button data-f="f" class="'+(f?'on':'')+'">Fantasy</button><button data-f="i" class="'+(!f?'on':'')+'">Inferi</button></div><div class="cgtabs">'+TB.map(t=>'<button data-t="'+t[0]+'" class="'+(cgT===t[0]?'on':'')+'">'+t[1]+'</button>').join('')+'</div>'+body+'</div>';
+  $('#root').innerHTML='<header class="top"><button class="pill" data-gb="1">‹ Minigiochi</button><div class="ttl">Card Game</div><div class="hbtns"></div></header><div class="apps cgp"><div class="cgtitle">Fantasy <span>contro</span> Inferi</div><div class="tbai"><span>Contro il telefono</span><button data-play="10">Facile</button><button data-play="11">Normale</button><button data-play="12">Difficile</button></div><button class="tbgo" data-play="1">Gioca in due</button><div class="cgfac"><button data-f="f" class="'+(f?'on':'')+'">Fantasy</button><button data-f="i" class="'+(!f?'on':'')+'">Inferi</button></div><div class="cgtabs">'+TB.map(t=>'<button data-t="'+t[0]+'" class="'+(cgT===t[0]?'on':'')+'">'+t[1]+'</button>').join('')+'</div>'+body+'</div>';
   const r=$('#root');$('[data-gb]').onclick=showGames;
-  r.querySelector('.apps').onclick=e=>{{const pl=e.target.closest('[data-play]');if(pl)return showBoard(pl.dataset.play==='2')}const a=e.target.closest('[data-f]'),b=e.target.closest('[data-t]'),c=e.target.closest('.cgc');if(a){cgF=a.dataset.f;showCards()}else if(b){cgT=b.dataset.t;showCards()}else if(c)cgZoom(c.dataset.i)}}
+  r.querySelector('.apps').onclick=e=>{{const pl=e.target.closest('[data-play]');if(pl){const v=pl.dataset.play;return v==='1'?showBoard(false):showBoard(true,+v-10)}}const a=e.target.closest('[data-f]'),b=e.target.closest('[data-t]'),c=e.target.closest('.cgc');if(a){cgF=a.dataset.f;showCards()}else if(b){cgT=b.dataset.t;showCards()}else if(c)cgZoom(c.dataset.i)}}
 /* ---------- TABELLONE: partita in due sullo stesso telefono ---------- */
 let TG=null;
 const tbRnd=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n};
@@ -2132,35 +2170,67 @@ async function tbCombat(){const p=TG.cur,o=1-p;if(TG.pend||TG.over!=null)return;
   tbEndTurn();tbRender()}
 /* ----- avversario controllato dal telefono ----- */
 const tbSleep=ms=>new Promise(r=>setTimeout(r,ms));
-function tbBotLane(cands,card){let best=null,bs=-99;for(const key of cands){const l=+key.split(':')[2],e=TG.F[0][l].main,mine=TG.F[1][l];let s=0;
-  if(card&&card.t==='c'){const a=CGC[card.i][6],d=CGC[card.i][7];if(!e&&!TG.F[0][l].bard)s+=5;else if(e){const ed=tbDef(e)-e.dmg,ea=tbAtk(e,0,l);if(a>=ed)s+=4;if(ea>=d)s-=3}if(!mine.main)s+=2}
+const tbVal=c=>CGC[c.i][6]+CGC[c.i][7]*.6+CGC[c.i][5]*.8;
+function tbBotLane(cands,card){let best=null,bs=-99;const lv=TG.lvl;for(const key of cands){const l=+key.split(':')[2],e=TG.F[0][l].main,mine=TG.F[1][l];let s=0;
+  if(lv===0)s=Math.random();
+  else if(card&&card.t==='c'){const a=CGC[card.i][6],d=CGC[card.i][7];if(!e&&!TG.F[0][l].bard)s+=5;else if(e){const ed=tbDef(e)-e.dmg,ea=tbAtk(e,0,l);if(a>=ed)s+=4;if(ea>=d)s-=3;if(lv===2&&a<ed&&ea<d)s+=1.5}if(!mine.main)s+=2;if(lv===2){const pl=mine.plc;if(pl&&(pl.i===0||pl.i===1))s+=1.5}}
   else s+=(mine.plc?-5:2)+(l===1||l===2?1:0);
   s+=Math.random()*.5;if(s>bs){bs=s;best=key}}return best}
-function tbBotKey(pe,card){const cs=pe.cands;if(!cs.length)return null;const f=cs[0].split(':')[0];
-  if(f==='fld'){const mine=cs.filter(x=>x.split(':')[1]==='1');return tbBotLane(mine.length?mine:cs,card)}
+function tbVulcanoLane(){let best=null,bs=-99;for(let l=0;l<4;l++){let gain=0,any=false;
+  for(let q=0;q<2;q++){const f=TG.F[q][l];if(f.plc){any=true;gain+=(q===0?1.5:-1.5)*(CGL[f.plc.i][5]==='Leggendario'?2:1)}
+    for(const s of ['main','bard']){const c=f[s];if(!c)continue;any=true;if(c.dmg+3>=tbDef(c))gain+=(q===0?1:-1.3)*(tbVal(c)+2);else gain+=(q===0?.6:-.4)}}
+  if(any&&gain>bs){bs=gain;best=l}}
+  return{l:best,s:bs}}
+function tbBotKey(pe,card){const cs=pe.cands;if(!cs.length)return null;const f=cs[0].split(':')[0],lv=TG.lvl;
+  if(f==='fld'){const mine=cs.filter(x=>x.split(':')[1]==='1');
+    if(card&&card.t==='s'&&card.i>=5&&card.i<=7){const en=cs.filter(x=>x.split(':')[1]==='0');
+      let b=null,bs=-1;for(const k of en){const l=+k.split(':')[2];if(TG.F[0][l].main||TG.F[0][l].bard)continue;const m=TG.F[1][l].main;if(m&&m.ready&&CGC[m.i][6]>=2){const s=CGC[m.i][6]+Math.random();if(s>bs){bs=s;b=k}}}
+      return b||en[0]||cs[0]}
+    return tbBotLane(mine.length?mine:cs,card)}
+  if(f==='lan'){const v=tbVulcanoLane();return v.l!=null?'lan:'+v.l:cs[0]}
+  if(f==='plc'){const en=cs.filter(x=>x.split(':')[1]==='0');const pool=en.length?en:cs;return pool.slice().sort((a,b)=>{const pa=TG.F[+a.split(':')[1]][+a.split(':')[2]].plc,pb=TG.F[+b.split(':')[1]][+b.split(':')[2]].plc;return(CGL[pb.i][5]==='Leggendario')-(CGL[pa.i][5]==='Leggendario')})[0]}
+  if(f==='sea'){const own=cs.filter(x=>x.split(':')[1]==='1');return(own.length?own:cs)[0]}
   if(f==='cre'){const own=cs.filter(x=>x.split(':')[1]==='1'),en=cs.filter(x=>x.split(':')[1]==='0');
     const ref=x=>{const a=x.split(':');return TG.F[+a[1]][+a[2]][a[3]]};
+    if(lv===0)return cs[Math.floor(Math.random()*cs.length)];
     if(en.length&&!own.length)return en.slice().sort((a,b)=>(tbDef(ref(a))-ref(a).dmg)-(tbDef(ref(b))-ref(b).dmg))[0];
     if(own.length){const heal=/ferit|cura/i.test(pe.msg);return own.slice().sort((a,b)=>heal?ref(b).dmg-ref(a).dmg:CGC[ref(b).i][6]-CGC[ref(a).i][6])[0]}}
   return cs[0]}
-function tbBotScore(card){const P=TG.P[1],cost=card.t==='s'?tbSpellCost(1,card):tbCost(card);if(cost>P.mana)return-1;
+function tbBotScore(card){const P=TG.P[1],lv=TG.lvl,cost=card.t==='s'?tbSpellCost(1,card):tbCost(card);if(cost>P.mana)return-1;
   if(card.t==='c'){if(!tbPlayCands(1,card).length)return-1;return 8+CGC[card.i][6]*1.2+CGC[card.i][7]*.6+(cost===0?2:0)-cost*.3}
-  if(card.t==='l'){if(!tbPlayCands(1,card).length)return-1;return TG.F[1].filter(f=>f.plc).length>=2?2:6-cost*.5}
+  if(card.t==='l'){if(!tbPlayCands(1,card).length)return-1;return TG.F[1].filter(f=>f.plc).length>=(lv===2?3:2)?2:6-cost*.5}
   const k=card.i,en=tbCreList(0),mine=tbCreList(1);
+  if(lv===0&&k>4)return-1;
   if(k===0||k===4){if(!en.length)return-1;const n=k===0?2:4;return en.some(x=>tbDef(x.c)-x.c.dmg<=n)?9:4}
   if(k===1)return mine.some(x=>x.c.dmg>=2)?5:-1;
   if(k===2)return mine.some(x=>x.slot==='main'&&x.c.ready)?3.5:-1;
   if(k===3)return en.length?3:-1;
+  if(lv<2)return-1;
+  if(k===9){const pls=[];for(let q=0;q<2;q++)for(let l=0;l<4;l++)if(TG.F[q][l].plc)pls.push(q);const e=pls.filter(x=>x===0).length,o=pls.filter(x=>x===1).length;return e&&e>=o?5:-1}
+  if(k===8){for(let l=0;l<4;l++)if(TG.F[1][l].seal)return 4;return-1}
+  if(k===10){if(P.mana<cost)return-1;const v=tbVulcanoLane();return v.l!=null&&v.s>=3?7:-1}
+  if(k===11){const ok=P.disc.some(c=>c.t==='c'&&c.i!==8&&c.i!==5&&CGC[c.i][6]+CGC[c.i][7]>=7);const lane=TG.F[1].some((f,l)=>!f.main&&tbCanEnter(1,l,{t:'c',i:0}));return ok&&lane?6:-1}
+  if(k>=5&&k<=7){const cnt=[];for(let l=0;l<4;l++)if(!TG.F[0][l].main&&!TG.F[0][l].bard&&!TG.F[0][l].seal){const m=TG.F[1][l].main;if(m&&m.ready&&CGC[m.i][6]>=2)cnt.push(l)}
+    if(k===7)return cnt.length?4.5:-1;return-1}
   return-1}
 function tbBotResolve(card){let g=0;while(TG&&TG.pend&&g++<4){const pe=TG.pend,key=tbBotKey(pe,card);if(!key){TG.pend=null;break}pe.pick(key);if(TG&&TG.over!=null)break}if(TG&&TG.pend)TG.pend=null}
+function tbBotRebirth(){if(!TG.ov||TG.ov.type!=='disc'||!TG.rin)return false;const P=TG.P[1];let bi=null,bs=-1;for(const i of TG.ov.ix){const c=P.disc[i];if(!c)continue;const s=CGC[c.i][6]+CGC[c.i][7]+Math.random()*.3;if(s>bs){bs=s;bi=i}}
+  if(bi==null){TG.ov=null;TG.rin=null;return false}tbRinPick(bi);tbBotResolve(null);TG.ov=null;TG.rin=null;return true}
 async function tbBotStep(){
-  const P=TG.P[1],tried=TG.botTried;
-  if(!TG.firstTurn&&!P.placeMana)for(let l=0;l<4;l++){const pl=TG.F[1][l].plc;if(pl&&pl.i===3&&pl.ready){tbFloop('plc',1,l);tbRender();return true}}
-  let best=null,bs=2.9;for(const c of P.hand){if(tried.has(c))continue;const s=tbBotScore(c);if(s>bs){bs=s;best=c}}
-  if(best){tried.add(best);tbPlay(best);tbBotResolve(best);tbRender();return true}
-  if(!P.cmdUsed&&P.mana>=1&&!tried.has('cmd')){const m=P.cmd,mine=tbCreList(1);
+  const P=TG.P[1],tried=TG.botTried,lv=TG.lvl;
+  if(lv===0&&Math.random()<.22)return false;
+  if(lv>=1&&!TG.firstTurn&&!P.placeMana)for(let l=0;l<4;l++){const pl=TG.F[1][l].plc;if(pl&&pl.i===3&&pl.ready){tbFloop('plc',1,l);tbRender();return true}}
+  let best=null,bs=2.9;
+  if(lv===0){const cs=P.hand.filter(c=>!tried.has(c)&&tbBotScore(c)>0);if(cs.length)best=cs[Math.floor(Math.random()*cs.length)]}
+  else for(const c of P.hand){if(tried.has(c))continue;const s=tbBotScore(c)+(lv===2?Math.random()*.2:0);if(s>bs){bs=s;best=c}}
+  if(best){tried.add(best);tbPlay(best);if(TG.ov&&TG.ov.type==='disc')tbBotRebirth();else tbBotResolve(best);tbRender();return true}
+  if(lv===2&&!TG.firstTurn){for(let l=0;l<4;l++){const f=TG.F[1][l];
+    for(const sl of ['main','bard']){const c=f[sl];if(!c||!c.ready||c.guest||tried.has('f'+l+sl))continue;
+      if(c.i===0){const en=tbCreList(0);if(en.some(x=>tbDef(x.c)-x.c.dmg<=1)){tried.add('f'+l+sl);tbFloop('cre',1,l,sl);tbBotResolve(null);tbRender();return true}}
+      if(c.i===2){if(tbCreList(1).some(x=>x.slot==='main'&&x.c!==c&&x.c.ready)){tried.add('f'+l+sl);tbFloop('cre',1,l,sl);tbBotResolve(null);tbRender();return true}}}}}
+  if(lv>=1&&!P.cmdUsed&&P.mana>=1&&!tried.has('cmd')){const m=P.cmd,mine=tbCreList(1);
     if((m===1&&mine.some(x=>x.c.dmg>=2))||(m===2&&mine.some(x=>x.slot==='main'&&x.c.ready))){tried.add('cmd');tbCmd();tbBotResolve(null);tbRender();return true}}
-  if(P.mana>=1&&P.hand.length<=3&&P.deck.length&&!tried.has('draw')){tried.add('draw');tbPayDraw();return true}
+  if(lv>=1&&P.mana>=1&&P.hand.length<=(lv===2?4:3)&&P.deck.length&&!tried.has('draw')){tried.add('draw');tbPayDraw();return true}
   return false}
 async function tbBot(){
   if(!TG||!TG.ai||TG.cur!==1||TG.over!=null||TG.botBusy||TG.stage!=='play')return;
@@ -2218,7 +2288,7 @@ function tbTap(e){if(!TG)return;
   if(bt){const a=bt.dataset.tb;
     if(a==='exit'){if(TG.exit){TG=null;return showGames()}TG.exit=true;toast('Tocca di nuovo per uscire dalla partita');return}
     if(a==='exit2'){TG=null;return showGames()}
-    if(a==='again'){const ai=TG.ai;tbNew();TG.ai=ai;return tbRender()}
+    if(a==='again'){const ai=TG.ai,lv=TG.lvl;tbNew();TG.ai=ai;TG.lvl=lv;return tbRender()}
     if(a==='cmd'){if(TG.ai){TG.P[0].cmd=+bt.dataset.i;TG.P[1].cmd=tbRnd(3);TG.stage='mull';TG.cp=0;TG.P.forEach((_,q)=>tbDraw(q,5));return tbRender()}TG.P[TG.cp].cmd=+bt.dataset.i;if(TG.cp===0){TG.cp=1}else{TG.stage='mull';TG.cp=0;TG.P.forEach((_,q)=>tbDraw(q,5))}return tbRender()}
     if(a==='keep'){if(TG.ai)return tbAiStart();if(TG.cp===0){TG.cp=1;return tbRender()}TG.first=tbRnd(2);TG.cur=TG.first;TG.stage='pass';TG.hidden=true;return tbRender()}
     if(a==='mull'){if(TG.ai){const P0=TG.P[0];P0.deck.push(...P0.hand);P0.hand=[];tbShuf(P0.deck);tbDraw(0,5);return tbAiStart()}const P=TG.P[TG.cp];P.deck.push(...P.hand);P.hand=[];tbShuf(P.deck);tbDraw(TG.cp,5);if(TG.cp===0){TG.cp=1}else{TG.first=tbRnd(2);TG.cur=TG.first;TG.stage='pass';TG.hidden=true}return tbRender()}
@@ -2238,7 +2308,7 @@ function tbTap(e){if(!TG)return;
   if(TG.pend){let el=e.target;while(el&&el!==$('#root')){const t=el.dataset&&el.dataset.t;if(t&&TG.pend.cands.includes(t)){const pk=TG.pend.pick;pk(t);if(TG&&!TG.modal)tbRender();return}el=el.parentElement}return}
   const t=e.target.closest('[data-t]');if(!t||TG.hidden||TG.modal)return;const k=t.dataset.t.split(':');
   if(k[0]==='cre')tbShowCre(+k[1],+k[2],k[3]);else if(k[0]==='plc')tbShowPlc(+k[1],+k[2])}
-function showBoard(ai){tbNew();TG.ai=!!ai;tbRender()}
+function showBoard(ai,lvl){tbNew();TG.ai=!!ai;TG.lvl=lvl==null?1:lvl;tbRender()}
 function showGames(){
   $('#root').innerHTML='<header class="top"><button class="pill" data-gb="1">‹ App</button><div class="ttl">Minigiochi</div><div class="hbtns"></div></header><div class="apps"><div class="ggrid">'+
     GAMES.map(g=>'<button class="gcard" data-g="'+g.id+'" style="--gc:'+g.c+'"><svg viewBox="0 0 24 24">'+g.svg+'</svg><b>'+esc(g.n)+'</b><span>'+esc(g.d)+'</span>'+(g.soon?'<i>In arrivo</i>':'')+'</button>').join('')+
@@ -2316,7 +2386,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v80'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v82'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2624,6 +2694,42 @@ function autoLearn(p,to){
   let n=0;BR=BR.filter(b=>{if(b.a){n++;return n<=60}return true});
   brSave();paintBrain();toast('🟠 Ho imparato: «'+p+'» → '+to);return true}
 const brReview=()=>BR.filter(b=>b.a).length;
+/* ---------- Gestione promemoria e riepilogo settimanale ---------- */
+function rmWhenTxt(at){const m=Math.round((at-Date.now())/60000);if(m<=1)return'tra un attimo';if(m<90)return'tra '+m+' minuti';
+  const d=new Date(at),t=pad(d.getHours())+':'+pad(d.getMinutes()),k=ymd(d),tm=new Date();tm.setDate(tm.getDate()+1);
+  return k===today()?'alle '+t:k===ymd(tm)?'domani alle '+t:'il '+dshort(k)+' alle '+t}
+function rmListTxt(){RMS.sort((a,b)=>a.at-b.at);return RMS.map(r=>r.t+' '+rmWhenTxt(r.at))}
+function rmDrop(r){try{window.FLAAndroid&&FLAAndroid.cancel&&FLAAndroid.cancel(nvId('rm|'+r.id))}catch{}}
+function rmManage(raw){
+  const n=norm(raw);if(!/\bpromemoria\b/.test(n))return null;
+  if(/\b(cancella|elimina|togli|annulla|rimuovi|butta)\b/.test(n)){
+    if(/\b(tutti|tutte|ogni)\b/.test(n)){const c=RMS.length;RMS.forEach(rmDrop);RMS=[];rmSave();return c?'Ho tolto tutti i promemoria ('+c+').':'Non avevi promemoria da togliere.'}
+    const q=n.replace(/\b(cancella|elimina|togli|annulla|rimuovi|butta|il|lo|la|l|un|del|della|dello|di|dei|delle|promemoria|ehi|hey|ciao|ao|fla|tech|per|su|a|al)\b/g,' ').replace(/\s+/g,' ').trim();
+    const toks=q.split(' ').filter(w=>w.length>2);
+    const hit=RMS.filter(r=>{const t=norm(r.t);return toks.length&&toks.some(w=>t.includes(w.slice(0,Math.max(3,w.length-2))))});
+    if(!hit.length)return null;
+    const r=hit.sort((a,b)=>a.at-b.at)[0];rmDrop(r);RMS=RMS.filter(x=>x!==r);rmSave();return'Tolto il promemoria: '+r.t+'.'}
+  if(/\b(quali|elenco|lista|dimmi|mostrami|che|cosa|quanti)\b/.test(n)&&/\b(ho|ci sono|programmat\w*|impostat\w*)\b|\bpromemoria\b/.test(n)&&!/\b(aggiungi|crea|metti)\b/.test(n)){
+    const l=rmListTxt();if(!l.length)return'Non hai promemoria programmati.';return(l.length===1?'Hai un promemoria: ':'Hai '+l.length+' promemoria: ')+l.join('. ')+'.'}
+  return null}
+async function ensureFin(){try{if(D.exp&&D.exp.length)return true;if(!S)return false;const st=await rpc('pin_status');if(st==='verified'){await loadAll();return true}}catch{}return false}
+async function weekly(force){
+  const n=new Date();
+  if(!force){if(n.getDay()!==0||n.getHours()*60+n.getMinutes()<20*60||n.getHours()*60+n.getMinutes()>20*60+30)return;if(lget('flat_weekly')===today())return}
+  lset('flat_weekly',today());
+  const txt=await weeklyText();aiCap(txt,true);speak(txt)}
+async function weeklyText(){
+  const p=['Riepilogo della settimana.'];
+  try{await ensureFin();
+    if(D.exp&&D.exp.length){const t0=new Date();t0.setHours(12,0,0,0);const a=ymd(new Date(t0.getTime()-6*864e5)),b=ymd(new Date(t0.getTime()-13*864e5));
+      const w1=D.exp.filter(x=>x.spent_on>=a),w0=D.exp.filter(x=>x.spent_on>=b&&x.spent_on<a),s1=sum(w1),s0=sum(w0);
+      const cat={};for(const x of w1)cat[x.category||'altro']=(cat[x.category||'altro']||0)+(+x.amount||0);const top=Object.entries(cat).sort((x,y)=>y[1]-x[1])[0];
+      p.push('Questa settimana hai speso '+Math.round(s1)+' euro'+(s0?(s1>s0?', '+Math.round(s1-s0)+' in più':s1<s0?', '+Math.round(s0-s1)+' in meno':'')+' della settimana scorsa':'')+'.'+(top?' La voce più pesante è '+top[0]+', '+Math.round(top[1])+' euro.':''));
+      const c=D.inc&&D.inc.length?curCycle():null;if(c)p.push('Nel ciclo ti restano '+Math.round(c.left)+' euro.')}}catch{}
+  try{paintRem();const nx=REM.filter(r=>r.days>=0&&r.days<=7&&r.kind!=='spesa');
+    p.push(nx.length?'Nei prossimi sette giorni hai: '+nx.slice(0,4).map(r=>r.t+' '+(r.days===0?'oggi':r.days===1?'domani':'tra '+r.days+' giorni')).join(', ')+(nx.length>4?' e altri '+(nx.length-4):'')+'.':'Nei prossimi sette giorni non hai impegni.')}catch{}
+  try{if(GOAL&&GOAL.target>0){const left=Math.max(0,GOAL.target-GOAL.saved);p.push('Obiettivo '+GOAL.name+': '+Math.round(GOAL.saved/GOAL.target*100)+' per cento'+(left?', mancano '+Math.round(left)+' euro.':'. Raggiunto!'))}}catch{}
+  return p.join(' ')}
 async function hubCommand(raw,inner,fz){
   const t=norm(raw).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'');
   if(!inner&&!fz&&!chainBusy&&!brainFind(t)){const ps=chainSplit(t);if(ps.length>1){chainBusy=true;try{const out=[];for(const x of ps){out.push(await hubCommand(x,false));await tbSleep(500)}return out.filter(Boolean).join(' ')}finally{chainBusy=false}}}
@@ -2635,6 +2741,8 @@ async function hubCommand(raw,inner,fz){
   {const w=webCommand(raw);if(w)return w}
   {const w=imgCommand(raw);if(w)return w}
   {const w=phoneCommand(raw);if(w)return w}
+  {const w=rmManage(raw);if(w)return w}
+  if(/\b(riepilogo|resoconto|riassunto|com e andata|come e andata)\b/.test(t)&&/\bsettiman\w*/.test(t)){const x=await weeklyText();return x}
   {const w=repCommand(raw);if(w)return w}
   {const w=evAlertCommand(raw);if(w)return w}
   {const w=reminderCommand(raw);if(w)return w}
@@ -2687,7 +2795,7 @@ document.addEventListener('click',async e=>{
   const t=e.target.closest('[data-tab],[data-act]');if(!t)return;
   if(t.dataset.tab)return setTab(t.dataset.tab);
   const a=t.dataset.act,id=t.dataset.id;
-  if(a==='tri'){const h=$('#hub');h.classList.toggle('open');if(h.classList.contains('open')){aiWake();hubData();briefing()}else{aiSet('idle');aiCap('')}}
+  if(a==='tri'){const h=$('#hub');h.classList.toggle('open');if(h.classList.contains('open')){aiWake();hubData();briefing();weekly()}else{aiSet('idle');aiCap('')}}
   else if(a&&a.startsWith('goal'))goalAct(a);
   else if(a==='finanze')openApp(t,'fin');
   else if(a==='cal')openApp(t,'cal');
