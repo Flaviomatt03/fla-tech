@@ -542,7 +542,7 @@ html[data-style=reattore] .shape.ap .gr i{width:6px;height:6px;background:var(--
   </button><span>Tema</span></div>
     <div class="ddi"><button class="tbtn tcbtn" id="torchbtn" data-act="torch" aria-pressed="false" aria-label="Torcia"><svg viewBox="0 0 24 24"><path d="M8 3h8l-1.5 6h-5zM9.5 9h5v3l1 2v6a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 8.5 20v-6l1-2z"/><path d="M12 13v3"/></svg></button><span>Torcia</span></div>
     <div class="ddi"><button class="tbtn" data-act="dsopen" aria-label="Cerca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button><span>Cerca</span></div>
-    <div id="dsbar"><input id="dsin" type="search" placeholder="Cerca in spese, eventi, task, cervello…" autocomplete="off" enterkeyhint="search"><div id="dsres"></div></div>
+    <div id="dsbar"><input id="dsin" type="search" placeholder="Cerca in spese, eventi, task, app…" autocomplete="off" enterkeyhint="search"><div id="dsres"></div></div>
     <span class="grab" data-act="ddclose"></span>
   </div>
   <div class="ibar" id="ibar" data-act="dd" aria-label="Ora, data e batteria. Tocca o scorri giù per i comandi">
@@ -2322,7 +2322,8 @@ function showApps(){
   $('.apps').onclick=e=>{if(e.target.closest('[data-stile]'))return showStyles();if(e.target.closest('[data-giochi]'))return showGames();const b=e.target.closest('[data-app]');if(b)launchApp(b.dataset.app)}}
 function appCommand(t){if(!/\b(apri|aprimi|avvia|lancia|vai su|vai a|mostrami|fammi vedere)\b/.test(t))return null;
   if(/\b(minigiochi|mini giochi|giochi|card game)\b/.test(t)){setTimeout(()=>{closeSheet(true);showGames()},900);return'Apro i minigiochi.'}
-  const id=Object.keys(APPL).find(k=>APPL[k].re.test(t));if(!id)return null;
+  const id=Object.keys(APPL).find(k=>APPL[k].re.test(t));
+  if(!id){const q=t.replace(/\b(apri|aprimi|avvia|lancia|vai su|vai a|mostrami|fammi vedere|per favore|pf)\b/g,' ');const a=instFind(q);if(a){setTimeout(()=>{closeSheet(true);instOpen(a.p)},900);return'Apro '+a.n+'.'}return null}
   PEND={kind:'apps',hl:'[data-app="'+id+'"]',apply:()=>launchApp(id)};return'Apro '+APPL[id].n+'.'}
 /* ---------- eliminare con la voce / il testo ---------- */
 const DELV=/\b(elimina|eliminare|elimini|eliminami|rimuovi|rimuovere|rimuovimi|cancella|cancellare|cancellami|togli|togliere|annulla|annullare|butta)\b/;
@@ -2386,7 +2387,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v82'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v83'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2554,6 +2555,11 @@ function reminderCommand(raw){
     rmAdd(w,d.getTime());try{calAdd(ymd(d),w,pad(d.getHours())+':'+pad(d.getMinutes()))}catch{}
     return'Ok, '+(dom?'domani':d.getDate()===new Date().getDate()?'oggi':'')+' alle '+pad(d.getHours())+':'+pad(d.getMinutes())+' ti ricordo: '+w+'.'}
   return null}
+/* ---------- app installate (launcher) ---------- */
+let INSA=null;
+function instApps(){if(INSA)return INSA;try{if(window.FLAAndroid&&typeof FLAAndroid.listApps==='function'){INSA=JSON.parse(FLAAndroid.listApps()||'[]').map(x=>({n:x.n,p:x.p,k:norm(x.n)}));if(!INSA.length)INSA=null}}catch{INSA=null}return INSA||[]}
+function instFind(q){const k=norm(q).replace(/\b(l|la|lo|il|le|app|applicazione)\b/g,' ').replace(/\s+/g,' ').trim();if(k.length<2)return null;const A=instApps();return A.find(a=>a.k===k)||A.find(a=>a.k.startsWith(k))||A.find(a=>a.k.split(' ').some(w=>w===k))||(k.length>=4?A.find(a=>a.k.includes(k)):null)||null}
+function instOpen(pk){try{FLAAndroid.openPkgs('x',pk)}catch{}}
 /* ---------- Ricerca unica ---------- */
 function srQ(q){
   const toks=norm(q).split(' ').filter(Boolean);if(!toks.length)return'';
@@ -2569,11 +2575,14 @@ function srQ(q){
     if(r.length)sec.push(['Cervello',r])}catch{}
   try{const r=[];for(const k in WAC)if(hit(WAC[k].n)){r.push('<div class="srr"><span>'+esc(WAC[k].n)+'</span><i>WhatsApp</i></div>')}
     if(r.length)sec.push(['Contatti',r.slice(0,5)])}catch{}
+  try{const r=[];for(const a of instApps())if(hit(a.n)){r.push('<div class="srr" data-pk="'+esc(a.p)+'" style="cursor:pointer"><span>'+esc(a.n)+'</span><i>apri →</i></div>');if(r.length>=8)break}
+    if(r.length)sec.push(['App',r])}catch{}
   if(!sec.length)return'<div class="srr dim">Niente trovato per «'+esc(q)+'».'+((D.exp||[]).length?'':' Le spese si cercano dopo aver aperto Finanze.')+'</div>';
   return sec.map(([h,r])=>'<div class="srh">'+h+'</div>'+r.join('')).join('')}
-function srOpen(){const h=$('#hub'),d=$('#dd');if(!h||!d)return;d.classList.add('ds-on');const i=$('#dsin');if(i){i.value='';$('#dsres').innerHTML='';setTimeout(()=>i.focus(),50)}}
+function srOpen(){const h=$('#hub'),d=$('#dd');if(!h||!d)return;instApps();d.classList.add('ds-on');const i=$('#dsin');if(i){i.value='';$('#dsres').innerHTML='';setTimeout(()=>i.focus(),50)}}
 function srClose(){const d=$('#dd');if(d)d.classList.remove('ds-on');const i=$('#dsin');if(i)i.blur()}
 document.addEventListener('click',e=>{const d=$('#dd');if(!d||!d.classList.contains('ds-on'))return;if(e.target.closest('#dsbar'))return;e.stopPropagation();e.preventDefault();srClose()},true);
+document.addEventListener('click',e=>{const r=e.target.closest&&e.target.closest('#dsres .srr[data-pk]');if(r){e.stopPropagation();srClose();instOpen(r.dataset.pk)}},true);
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='dsin')$('#dsres').innerHTML=srQ(e.target.value)});
 function imgCommand(raw){
   const t=raw.trim().replace(/^(?:ehi |hey |ciao |ao )?(?:fla ?tech[ ,]*)?/i,'');
