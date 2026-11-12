@@ -738,10 +738,39 @@ function rowHtml(x){
   <div class="m">${esc(x.category)}${x.account?' · '+esc(x.account):''} · ${dshort(x.spent_on)}</div></div><div class="a">-${eur(x.amount)}</div></div>
   ${open?`<div class="acts"><button class="btn sm" data-act="fix" data-id="${x.id}">${x.is_fixed?'Togli fissa':'Segna fissa'}</button><button class="btn sm dng" data-act="del" data-id="${x.id}">Elimina</button></div>`:''}`;
 }
+/* ---------- Obiettivo ---------- */
+let GOAL=lget('flat_goal')||null,goalEd='';
+const goalSave=()=>{lset('flat_goal',GOAL)};
+function goalCard(){
+  if(goalEd==='set'||!GOAL){
+    const g=GOAL||{};
+    return'<section class="card" id="goalc"><div class="lab">Obiettivo</div>'+(goalEd==='set'?'':'<div class="dim" style="margin-bottom:10px">Metti una cifra da raggiungere (un viaggio, un acquisto, un fondo) e ti seguo.</div>')
+    +(goalEd==='set'?'<input id="gn" placeholder="Cosa vuoi raggiungere?" value="'+esc(g.name||'')+'" style="width:100%;margin-bottom:8px;padding:10px;border-radius:10px;border:1px solid var(--line,#ccc);font:inherit"><input id="gt" inputmode="decimal" placeholder="Quanto serve (€)" value="'+(g.target||'')+'" style="width:100%;margin-bottom:8px;padding:10px;border-radius:10px;border:1px solid var(--line,#ccc);font:inherit"><input id="gd" type="date" value="'+esc(g.date||'')+'" style="width:100%;margin-bottom:10px;padding:10px;border-radius:10px;border:1px solid var(--line,#ccc);font:inherit"><div class="acts" style="padding:0"><button class="btn pri" data-act="goalok">Salva</button><button class="btn" data-act="goalno">Annulla</button></div>'
+      :'<button class="btn pri" data-act="goalset">Imposta obiettivo</button>')+'</section>'}
+  const pct=GOAL.target>0?Math.min(100,GOAL.saved/GOAL.target*100):0,left=Math.max(0,GOAL.target-GOAL.saved);
+  let extra='';if(GOAL.date&&left>0){const dd=Math.ceil((pd(GOAL.date)-pd(today()))/864e5);extra=dd>0?'<div class="dim" style="margin-top:8px">Entro il '+dshort(GOAL.date)+': mettine da parte '+eur(left/dd*30)+' al mese</div>':'<div class="dim" style="margin-top:8px">La scadenza è passata</div>'}
+  if(left===0)extra='<div class="dim" style="margin-top:8px">Obiettivo raggiunto!</div>';
+  return'<section class="card" id="goalc"><div class="lab">Obiettivo · '+esc(GOAL.name)+'</div><div class="big" style="font-size:30px">'+eur(GOAL.saved)+' <span class="dim" style="font-size:15px">di '+eur(GOAL.target)+'</span></div>'
+  +'<div class="bar"><i style="width:'+pct+'%"></i></div>'+extra
+  +(goalEd==='add'?'<input id="ga" inputmode="decimal" placeholder="Quanto aggiungi (€)" style="width:100%;margin:10px 0 8px;padding:10px;border-radius:10px;border:1px solid var(--line,#ccc);font:inherit"><div class="acts" style="padding:0"><button class="btn pri" data-act="goaladdok">Aggiungi</button><button class="btn" data-act="goalno">Annulla</button></div>'
+   :'<div class="acts" style="padding:10px 0 0"><button class="btn pri" data-act="goaladd">+ Aggiungi</button><button class="btn" data-act="goalset">Modifica</button></div>')+'</section>'}
+function goalAct(a){
+  const num=v=>parseFloat(String(v||'').replace(',','.'))||0;
+  if(a==='goalset'){goalEd='set'}
+  else if(a==='goaladd'){goalEd='add'}
+  else if(a==='goalno'){goalEd=''}
+  else if(a==='goalok'){const n=($('#gn')||{}).value||'',t=num(($('#gt')||{}).value);if(!n.trim()||t<=0)return;GOAL={name:n.trim(),target:t,saved:GOAL?GOAL.saved:0,date:($('#gd')||{}).value||''};goalSave();goalEd=''}
+  else if(a==='goaladdok'){const v=num(($('#ga')||{}).value);if(!v)return;GOAL.saved=Math.max(0,GOAL.saved+v);goalSave();goalEd=''}
+  render()}
+const goalCommand=t=>{
+  const m=t.match(/(?:aggiungi|metti|versa)\s+(\d+(?:[.,]\d+)?)\s*(?:euro|€)?\s*(?:all|al|sull|su|per l)?\s*['’]?\s*obiettivo/);
+  if(m){if(!GOAL)return'Non hai ancora un obiettivo. Impostalo in Finanze.';const v=parseFloat(m[1].replace(',','.'));GOAL.saved+=v;goalSave();if($('#goalc'))render();return'Fatto, aggiungo '+v+' euro. Siamo a '+Math.round(GOAL.saved)+' su '+Math.round(GOAL.target)+'.'}
+  if(/\bobiettivo\b/.test(t)){if(!GOAL)return'Non hai ancora un obiettivo. Impostalo in Finanze.';return GOAL.name+': hai messo da parte '+Math.round(GOAL.saved)+' euro su '+Math.round(GOAL.target)+', il '+Math.round(GOAL.saved/GOAL.target*100)+' per cento.'}
+  return null};
 function viewHome(){
   const c=curCycle();
   if(!c)return`<section class="card hero"><div class="lab">Si parte da qui</div><p class="empty" style="margin:0 0 16px">Registra lo stipendio: da quel giorno contiamo le spese del ciclo e a fine mese vediamo quali sono davvero fisse.</p><button class="btn pri" data-act="inc">Registra stipendio</button></section>`
-    +(D.exp.length?`<section class="card"><div class="lab">Ultime spese</div>${D.exp.slice(0,6).map(rowHtml).join('')}</section>`:'');
+    +goalCard()+(D.exp.length?`<section class="card"><div class="lab">Ultime spese</div>${D.exp.slice(0,6).map(rowHtml).join('')}</section>`:'');
   const pct=c.income>0?Math.min(100,Math.max(0,c.spent/c.income*100)):0,n=Math.floor((pd(today())-pd(c.start))/864e5)+1;
   const t=today(),ws=weekStart(),spToday=sum(c.exp.filter(x=>x.spent_on===t)),spWeek=sum(c.exp.filter(x=>x.spent_on>=ws));
   return`<section class="card hero"><div class="lab">Resta nel ciclo</div><div class="big ${c.left<0?'neg':''}">${eur(c.left)}</div>
@@ -749,7 +778,7 @@ function viewHome(){
   <div class="dim" style="margin-top:10px">Giorno ${n} dal ${dshort(c.start)}</div></section>
   <div class="mini"><div class="card"><div class="lab">Oggi</div><div class="v">${eur(spToday)}</div></div><div class="card"><div class="lab">Settimana</div><div class="v">${eur(spWeek)}</div></div></div>
   <div class="acts" style="padding-top:0"><button class="btn pri" data-act="exp">+ Spesa</button><button class="btn" data-act="inc">+ Entrata</button></div>
-  <section class="card"><div class="lab">Ultime spese</div>${c.exp.length?c.exp.slice(0,6).map(rowHtml).join(''):'<div class="empty">Nessuna spesa in questo ciclo.</div>'}</section>`;
+  ${goalCard()}<section class="card"><div class="lab">Ultime spese</div>${c.exp.length?c.exp.slice(0,6).map(rowHtml).join(''):'<div class="empty">Nessuna spesa in questo ciclo.</div>'}</section>`;
 }
 function viewSpese(){
   if(!D.exp.length)return`<section class="card"><div class="lab">Spese</div><div class="empty">Ancora nessuna spesa. Tocca "+ spesa" o usa il microfono.</div></section>`;
@@ -1693,6 +1722,19 @@ function showStyles(){
     '</div><div class="ahint">Cambia solo la home. Le schermate dentro restano come sono.</div></div>';
   $('.apps').onclick=e=>{const b=e.target.closest('[data-st]');if(!b)return;setStyle(b.dataset.st);showStyles();toast('Stile: '+STILI[b.dataset.st].n)}}
 function hubSet(id,b,s){const e=document.querySelector('#'+id+' .dt');if(e)e.innerHTML='<b>'+esc(b)+'</b><small>'+esc(s)+'</small>'}
+/* ---------- Briefing del mattino ---------- */
+async function briefing(force){
+  const n=new Date(),m=n.getHours()*60+n.getMinutes();
+  if(!force){if(m<9*60+7||m>9*60+20)return;if(lget('flat_brief')===today())return}
+  lset('flat_brief',today());
+  const p=['Buongiorno Flavio.'];
+  try{const j=await fetchMeteo(),d=j.daily;p.push('Oggi a '+PLACE+': '+wc(d.weather_code[0])[0].toLowerCase()+', tra '+Math.round(d.temperature_2m_min[0])+' e '+Math.round(d.temperature_2m_max[0])+' gradi, pioggia al '+d.precipitation_probability_max[0]+' per cento.')}catch{}
+  try{paintRem();const o=REM.filter(r=>r.days<=0);
+    if(o.length)p.push('In agenda: '+o.slice(0,4).map(r=>r.t+(r.time?' alle '+r.time:'')).join(', ')+'.');else p.push('Niente in agenda per oggi.')}catch{}
+  try{if(D.exp&&D.exp.length){const y=new Date();y.setDate(y.getDate()-1);const sp=sum(D.exp.filter(x=>x.spent_on===ymd(y)));p.push('Ieri hai speso '+Math.round(sp)+' euro.')}
+    const c=D.inc&&D.inc.length?curCycle():null;if(c)p.push('Nel ciclo ti restano '+Math.round(c.left)+' euro.')}catch{}
+  try{if(GOAL&&GOAL.target>0)p.push('Obiettivo '+GOAL.name+': '+Math.round(GOAL.saved/GOAL.target*100)+' per cento.')}catch{}
+  const txt=p.join(' ');aiCap(txt,true);speak(txt)}
 async function hubData(){
   try{paintRem()}catch{}
   try{const c=(typeof D!=='undefined'&&D.inc&&D.inc.length)?curCycle():null;hubSet('sq-finanze',c?eur(c.left):'Finanze',c?'restano nel ciclo':'tocca per aprire')}catch{}
@@ -2180,7 +2222,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v67'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v69'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2242,6 +2284,8 @@ async function hubCommand(raw,inner){
   if(!inner){const bl=brainFind(t);if(bl)return await hubCommand(bl,true)}
   if(!inner&&/^(grazie|ok|va bene|perfetto|bene|ciao)$/.test(t))return'Ok.';
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
+  {const g=goalCommand(t);if(g)return g}
+  if(/\b(buongiorno|briefing)\b/.test(t)&&/\b(briefing|riassunto)\b/.test(t)){briefing(true);return''}
   if(/\b(torcia|lampadina|luce del telefono)\b/.test(t)&&!/\b(task|taks|evento|calendario|spes\w*)\b/.test(t))return torchCommand(t);
   if(/\b(stile|reattore)\b/.test(t)&&/\b(cambia|metti|passa|usa|imposta|stile|tema)\b/.test(t)&&!/\b(ash|scheda|task|taks)\b/.test(t)){const r=styleCommand(t);if(r)return r}
   if(/\b(aggiorna|aggiornati|aggiornami)\b/.test(t)&&/\b(app|fla|sito|tech|versione)\b/.test(t)){setTimeout(hardUpdate,900);return'Aggiorno FLA-Tech.'}
@@ -2286,7 +2330,8 @@ document.addEventListener('click',async e=>{
   const t=e.target.closest('[data-tab],[data-act]');if(!t)return;
   if(t.dataset.tab)return setTab(t.dataset.tab);
   const a=t.dataset.act,id=t.dataset.id;
-  if(a==='tri'){const h=$('#hub');h.classList.toggle('open');if(h.classList.contains('open')){aiWake();hubData()}else{aiSet('idle');aiCap('')}}
+  if(a==='tri'){const h=$('#hub');h.classList.toggle('open');if(h.classList.contains('open')){aiWake();hubData();briefing()}else{aiSet('idle');aiCap('')}}
+  else if(a&&a.startsWith('goal'))goalAct(a);
   else if(a==='finanze')openApp(t,'fin');
   else if(a==='cal')openApp(t,'cal');
   else if(a==='meteo')openApp(t,'meteo');
