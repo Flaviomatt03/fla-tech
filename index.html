@@ -22,7 +22,7 @@ class NSR{constructor(){this.lang='it-IT';this.continuous=false;this.interimResu
  start(){cur=this;try{A.startListen()}catch(e){}}
  stop(){try{A.finishListen()}catch(e){}}
  abort(){if(cur===this)cur=null;try{A.stopListen()}catch(e){}}}
-function emit(c,alts,fin){const r=alts.map(t=>({transcript:t,confidence:.9}));r.isFinal=fin;if(c.onresult)c.onresult({resultIndex:0,results:[r]})}
+function emit(c,alts,fin){if(fin){window.__alts=alts.slice();window.__altsT=Date.now()}const r=alts.map(t=>({transcript:t,confidence:.9}));r.isFinal=fin;if(c.onresult)c.onresult({resultIndex:0,results:[r]})}
 window.__flaSR=function(t,d){const c=cur;if(!c)return;
  if(t==='start'){if(c.onstart)c.onstart()}
  else if(t==='partial'){emit(c,d,false)}
@@ -2260,7 +2260,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v76'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v77'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2459,8 +2459,34 @@ function imgCommand(raw){
   const q='Genera '+(/^(immagine|illustrazione)/.test(tipo)?'un\u2019'+tipo:tipo==='foto'?'una foto':'un '+tipo)+' '+(/^(di|del|della|dello|dei|delle|con|per)\b/i.test(rest)?rest:'di '+rest);
   extOpen('https://chatgpt.com/?q='+encodeURIComponent(q));
   return'Apro ChatGPT con la richiesta: '+q+'.'}
-async function hubCommand(raw,inner){
+/* ---------- Capire meglio: correzione parole, sinonimi, alternative ---------- */
+const UNK={};
+const FZV=new Set(('torcia accendi accendimi spegni spegnimi timer minuti minuto secondi secondo ora ore musica metti mettimi suona suonami canzone brano playlist pausa prossima prossimo precedente volume alza abbassa calendario evento appuntamento agenda ricordami promemoria domani dopodomani oggi stasera lunedi martedi mercoledi giovedi venerdi sabato domenica meteo piove pioggia ombrello luna temperatura nuvoloso sole spesa spese stipendio entrata euro quaderno task apri vai portami naviga chiama telefona scrivi manda cerca google claude chatgpt whatsapp instagram youtube spotify tiktok calcolatrice sveglia impostazioni galleria fotocamera rubrica obiettivo briefing buongiorno buonanotte aggiorna stile reattore tema finanze finanza cicli fisse ciclo statistiche contatto contatti salva elimina cancella sposta rimanda aggiungi segna crea ash scheda dado tira lancia danni cura riposo ispirazione immagine genera disegna foto casa lavoro mappa mappa cervello minigiochi giochi app fatto resta rimane speso speso quanto ultima annulla').split(/\s+/).filter(Boolean));
+const FZS=[[/\bcronometro\b/g,'timer'],[/\ballarme\b/g,'sveglia'],[/\bprevisioni\b/g,'meteo'],[/\bavvisami\b/g,'ricordami'],[/\baccendimi\b/g,'accendi'],[/\bspegnimi\b/g,'spegni'],[/\bbrani\b/g,'canzone'],[/\bcanzoni\b/g,'canzone']];
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function bigr(s){const o=new Map();s=' '+s+' ';for(let i=0;i<s.length-1;i++){const g=s.slice(i,i+2);o.set(g,(o.get(g)||0)+1)}return o}
+function dice(a,b){if(a===b)return 1;const x=bigr(a),y=bigr(b);let i=0,n=0;for(const[k,v]of x){n+=v;if(y.has(k))i+=Math.min(v,y.get(k))}let m=0;for(const v of y.values())m+=v;return n+m?2*i/(n+m):0}
+function fixText(t,strict){
+  let s=t;for(const[r,w]of FZS)s=s.replace(r,w);
+  s=s.split(' ').map(w=>{
+    if(w.length<4||FZV.has(w)||/\d/.test(w)||!/^[a-z]+$/.test(w))return w;
+    let best=null,bd=9;const lim=strict?(w.length>=5?1:0):(w.length<=6?1:2);if(!lim)return w;
+    for(const v of FZV){if(Math.abs(v.length-w.length)>lim)continue;const d=lev(w,v);if(d<=lim&&d<bd){bd=d;best=v}}
+    return best||w}).join(' ');
+  return s}
+async function fuzzyRetry(raw,t){
+  const seen=new Set([t]),cands=[];
+  const add=x=>{x=norm(x).replace(/^(ehi|hey|ciao|oh|ao)?\s*(fla ?tech|fla)\b[ ,]*/,'');if(x&&!seen.has(x)){seen.add(x);cands.push(x)}};
+  const al=(window.__alts&&Date.now()-window.__altsT<20000)?window.__alts:[];
+  for(const a of al)add(a);
+  for(const c of [t,...cands.slice()]){add(fixText(c))}
+  let bestB=null,bs=0;for(const c of [t,...cands]){for(const b of BR){const d=dice(c,b.p);if(d>bs){bs=d;bestB=b}}}
+  if(bestB&&bs>=.8)return await hubCommand(bestB.t,true);
+  for(const c of cands){const r=await hubCommand(c,false,true);if(r!==UNK)return r}
+  return null}
+async function hubCommand(raw,inner,fz){
   const t=norm(raw).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'');
+  if(!inner&&!fz&&!brainFind(t)&&!/^(scrivi|manda|mandagli|invia|messaggia|ricordami|aggiungi|segna|crea|nota|salva|imposta|cerca|googla|chiedi|genera|disegna|chiama|portami|naviga)\b/.test(t)){const ft=fixText(t,true);if(ft!==t)return await hubCommand(ft,false,fz)}
   if(!inner){const bl=brainFind(t);if(bl)return await hubCommand(bl,true)}
   if(!inner&&/^(grazie|ok|va bene|perfetto|bene|ciao)$/.test(t))return'Ok.';
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
@@ -2489,7 +2515,8 @@ async function hubCommand(raw,inner){
   if(/\b(aggiungi|aggiungere|metti|segna|segnami|fissa|crea)\b/.test(t)&&/\b(lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|domani|dopodomani|oggi|giorno)\b/.test(t)&&/\b(alle|ore)\b|\b\d{1,2}[:.]\d{2}\b/.test(t)&&!/\b(euro|spes\w*|speso|pagat\w*|stipendio|entrata|incasso|incassat\w*|€)\b|€/.test(t))return calCommand(raw);
   if(/promemoria|scadenz|cosa devo fare|cosa ho da fare/.test(t))return remVoice();
   if(/\b(meteo|tempo|piove|piover[aà]?|pioggia|ombrello|temperatura|luna|lunare|nuvol\w*|sole|freddo|caldo|gradi|neve|vento)\b/.test(t)&&!/\b(spes\w*|euro|pagat\w*|speso)\b/.test(t))return await weatherCommand(raw);
-  if(!inner&&!BRFIN.test(t)&&!findAmount(t))return brainUnknown(raw);
+  if(!inner&&!BRFIN.test(t)&&!findAmount(t)){if(fz)return UNK;const r=await fuzzyRetry(raw,t);return r!==null?r:brainUnknown(raw)}
+  if(fz)return UNK;
   if(!S)return'Per inserire le finanze devi prima entrare una volta in Finanze con email, password e PIN.';
   let st;try{st=await rpc('pin_status')}catch{return'Sessione scaduta: apri Finanze e rientra.'}
   if(st!=='verified')return'Apri Finanze e inserisci il PIN, poi potrò scrivere le spese da qui.';
@@ -2499,7 +2526,7 @@ async function hubCommand(raw,inner){
     closeSheet();tab=tb;openApp($('#sq-finanze'),'fin');return'Apro Finanze.';
   }
   const out=await command(raw);
-  if(!inner&&/^Non ho capito/.test(out))return brainUnknown(raw);
+  if(!inner&&/^Non ho capito/.test(out)){const r=await fuzzyRetry(raw,t);return r!==null?r:brainUnknown(raw)}
   if(/^(Aggiunta spesa|Stipendio registrato|Entrata registrata|Tolta)/.test(out))PEND={kind:'fin',apply:()=>setTab('spese')};
   return out;
 }
