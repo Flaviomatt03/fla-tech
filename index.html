@@ -2248,7 +2248,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v71'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v72'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2313,6 +2313,13 @@ function waOpen(num,msg){const u='whatsapp://send?'+(num?'phone='+num+'&':'')+'t
 function waFind(rest){const r=norm(rest);let best=null;
   for(const k in WAC){if((r===k||r.startsWith(k+' '))&&(!best||k.length>best.length))best=k}
   return best}
+const WAEM={giallo:'💛',rosso:'❤',blu:'💙',azzurro:'💙',verde:'💚',viola:'💜',nero:'🖤',bianco:'🤍',arancione:'🧡',rosa:'🩷'};
+function waLook(words){
+  if(!(window.FLAAndroid&&FLAAndroid.findContact))return null;
+  const q=words.join(' '),vs=[q,q.replace(/\bcuor[ei]\s+(\w+)/gi,(a,c)=>WAEM[c.toLowerCase()]||a)];
+  for(const v of vs){try{const r=FLAAndroid.findContact(v);if(r){const o=JSON.parse(r);return{n:o.n,p:waNum(o.p)}}}catch{}}
+  return null}
+function waLookBest(words){for(let i=Math.min(4,words.length);i>=1;i--){const r=waLook(words.slice(0,i));if(r)return{r,used:i}}return null}
 function waCommand(raw){
   const t=raw.trim();
   let m=norm(t).match(/^(?:salva|aggiungi|memorizza)\s+(?:il\s+)?(?:contatto|numero)\s+(?:di\s+)?(.+?)\s+((?:\+|00)?[\d ]{8,})$/);
@@ -2326,11 +2333,12 @@ function waCommand(raw){
   const sep=rest.match(/^(.+?)\s*(?::|\bdicendo\b|\bscrivendo\b|\bche\b)\s*(.+)$/i);
   if(sep){name=sep[1].trim();msg=sep[2].trim()}
   else{const k=waFind(rest);if(k){const w=k.split(' ').length;name=rest.split(/\s+/).slice(0,w).join(' ');msg=rest.split(/\s+/).slice(w).join(' ')}
-       else{const w=rest.split(/\s+/);name=w[0];msg=w.slice(1).join(' ')}}
+       else{const w=rest.split(/\s+/),b=waLookBest(w);if(b){name=w.slice(0,b.used).join(' ');msg=w.slice(b.used).join(' ')}else{name=w[0];msg=w.slice(1).join(' ')}}}
   msg=msg.replace(/^["“]|["”]$/g,'');
   if(!msg)return'Cosa devo scrivere a '+name+'?';
   msg=msg.charAt(0).toUpperCase()+msg.slice(1);
-  const k=waFind(name);
+  let k=waFind(name);
+  if(!k){const f=waLook(name.split(/\s+/));if(f){k=norm(name);WAC[k]=f;waSave()}}
   if(k){waOpen(WAC[k].p,msg);return'Apro WhatsApp con '+WAC[k].n+'. Il messaggio è pronto, devi solo premere invia.'}
   waOpen('',msg);return'Non ho il numero di '+name+'. Apro WhatsApp con il messaggio pronto, scegli tu la chat. Per la prossima volta dì: salva contatto '+name+' e il numero.'}
 async function hubCommand(raw,inner){
