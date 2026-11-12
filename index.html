@@ -428,6 +428,8 @@ html[data-style=reattore] .ddi{color:hsl(calc(var(--rh) + 5) calc(25% * var(--rs
 .brain{position:absolute;left:calc(50% + 108px);bottom:calc(env(safe-area-inset-bottom) + 32px);width:46px;height:46px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--tx);display:grid;place-items:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .4s;z-index:3;box-shadow:var(--shadow)}
 .brain svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #hub.open .brain{opacity:1;pointer-events:auto;transition-delay:.9s}
+.brain.rev::after{content:'';position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;background:#f08c1a;border:2px solid var(--panel)}
+.brow.auto b::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:#f08c1a;margin-right:6px}.brow .bok{color:#2f9d62}.brow span{cursor:pointer}
 .brain.dot::after{content:'';position:absolute;top:1px;right:1px;width:12px;height:12px;border-radius:50%;background:#e5484d;border:2px solid var(--panel)}
 html[data-style=reattore] .brain{background:hsl(calc(var(--rh) + 7) calc(64% * var(--rs)) 11.0% / .85);border-color:hsl(var(--rh) calc(87% * var(--rs)) 69.6% / .6);color:hsl(calc(var(--rh) + -1) calc(100% * var(--rs)) 78.0%);box-shadow:0 0 14px hsl(calc(var(--rh) + -3) calc(89% * var(--rs)) 65.7% / .25)}
 .bchips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 6px}.bchips .chipb{font-size:13px;padding:9px 12px}
@@ -928,7 +930,7 @@ function listen(){
 }
 async function run(t){
   status('Elaboro…');aiSet('think');
-  try{const inFin=appOpen&&appEl&&appEl.id==='sq-finanze',bt=inFin?brainFind(norm(t).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'')):null;const r=await((inFin&&!bt)?command(t):hubCommand(t));status('Tocca il microfono per un altro comando');reply(r);liveGo()}
+  try{const inFin=appOpen&&appEl&&appEl.id==='sq-finanze',bt=inFin?brainFind(norm(t).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'')):null;const r=await((inFin&&!bt)?command(t):hubCommand(t));try{if(lastUnk&&typeof r==='string'&&!/^Non ho capito/.test(r)&&Date.now()-lastUnk.ts<45000&&!(inFin&&!bt)){const lu=lastUnk;lastUnk=null;autoLearn(lu.p,t)}}catch{};status('Tocca il microfono per un altro comando');reply(r);liveGo()}
   catch(e){reply(e.message==='auth'?'Sessione scaduta, rientra.':'Qualcosa è andato storto: '+e.message);liveGo()}
 }
 const U={zero:0,uno:1,una:1,un:1,due:2,tre:3,quattro:4,cinque:5,sei:6,sette:7,otto:8,nove:9,dieci:10,undici:11,dodici:12,tredici:13,quattordici:14,quindici:15,sedici:16,diciassette:17,diciotto:18,diciannove:19,venti:20,trenta:30,quaranta:40,cinquanta:50,sessanta:60,settanta:70,ottanta:80,novanta:90};
@@ -1160,6 +1162,7 @@ function buildRem(){
   out.sort((a,b)=>a.days-b.days||String(a.time||'99').localeCompare(String(b.time||'99')));return out}
 const remWhen=(r)=>r.days===0?'Oggi':r.days===1?'Domani':r.days<0?'In ritardo':'Tra '+r.days+' giorni';
 function paintRem(){
+  try{nativeSyncSoon()}catch{}
   REM=buildRem();const near=REM.filter(r=>r.days<=1),st=$('#rstrip'),bd=$('#rbadge');
   if(bd){bd.textContent=near.length;bd.hidden=!near.length}
   wkRem();
@@ -1993,9 +1996,9 @@ function showCards(){
   let body='';
   if(cgT==='reg')body='<div class="cgreg">'+CGR.map((r,k)=>'<details'+(k===0?' open':'')+'><summary>'+esc(r[0])+'</summary><p>'+esc(r[1])+'</p></details>').join('')+'</div>';
   else{const L=cgItems(),tot=L.reduce((a,x)=>a+(x.cp||1),0);body='<div class="cgcount">'+L.length+' carte diverse · '+(cgT==='cmd'?'una scelta per partita':tot+' nel mazzo')+'</div><div class="cggrid">'+L.map(cgCard).join('')+'</div>'}
-  $('#root').innerHTML='<header class="top"><button class="pill" data-gb="1">‹ Minigiochi</button><div class="ttl">Card Game</div><div class="hbtns"></div></header><div class="apps cgp"><div class="cgtitle">Fantasy <span>contro</span> Inferi</div><button class="tbgo" data-play="1">Gioca in due</button><div class="cgfac"><button data-f="f" class="'+(f?'on':'')+'">Fantasy</button><button data-f="i" class="'+(!f?'on':'')+'">Inferi</button></div><div class="cgtabs">'+TB.map(t=>'<button data-t="'+t[0]+'" class="'+(cgT===t[0]?'on':'')+'">'+t[1]+'</button>').join('')+'</div>'+body+'</div>';
+  $('#root').innerHTML='<header class="top"><button class="pill" data-gb="1">‹ Minigiochi</button><div class="ttl">Card Game</div><div class="hbtns"></div></header><div class="apps cgp"><div class="cgtitle">Fantasy <span>contro</span> Inferi</div><button class="tbgo" data-play="2" style="background:#2f8f83">Contro il telefono</button><button class="tbgo" data-play="1">Gioca in due</button><div class="cgfac"><button data-f="f" class="'+(f?'on':'')+'">Fantasy</button><button data-f="i" class="'+(!f?'on':'')+'">Inferi</button></div><div class="cgtabs">'+TB.map(t=>'<button data-t="'+t[0]+'" class="'+(cgT===t[0]?'on':'')+'">'+t[1]+'</button>').join('')+'</div>'+body+'</div>';
   const r=$('#root');$('[data-gb]').onclick=showGames;
-  r.querySelector('.apps').onclick=e=>{if(e.target.closest('[data-play]'))return showBoard();const a=e.target.closest('[data-f]'),b=e.target.closest('[data-t]'),c=e.target.closest('.cgc');if(a){cgF=a.dataset.f;showCards()}else if(b){cgT=b.dataset.t;showCards()}else if(c)cgZoom(c.dataset.i)}}
+  r.querySelector('.apps').onclick=e=>{{const pl=e.target.closest('[data-play]');if(pl)return showBoard(pl.dataset.play==='2')}const a=e.target.closest('[data-f]'),b=e.target.closest('[data-t]'),c=e.target.closest('.cgc');if(a){cgF=a.dataset.f;showCards()}else if(b){cgT=b.dataset.t;showCards()}else if(c)cgZoom(c.dataset.i)}}
 /* ---------- TABELLONE: partita in due sullo stesso telefono ---------- */
 let TG=null;
 const tbRnd=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n};
@@ -2033,7 +2036,7 @@ function tbStartTurn(){const p=TG.cur,P=TG.P[p];TG.turnNo++;
   P.mana=2;tbDraw(p,1);tbLog('Turno '+TG.turnNo+': '+(p?'Inferi':'Fantasy')+'.');TG.hidden=false}
 function tbEndTurn(){const p=TG.cur;
   for(let q=0;q<2;q++)TG.F[q].forEach(f=>{['main','bard'].forEach(s=>{if(f[s]){f[s].tb=0;f[s].ic=false}});if(f.seal&&f.seal.until&&f.seal.until===TG.turnNo)f.seal=null});
-  TG.P[p].mana=0;TG.pend=null;TG.firstTurn=false;TG.cur=1-p;TG.hidden=true}
+  TG.P[p].mana=0;TG.pend=null;TG.firstTurn=false;TG.cur=1-p;TG.hidden=!TG.ai;if(TG.ai){tbStartTurn();if(TG.cur===1)setTimeout(tbBot,800)}}
 /* ----- azioni: giocare carte ----- */
 function tbPlayCands(p,card){const i=card.i,res=[],side=TG.F[p];
   for(let l=0;l<4;l++){const f=side[l];
@@ -2118,7 +2121,7 @@ async function tbCombat(){const p=TG.cur,o=1-p;if(TG.pend||TG.over!=null)return;
     let atkr={c:a,l:l},defr=null;
     if(ts){const t=df[ts];defr={c:t,l,p:o,slot:ts};
       const cands=[];[l-1,l+1].forEach(x=>{if(x<0||x>3)return;const m=TG.F[o][x].main;if(m&&m.i===3&&!m.guest&&!m.ic&&m!==t)cands.push({c:m,l:x})});
-      for(const cd of cands){const yes=await tbAsk('<b>'+(o?'Inferi':'Fantasy')+'</b>: intercetti con <b>'+esc(tbNm({t:'c',i:cd.c.i,f:cd.c.f}))+'</b> l’attacco di <b>'+esc(tbNm({t:'c',i:a.i,f:a.f}))+'</b> contro <b>'+esc(tbNm({t:'c',i:t.i,f:t.f}))+'</b>?',['Sì, intercetto','No']);
+      for(const cd of cands){const yes=(TG.ai&&o===1)?0:await tbAsk('<b>'+(o?'Inferi':'Fantasy')+'</b>: intercetti con <b>'+esc(tbNm({t:'c',i:cd.c.i,f:cd.c.f}))+'</b> l’attacco di <b>'+esc(tbNm({t:'c',i:a.i,f:a.f}))+'</b> contro <b>'+esc(tbNm({t:'c',i:t.i,f:t.f}))+'</b>?',['Sì, intercetto','No']);
         if(yes===0){cd.c.ic=true;defr={c:cd.c,l:cd.l,p:o,slot:'main'};tbLog(tbNm({t:'c',i:cd.c.i,f:cd.c.f})+' intercetta!');break}}}
     const aA=tbAtk(a,p,l);a.ready=false;
     if(!defr){TG.P[o].life-=aA;tbLog(tbNm({t:'c',i:a.i,f:a.f})+' colpisce direttamente: '+aA+' danni.');tbCheckOver();continue}
@@ -2127,6 +2130,45 @@ async function tbCombat(){const p=TG.cur,o=1-p;if(TG.pend||TG.over!=null)return;
     defr.c.dmg+=toD;a.dmg+=toA;tbLog(tbNm({t:'c',i:a.i,f:a.f})+' ('+aA+') combatte '+tbNm({t:'c',i:defr.c.i,f:defr.c.f})+' ('+dA+').');tbDeaths();tbRender()}}
   tbCheckOver();if(TG.over!=null){TG.stage='over';return tbRender()}
   tbEndTurn();tbRender()}
+/* ----- avversario controllato dal telefono ----- */
+const tbSleep=ms=>new Promise(r=>setTimeout(r,ms));
+function tbBotLane(cands,card){let best=null,bs=-99;for(const key of cands){const l=+key.split(':')[2],e=TG.F[0][l].main,mine=TG.F[1][l];let s=0;
+  if(card&&card.t==='c'){const a=CGC[card.i][6],d=CGC[card.i][7];if(!e&&!TG.F[0][l].bard)s+=5;else if(e){const ed=tbDef(e)-e.dmg,ea=tbAtk(e,0,l);if(a>=ed)s+=4;if(ea>=d)s-=3}if(!mine.main)s+=2}
+  else s+=(mine.plc?-5:2)+(l===1||l===2?1:0);
+  s+=Math.random()*.5;if(s>bs){bs=s;best=key}}return best}
+function tbBotKey(pe,card){const cs=pe.cands;if(!cs.length)return null;const f=cs[0].split(':')[0];
+  if(f==='fld'){const mine=cs.filter(x=>x.split(':')[1]==='1');return tbBotLane(mine.length?mine:cs,card)}
+  if(f==='cre'){const own=cs.filter(x=>x.split(':')[1]==='1'),en=cs.filter(x=>x.split(':')[1]==='0');
+    const ref=x=>{const a=x.split(':');return TG.F[+a[1]][+a[2]][a[3]]};
+    if(en.length&&!own.length)return en.slice().sort((a,b)=>(tbDef(ref(a))-ref(a).dmg)-(tbDef(ref(b))-ref(b).dmg))[0];
+    if(own.length){const heal=/ferit|cura/i.test(pe.msg);return own.slice().sort((a,b)=>heal?ref(b).dmg-ref(a).dmg:CGC[ref(b).i][6]-CGC[ref(a).i][6])[0]}}
+  return cs[0]}
+function tbBotScore(card){const P=TG.P[1],cost=card.t==='s'?tbSpellCost(1,card):tbCost(card);if(cost>P.mana)return-1;
+  if(card.t==='c'){if(!tbPlayCands(1,card).length)return-1;return 8+CGC[card.i][6]*1.2+CGC[card.i][7]*.6+(cost===0?2:0)-cost*.3}
+  if(card.t==='l'){if(!tbPlayCands(1,card).length)return-1;return TG.F[1].filter(f=>f.plc).length>=2?2:6-cost*.5}
+  const k=card.i,en=tbCreList(0),mine=tbCreList(1);
+  if(k===0||k===4){if(!en.length)return-1;const n=k===0?2:4;return en.some(x=>tbDef(x.c)-x.c.dmg<=n)?9:4}
+  if(k===1)return mine.some(x=>x.c.dmg>=2)?5:-1;
+  if(k===2)return mine.some(x=>x.slot==='main'&&x.c.ready)?3.5:-1;
+  if(k===3)return en.length?3:-1;
+  return-1}
+function tbBotResolve(card){let g=0;while(TG&&TG.pend&&g++<4){const pe=TG.pend,key=tbBotKey(pe,card);if(!key){TG.pend=null;break}pe.pick(key);if(TG&&TG.over!=null)break}if(TG&&TG.pend)TG.pend=null}
+async function tbBotStep(){
+  const P=TG.P[1],tried=TG.botTried;
+  if(!TG.firstTurn&&!P.placeMana)for(let l=0;l<4;l++){const pl=TG.F[1][l].plc;if(pl&&pl.i===3&&pl.ready){tbFloop('plc',1,l);tbRender();return true}}
+  let best=null,bs=2.9;for(const c of P.hand){if(tried.has(c))continue;const s=tbBotScore(c);if(s>bs){bs=s;best=c}}
+  if(best){tried.add(best);tbPlay(best);tbBotResolve(best);tbRender();return true}
+  if(!P.cmdUsed&&P.mana>=1&&!tried.has('cmd')){const m=P.cmd,mine=tbCreList(1);
+    if((m===1&&mine.some(x=>x.c.dmg>=2))||(m===2&&mine.some(x=>x.slot==='main'&&x.c.ready))){tried.add('cmd');tbCmd();tbBotResolve(null);tbRender();return true}}
+  if(P.mana>=1&&P.hand.length<=3&&P.deck.length&&!tried.has('draw')){tried.add('draw');tbPayDraw();return true}
+  return false}
+async function tbBot(){
+  if(!TG||!TG.ai||TG.cur!==1||TG.over!=null||TG.botBusy||TG.stage!=='play')return;
+  TG.botBusy=true;TG.botTried=new Set();
+  try{for(let g=0;g<10&&TG&&TG.over==null&&TG.cur===1;g++){await tbSleep(g?700:900);if(!TG||TG.cur!==1)return;let did=false;try{did=await tbBotStep()}catch(e){did=false}if(!did)break}
+    if(TG&&TG.cur===1&&TG.over==null){await tbSleep(600);if(TG&&TG.cur===1)await tbCombat()}}
+  finally{if(TG)TG.botBusy=false}}
+function tbAiStart(){TG.first=tbRnd(2);TG.cur=TG.first;TG.stage='play';TG.firstTurn=true;TG.hidden=false;tbStartTurn();tbRender();if(TG.cur===1)setTimeout(tbBot,900)}
 /* ----- interfaccia ----- */
 const tbArt=c=>CGART[c.i===8?(c.f==='f'?'drago_f':'drago_i'):(c.f==='f'?CGC[c.i][0]:cgInf(CGC[c.i][0]))]();
 const tbPN=p=>(p?'Inferi':'Fantasy');
@@ -2141,7 +2183,7 @@ function tbCell(p,l){const f=TG.F[p][l],pe=TG.pend,tg=k=>pe&&pe.cands.includes(k
 function tbHand(card,i){const c=tbCd(card),cost=card.t==='s'?tbSpellCost(TG.cur,card):tbCost(card),art=card.t==='c'?tbArt(card):'<g transform="translate(0 2)">'+CGI[c[0]]+'</g>';
   const T=CGF[card.f];return'<div class="tbh'+(tbLeg(card)?' leg':'')+(cost>TG.P[TG.cur].mana?' no':'')+'" data-h="'+i+'" style="--ca:'+T.a+';--cbg:'+T.bg+'"><b class="m">'+cost+'</b><span class="n">'+esc(tbNm(card))+'</span><div class="ar"><svg viewBox="0 0 100 100">'+art+'</svg></div>'+(card.t==='c'?'<span class="tbst"><i class="a">'+c[6]+'</i><i class="d">'+c[7]+'</i></span>':'<span class="tbst t">'+(card.t==='l'?'Luogo':c[5])+'</span>')+'</div>'}
 function tbStats(p){const P=TG.P[p];return'<div class="tbi'+(p===TG.cur?' act':'')+'"><b>'+tbPN(p)+'</b><span>♥ '+P.life+'</span><span>◆ '+P.mana+'</span><span>mano '+P.hand.length+'</span><span>mazzo '+P.deck.length+'</span></div>'}
-function tbRender(){const r=$('#root');if(!r||!TG)return;const p=TG.cur,o=1-p;let b='';
+function tbRender(){const r=$('#root');if(!r||!TG)return;const p=(TG.ai&&TG.stage==='play')?0:TG.cur,o=1-p;let b='';
   const head='<header class="top"><button class="pill" data-tb="exit">‹ Esci</button><div class="ttl">Tabellone</div><div class="hbtns"><button class="pill" data-tb="log">Cronaca</button></div></header>';
   if(TG.stage==='cmd'){const q=TG.cp,P=TG.P[q];b='<div class="tbs1"><div class="tbh1">Giocatore '+(q+1)+' · '+tbPN(q)+'</div><p>Scegli in segreto il tuo comandante. Gli altri due restano fuori dalla partita.</p>'+CGK.map((k,i)=>'<button class="tbck" data-tb="cmd" data-i="'+i+'"><b>'+esc(q?k[2]:k[1])+'</b><small>'+esc(k[3])+' · 1 mana</small><span>'+esc(k[4])+'</span></button>').join('')+'</div>'}
   else if(TG.stage==='mull'){const q=TG.cp;b='<div class="tbs1"><div class="tbh1">Giocatore '+(q+1)+' · '+tbPN(q)+'</div><p>Questa è la tua mano iniziale. Puoi rimescolarla e pescarne 5 nuove, una sola volta.</p><div class="tbhand wrap">'+TG.P[q].hand.map((c,i)=>tbHand(c,i)).join('')+'</div><button class="btn pri" data-tb="keep">Tengo la mano</button> <button class="btn" data-tb="mull">Cambia mano</button></div>'}
@@ -2171,14 +2213,15 @@ function tbShowHand(i){const card=TG.P[TG.cur].hand[i];if(!card)return;const d=t
   const html=tbBig({n:tbNm(card),role:card.t==='c'?d[3]:d[5],mana:cost,atk:card.t==='c'?d[6]:null,def:card.t==='c'?d[7]:null,fx:card.t==='c'?d[8]:d[6],leg:tbLeg(card),art:card.t==='c'?tbArt(card):'<g transform="translate(0 2)">'+CGI[d[0]]+'</g>'});cgF=prev;
   TG.ov={type:'card',html:'<div class="cgz tbov" data-tb="ovx"><div class="cgzi">'+html+'<div class="tbbtns"><button class="btn pri" data-tb="play" data-i="'+i+'">Gioca ◆'+cost+'</button><button class="btn" data-tb="ovx">Chiudi</button></div></div></div>'};tbRender()}
 function tbTap(e){if(!TG)return;
+  if(TG.ai&&TG.stage==='play'&&TG.cur===1&&!TG.modal){const b0=e.target.closest('[data-tb]');if(!b0||!['exit','exit2','log','ovx'].includes(b0.dataset.tb))return}
   const bt=e.target.closest('[data-tb]');
   if(bt){const a=bt.dataset.tb;
     if(a==='exit'){if(TG.exit){TG=null;return showGames()}TG.exit=true;toast('Tocca di nuovo per uscire dalla partita');return}
     if(a==='exit2'){TG=null;return showGames()}
-    if(a==='again'){tbNew();return tbRender()}
-    if(a==='cmd'){TG.P[TG.cp].cmd=+bt.dataset.i;if(TG.cp===0){TG.cp=1}else{TG.stage='mull';TG.cp=0;TG.P.forEach((_,q)=>tbDraw(q,5))}return tbRender()}
-    if(a==='keep'){if(TG.cp===0){TG.cp=1;return tbRender()}TG.first=tbRnd(2);TG.cur=TG.first;TG.stage='pass';TG.hidden=true;return tbRender()}
-    if(a==='mull'){const P=TG.P[TG.cp];P.deck.push(...P.hand);P.hand=[];tbShuf(P.deck);tbDraw(TG.cp,5);if(TG.cp===0){TG.cp=1}else{TG.first=tbRnd(2);TG.cur=TG.first;TG.stage='pass';TG.hidden=true}return tbRender()}
+    if(a==='again'){const ai=TG.ai;tbNew();TG.ai=ai;return tbRender()}
+    if(a==='cmd'){if(TG.ai){TG.P[0].cmd=+bt.dataset.i;TG.P[1].cmd=tbRnd(3);TG.stage='mull';TG.cp=0;TG.P.forEach((_,q)=>tbDraw(q,5));return tbRender()}TG.P[TG.cp].cmd=+bt.dataset.i;if(TG.cp===0){TG.cp=1}else{TG.stage='mull';TG.cp=0;TG.P.forEach((_,q)=>tbDraw(q,5))}return tbRender()}
+    if(a==='keep'){if(TG.ai)return tbAiStart();if(TG.cp===0){TG.cp=1;return tbRender()}TG.first=tbRnd(2);TG.cur=TG.first;TG.stage='pass';TG.hidden=true;return tbRender()}
+    if(a==='mull'){if(TG.ai){const P0=TG.P[0];P0.deck.push(...P0.hand);P0.hand=[];tbShuf(P0.deck);tbDraw(0,5);return tbAiStart()}const P=TG.P[TG.cp];P.deck.push(...P.hand);P.hand=[];tbShuf(P.deck);tbDraw(TG.cp,5);if(TG.cp===0){TG.cp=1}else{TG.first=tbRnd(2);TG.cur=TG.first;TG.stage='pass';TG.hidden=true}return tbRender()}
     if(a==='ready'){TG.hidden=false;if(TG.stage==='pass'){TG.stage='play';TG.firstTurn=true}tbStartTurn();return tbRender()}
     if(a==='cancel'){TG.pend=null;TG.rin=null;return tbRender()}
     if(a==='draw')return tbPayDraw();
@@ -2195,7 +2238,7 @@ function tbTap(e){if(!TG)return;
   if(TG.pend){let el=e.target;while(el&&el!==$('#root')){const t=el.dataset&&el.dataset.t;if(t&&TG.pend.cands.includes(t)){const pk=TG.pend.pick;pk(t);if(TG&&!TG.modal)tbRender();return}el=el.parentElement}return}
   const t=e.target.closest('[data-t]');if(!t||TG.hidden||TG.modal)return;const k=t.dataset.t.split(':');
   if(k[0]==='cre')tbShowCre(+k[1],+k[2],k[3]);else if(k[0]==='plc')tbShowPlc(+k[1],+k[2])}
-function showBoard(){tbNew();tbRender()}
+function showBoard(ai){tbNew();TG.ai=!!ai;tbRender()}
 function showGames(){
   $('#root').innerHTML='<header class="top"><button class="pill" data-gb="1">‹ App</button><div class="ttl">Minigiochi</div><div class="hbtns"></div></header><div class="apps"><div class="ggrid">'+
     GAMES.map(g=>'<button class="gcard" data-g="'+g.id+'" style="--gc:'+g.c+'"><svg viewBox="0 0 24 24">'+g.svg+'</svg><b>'+esc(g.n)+'</b><span>'+esc(g.d)+'</span>'+(g.soon?'<i>In arrivo</i>':'')+'</button>').join('')+
@@ -2273,7 +2316,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v79'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v80'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2291,12 +2334,12 @@ async function brPull(){if(!S)return;
 const reEsc=x=>x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function brainFind(t){for(const b of [...BR].sort((a,c)=>c.p.length-a.p.length)){if(t===b.p||new RegExp('(^| )'+reEsc(b.p)+'( |$)').test(t))return b.t}return null}
 function brainAdd(p,to){p=norm(p);to=(to||'').trim();if(!p||!to)return false;BR=BR.filter(b=>b.p!==p);BR.unshift({p,t:to});brSave();return true}
-function brainUnknown(raw){brainPend=raw;paintBrain();return'Non ho capito «'+raw+'». Tocca il cervello vicino a Parla con me e dimmi cosa intendevi: la prossima volta lo so.'}
-function paintBrain(){const b=$('#brainbtn');if(b)b.classList.toggle('dot',!!brainPend)}
+function brainUnknown(raw){brainPend=raw;lastUnk={p:norm(raw),ts:Date.now()};paintBrain();return'Non ho capito «'+raw+'». Tocca il cervello vicino a Parla con me e dimmi cosa intendevi: la prossima volta lo so.'}
+function paintBrain(){const b=$('#brainbtn');if(b){b.classList.toggle('dot',!!brainPend);b.classList.toggle('rev',!brainPend&&brReview()>0)}}
 const BRFIN=/spes|stipend|entrat|euro|resta|rimane|rimasto|cicl|fiss|finanz|guadagn|annulla|ultima|totale|quanto|incass|pagat|comprat/;
 const BTG=[['Finanze','apri finanze'],['Meteo e Luna','apri meteo'],['Calendario','apri calendario'],['Quaderno','apri quaderno'],['Ash','apri ash'],['Musica','apri musica'],['App','apri le app']];
 function brainChips(){const o=BTG.slice();for(const k of Object.keys(APPL)){const n=APPL[k].n.toLowerCase();const c=[n,n+' samsung'].find(x=>APPL[k].re.test(x));if(c)o.push([APPL[k].n,'apri '+c])}return o}
-function brainList(){return BR.length?BR.map((b,i)=>'<div class="brow"><span><b>«'+esc(b.p)+'»</b><br><small>→ '+esc(b.t)+'</small></span><button data-bdel="'+i+'" aria-label="Dimentica">×</button></div>').join(''):'<div class="hint">Ancora niente. Quando non capisco una frase, la insegni qui.</div>'}
+function brainList(){return BR.length?BR.map((b,i)=>'<div class="brow'+(b.a?' auto':'')+'"><span data-bed="'+i+'"><b>«'+esc(b.p)+'»</b><br><small>→ '+esc(b.t)+(b.a?' · imparato da solo, tocca per cambiare':'')+'</small></span>'+(b.a?'<button class="bok" data-bok="'+i+'" aria-label="Va bene">✓</button>':'')+'<button data-bdel="'+i+'" aria-label="Dimentica">×</button></div>').join(''):'<div class="hint">Ancora niente. Quando non capisco una frase, la insegni qui.</div>'}
 let brainNew='';
 const BRCOL={'apri finanze':['Finanze','#f2d675'],'apri meteo':['Meteo e Luna','#d3c8f1'],'apri calendario':['Calendario','#f2b8c8'],'apri quaderno':['Quaderno','#bfe3cf'],'apri ash':['Ash','#e7d5ab'],'apri musica':['Musica','#7fc7a1'],'apri le app':['App','#f3b58a']};
 function brainGraph(){
@@ -2327,8 +2370,8 @@ function openBrain(){
    '<form id="bf"><div class="lab" style="margin-top:10px">oppure fai questo comando</div><input id="bto" placeholder="es. quanto resta" autocomplete="off"><button class="btn pri" style="margin-top:10px;width:100%">Salva</button></form>'+
    '<div class="lab" style="margin-top:18px">Cosa so già</div><div id="bl">'+brainList()+'</div><div class="syn" id="bsyn">'+brSyncTxt()+'</div>');
   brPull();
-  const sh=$('#sheet'),learn=to=>{const p=$('#bph').value;if(!norm(p))return toast('Scrivi prima la frase');if(!brainAdd(p,to))return;brainNew=p;brainPend='';paintBrain();$('#bph').value='';$('#bto').value='';$('#bl').innerHTML=brainList();$('#bgraph').innerHTML=brainGraph();toast('Imparato')};
-  sh.onclick=e=>{const c=e.target.closest('[data-bt]'),d=e.target.closest('[data-bdel]');if(c)learn(ch[+c.dataset.bt][1]);else if(d){BR.splice(+d.dataset.bdel,1);brSave();$('#bl').innerHTML=brainList();$('#bgraph').innerHTML=brainGraph()}};
+  const sh=$('#sheet'),repaintB=()=>{$('#bl').innerHTML=brainList();$('#bgraph').innerHTML=brainGraph();paintBrain()},learn=to=>{const p=$('#bph').value;if(!norm(p))return toast('Scrivi prima la frase');if(!brainAdd(p,to))return;brainNew=p;brainPend='';paintBrain();$('#bph').value='';$('#bto').value='';$('#bl').innerHTML=brainList();$('#bgraph').innerHTML=brainGraph();toast('Imparato')};
+  sh.onclick=e=>{const c=e.target.closest('[data-bt]'),d=e.target.closest('[data-bdel]'),ok=e.target.closest('[data-bok]'),ed=e.target.closest('[data-bed]');if(ok){const b=BR[+ok.dataset.bok];if(b){delete b.a;brSave();repaintB()}return}if(ed){const b=BR[+ed.dataset.bed];if(b){$('#bph').value=b.p;$('#bto').value=b.t;$('#bto').focus();toast('Cambia il comando e premi Salva')}return}if(c)learn(ch[+c.dataset.bt][1]);else if(d){BR.splice(+d.dataset.bdel,1);brSave();$('#bl').innerHTML=brainList();$('#bgraph').innerHTML=brainGraph()}};
   $('#bf').onsubmit=e=>{e.preventDefault();learn($('#bto').value)}}
 /* ---------- WhatsApp ---------- */
 let WAC=lget('flat_wa')||{};
@@ -2416,8 +2459,8 @@ function rmShow(txt){
   speak('Promemoria: '+txt);
   let b=document.getElementById('rmban');if(!b){b=document.createElement('div');b.id='rmban';b.style.cssText='position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:99999;padding:16px 18px;border-radius:16px;background:#ffd34a;color:#3a2f05;font:700 16px/1.35 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.35);cursor:pointer';b.addEventListener('click',()=>b.remove());document.body.appendChild(b)}
   b.textContent='⏰ '+txt+'  (tocca per chiudere)'}
-function rmTick(){const n=Date.now();let f=RMS.filter(r=>r.at<=n);if(!f.length)return;RMS=RMS.filter(r=>r.at>n);rmSave();rmShow(f.map(r=>r.t).join(' · '))}
-function rmAdd(t,at){RMS.push({id:Date.now()+''+Math.random(),t,at});rmSave()}
+function rmTick(){const n=Date.now();let f=RMS.filter(r=>r.at<=n);if(!f.length)return;try{window.FLAAndroid&&FLAAndroid.cancel&&f.forEach(r=>FLAAndroid.cancel(nvId('rm|'+r.id)))}catch{}RMS=RMS.filter(r=>r.at>n);rmSave();rmShow(f.map(r=>r.t).join(' · '))}
+function rmAdd(t,at){RMS.push({id:Date.now()+''+Math.random(),t,at});rmSave();nativeSync()}
 function rmWhat(raw,cut){
   let w=raw.replace(cut,' ').replace(/^\s*(?:ehi|hey|ciao|ao)?\s*(?:fla ?tech)?[ ,]*/i,' ').replace(/\b(?:ricordami|ricordati|ricorda|promemoria|avvisami|svegliami)\b/ig,' ').replace(/^\s*(?:di|che|per|:|,)\s+/i,'').replace(/\s+/g,' ').trim().replace(/^(?:di|che)\s+/i,'');
   return w?w.charAt(0).toUpperCase()+w.slice(1):''}
@@ -2474,17 +2517,17 @@ function imgCommand(raw){
   return'Apro ChatGPT con la richiesta: '+q+'.'}
 /* ---------- Capire meglio: correzione parole, sinonimi, alternative ---------- */
 const UNK={};
-const FZV=new Set(('torcia accendi accendimi spegni spegnimi timer minuti minuto secondi secondo ora ore musica metti mettimi suona suonami canzone brano playlist pausa prossima prossimo precedente volume alza abbassa calendario evento appuntamento agenda ricordami promemoria domani dopodomani oggi stasera lunedi martedi mercoledi giovedi venerdi sabato domenica meteo piove pioggia ombrello luna temperatura nuvoloso sole spesa spese stipendio entrata euro quaderno task apri vai portami naviga chiama telefona scrivi manda cerca google claude chatgpt whatsapp instagram youtube spotify tiktok calcolatrice sveglia impostazioni galleria fotocamera rubrica obiettivo briefing buongiorno buonanotte aggiorna stile reattore tema finanze finanza cicli fisse ciclo statistiche contatto contatti salva elimina cancella sposta rimanda aggiungi segna crea ash scheda dado tira lancia danni cura riposo ispirazione immagine genera disegna foto casa lavoro mappa mappa cervello minigiochi giochi app fatto resta rimane speso speso quanto ultima annulla').split(/\s+/).filter(Boolean));
+const FZV=new Set(('torcia accendi accendimi spegni spegnimi timer minuti minuto secondi secondo ora ore musica metti mettimi suona suonami canzone brano playlist pausa prossima prossimo precedente volume alza abbassa calendario evento appuntamento agenda ricordami promemoria domani dopodomani oggi stasera lunedi martedi mercoledi giovedi venerdi sabato domenica meteo piove pioggia ombrello luna temperatura nuvoloso sole spesa spese stipendio entrata euro quaderno task apri vai portami naviga chiama telefona scrivi manda cerca google claude chatgpt whatsapp instagram youtube spotify tiktok calcolatrice sveglia impostazioni galleria fotocamera rubrica obiettivo briefing buongiorno buonanotte aggiorna stile reattore tema finanze finanza cicli fisse ciclo statistiche contatto contatti salva elimina cancella sposta rimanda aggiungi segna crea ash scheda dado tira lancia danni cura riposo ispirazione immagine genera disegna foto casa lavoro mappa mappa cervello minigiochi giochi app fatto resta rimane speso speso quanto ultima annulla eventi appuntamenti avvisami ripeti ripetere ripetizione ripetizioni smetti elenco prima poi anche tutti ogni giorno giorni settimana mese chiamata messaggio risposta vorrei potresti puoi dimmi dammi fammi mostrami portami dopo adesso subito').split(/\s+/).filter(Boolean));
 const FZS=[[/\bcronometro\b/g,'timer'],[/\ballarme\b/g,'sveglia'],[/\bprevisioni\b/g,'meteo'],[/\bavvisami\b/g,'ricordami'],[/\baccendimi\b/g,'accendi'],[/\bspegnimi\b/g,'spegni'],[/\bbrani\b/g,'canzone'],[/\bcanzoni\b/g,'canzone']];
 function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
 function bigr(s){const o=new Map();s=' '+s+' ';for(let i=0;i<s.length-1;i++){const g=s.slice(i,i+2);o.set(g,(o.get(g)||0)+1)}return o}
 function dice(a,b){if(a===b)return 1;const x=bigr(a),y=bigr(b);let i=0,n=0;for(const[k,v]of x){n+=v;if(y.has(k))i+=Math.min(v,y.get(k))}let m=0;for(const v of y.values())m+=v;return n+m?2*i/(n+m):0}
 function fixText(t,strict){
-  let s=t;for(const[r,w]of FZS)s=s.replace(r,w);
+  let s=t;if(!strict)for(const[r,w]of FZS)s=s.replace(r,w);
   s=s.split(' ').map(w=>{
     if(w.length<4||FZV.has(w)||/\d/.test(w)||!/^[a-z]+$/.test(w))return w;
     let best=null,bd=9;const lim=strict?(w.length>=5?1:0):(w.length<=6?1:2);if(!lim)return w;
-    for(const v of FZV){if(Math.abs(v.length-w.length)>lim)continue;const d=lev(w,v);if(d<=lim&&d<bd){bd=d;best=v}}
+    for(const v of FZV){if(Math.abs(v.length-w.length)>lim)continue;if(strict&&(v[0]!==w[0]||v[v.length-1]!==w[w.length-1]))continue;const d=lev(w,v);if(d<=lim&&d<bd){bd=d;best=v}}
     return best||w}).join(' ');
   return s}
 async function fuzzyRetry(raw,t){
@@ -2495,11 +2538,95 @@ async function fuzzyRetry(raw,t){
   for(const c of [t,...cands.slice()]){add(fixText(c))}
   let bestB=null,bs=0;for(const c of [t,...cands]){for(const b of BR){const d=dice(c,b.p);if(d>bs){bs=d;bestB=b}}}
   if(bestB&&bs>=.8)return await hubCommand(bestB.t,true);
-  for(const c of cands){const r=await hubCommand(c,false,true);if(r!==UNK)return r}
+  for(const c of cands){const r=await hubCommand(c,false,true);if(r!==UNK){autoLearn(t,c);return r}}
   return null}
+/* ---------- Ripetizioni, avvisi prima degli eventi, promemoria nativi ---------- */
+let REP=lget('flat_rep')||[],ALM=lget('flat_calalert'),EVF=lget('flat_evf')||{},NVMAP={},nvT=null;
+if(ALM==null)ALM=15;
+const repSave=()=>lset('flat_rep',REP);
+const DOWN={lunedi:1,martedi:2,mercoledi:3,giovedi:4,venerdi:5,sabato:6,domenica:0};
+const DOWN_N=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+function repMatch(r,d){const dt=pd(d);return r.k==='day'||(r.k==='week'&&dt.getDay()===r.dow)||(r.k==='month'&&dt.getDate()===r.dom)}
+function repTopUp(){let ch=false;const t0=new Date();t0.setHours(12,0,0,0);
+  for(const r of REP){r.made=r.made||{};const H=r.k==='day'?14:r.k==='week'?56:120;
+    for(let i=0;i<H;i++){const d=new Date(t0);d.setDate(d.getDate()+i);const k=ymd(d);if(r.made[k]||!repMatch(r,k))continue;
+      if((CAL[k]||[]).some(e=>e.t===r.t&&(e.time||'')===(r.time||''))){r.made[k]=1;ch=true;continue}
+      const e=calAdd(k,r.t,r.time);r.made[k]=e.id;ch=true}
+    const lim=ymd(new Date(Date.now()-7*864e5));for(const k in r.made)if(k<lim)delete r.made[k]}
+  if(ch)repSave();nativeSync()}
+function repDesc(r){return r.t+' '+(r.k==='day'?'ogni giorno':r.k==='week'?'ogni '+DOWN_N[r.dow]:'ogni mese il '+r.dom)+(r.time?' alle '+r.time:'')}
+function repCommand(raw){
+  const n=norm(raw);
+  let m=n.match(/\b(?:smetti di ripetere|non ripetere piu|non ripetere|togli la ripetizione|elimina la ripetizione|cancella la ripetizione|basta ripetere)\b\s*(.*)$/);
+  if(m){const q=m[1].replace(/\b(il|lo|la|l|di|del|della)\b/g,' ').trim();const r=REP.find(x=>!q||norm(x.t).includes(q)||q.includes(norm(x.t)));
+    if(!r)return'Non trovo questa ripetizione.';
+    REP=REP.filter(x=>x!==r);repSave();const td=today();let k0=0;
+    for(const d in r.made){if(d>=td&&typeof r.made[d]==='string'){const id=r.made[d];CAL[d]=(CAL[d]||[]).filter(e=>String(e.id)!==id);if(!CAL[d].length)delete CAL[d];calDel(id);k0++}}
+    calSave();if($('#calv'))showCal();paintRem();nativeSync();return'Ok, '+r.t+' non si ripete più'+(k0?' e ho tolto le date future.':'.')}
+  if(/\b(elenco|lista|quali sono|cosa si ripete)\b/.test(n)&&/\bripetizion\w*|\bsi ripete\b|\bripetut\w*/.test(n))return REP.length?'Si ripetono: '+REP.map(repDesc).join('; ')+'.':'Non hai eventi che si ripetono.';
+  m=n.match(/\b(?:ogni|tutti i|tutte le)\s+(lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|giorno|giorni|settimana|mese)\b/);
+  if(!m)return null;
+  const tm=n.match(/\balle\s+(?:ore\s+)?(\d{1,2})(?:[:.\s](\d{2}))?\b/);
+  if(!tm&&!/\b(aggiungi|aggiungere|metti|segna|crea|ricordami|evento|appuntamento|calendario)\b/.test(n))return null;
+  if(/\b(euro|spes\w*|speso|stipendio|pagat\w*)\b/.test(n))return null;
+  const time=tm?pad(+tm[1])+':'+(tm[2]||'00'):'';if(tm&&(+tm[1]>23||+(tm[2]||0)>59))return null;
+  let k='week',dow=null,dom=null;
+  if(m[1] in DOWN){dow=DOWN[m[1]]}else if(/^giorn/.test(m[1])){k='day'}else if(m[1]==='settimana'){dow=new Date().getDay()}else{k='month';const dm=n.match(/\bil\s+(\d{1,2})\b/);dom=dm?+dm[1]:new Date().getDate();if(dom<1||dom>31)return null}
+  let w=n.replace(m[0],' ').replace(tm?tm[0]:'@@',' ');if(k==='month')w=w.replace(/\bil\s+\d{1,2}\b/,' ');
+  w=w.replace(/\b(ehi|hey|ciao|ao|fla|tech|aggiungi|aggiungere|metti|segna|crea|ricordami|evento|appuntamento|calendario|in|sul|nel|il|del|di|alle|a|al|ore|per|le|la|lo|che|ripeti|ripetere|ripetizione|nuovo)\b/g,' ').replace(/\s+/g,' ').trim();
+  if(!w)return'Cosa devo ripetere?';
+  const t=w.charAt(0).toUpperCase()+w.slice(1);
+  if(REP.some(r=>r.t===t&&r.k===k&&r.dow===dow&&r.dom===dom&&r.time===time))return t+' è già impostato.';
+  REP.push({id:newId(),t,time,k,dow,dom,made:{}});repSave();repTopUp();
+  return'Ok, '+repDesc(REP[REP.length-1])+'. Ti ho messo le prossime date in calendario.'}
+function evAlertCommand(raw){
+  const n=norm(raw);
+  if(/\bavvis\w*|\ballarm\w*/.test(n)&&/\b(event\w*|appuntament\w*)\b/.test(n)&&/\b(non avvisarmi|disattiva|spegni|togli|niente|senza)\b/.test(n)){ALM=0;lset('flat_calalert',0);nativeSync();return'Ok, niente avvisi prima degli eventi.'}
+  if(/\bavvisami\b/.test(n)&&/\bprima\b/.test(n)&&/\b(eventi|evento|appuntamenti|appuntamento)\b/.test(n)){
+    let mins=null,m;
+    if((m=n.match(/(\d+|[a-z]+)\s*(minut\w*|or[ae])\b/))){const v=/^\d+$/.test(m[1])?+m[1]:(U[m[1]]!=null?U[m[1]]:null);if(v!=null)mins=v*(/minut/.test(m[2])?1:60)}
+    if(mins==null&&/mezz\S*\s?ora/.test(n))mins=30;
+    if(mins==null&&/\bun\S?\s?ora\b/.test(n))mins=60;
+    if(mins==null)return'Quanti minuti prima?';
+    ALM=Math.min(1440,mins);lset('flat_calalert',ALM);nativeSync();return'Ok, ti avviso '+ALM+' minuti prima degli eventi che hanno un orario.'}
+  return null}
+function evEach(days,fn){for(let dOff=0;dOff<days;dOff++){const d=new Date();d.setDate(d.getDate()+dOff);const k=ymd(d);
+  for(const e of CAL[k]||[]){if(!e.time||!/^\d{1,2}:\d{2}/.test(e.time))continue;const a=e.time.split(':').map(Number),at=new Date(d);at.setHours(a[0],a[1],0,0);fn(e,k,at.getTime(),k+'|'+(e.id||e.t)+'|'+ALM)}}}
+function evTick(){if(!ALM)return;const now=Date.now();
+  evEach(2,(e,k,ev,key)=>{if(EVF[key])return;if(now>=ev-ALM*60000&&now<ev){EVF[key]=1;lset('flat_evf',EVF);const left=Math.max(1,Math.round((ev-now)/60000));try{window.FLAAndroid&&FLAAndroid.cancel&&FLAAndroid.cancel(nvId('ev|'+key))}catch{}rmShow('Tra '+left+(left===1?' minuto':' minuti')+': '+e.t)}});
+  const lim=ymd(new Date(Date.now()-3*864e5));for(const k in EVF)if(k.split('|')[0]<lim)delete EVF[k]}
+const nvId=s=>{let h=7;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h)%2000000000+1};
+function nativeSync(){const A=window.FLAAndroid;if(!A||typeof A.schedule!=='function')return;
+  try{NVMAP={};const now=Date.now(),items=[];
+    for(const r of RMS)items.push({k:'rm|'+r.id,at:r.at,t:r.t});
+    if(ALM)evEach(3,(e,k,ev,key)=>{if(!EVF[key])items.push({k:'ev|'+key,at:ev-ALM*60000,t:'Tra '+ALM+' minuti: '+e.t,ek:key})});
+    for(const it of items){const id=nvId(it.k);NVMAP[id]=it;if(it.at>now)A.schedule(id,it.at,it.t)}}catch{}}
+function nativeSyncSoon(){clearTimeout(nvT);nvT=setTimeout(nativeSync,1500)}
+function nativeFired(){const A=window.FLAAndroid;if(!A||typeof A.takeFired!=='function')return;
+  try{const s=A.takeFired();if(!s)return;let ch=false;for(const x of String(s).split(',')){const id=+x,it=NVMAP[id];if(!id||!it)continue;
+    if(it.k.startsWith('rm|')){const rid=it.k.slice(3);RMS=RMS.filter(r=>r.id!==rid);ch=true}else if(it.ek){EVF[it.ek]=1;lset('flat_evf',EVF)}}
+    if(ch)rmSave()}catch{}}
+/* ---------- Comandi a catena ---------- */
+let chainBusy=false;
+function chainSplit(t){
+  if(/^(scrivi|manda|mandagli|invia|messaggia|ricordami|aggiungi|segna|crea|nota|salva|imposta|chiedi|genera|disegna|cerca su google|googla|ogni|tutti|avvisami|chiama)\b/.test(t))return[t];
+  if(/\b(euro|spes\w*|speso|pagat\w*|stipendio)\b/.test(t))return[t];
+  const ps=t.split(/\s+e poi\s+|\s+poi\s+|\s+dopodiche\s+|\s+e anche\s+|\s+e\s+(?=(?:metti|mettimi|apri|accendi|spegni|portami|naviga|abbassa|alza|ferma|pausa|avvia|imposta)\b)/).map(x=>x.trim()).filter(Boolean);
+  return ps.length>1&&ps.every(x=>x.split(' ').length>=2||/^(pausa|ferma|stop)$/.test(x))?ps:[t]}
+/* ---------- Il cervello impara da solo ---------- */
+let lastUnk=null;
+function autoLearn(p,to){
+  p=norm(p).replace(/^(ehi|hey|ciao|oh|ao)?\s*(fla ?tech|fla)\b[ ,]*/,'');to=norm(to).replace(/^(ehi|hey|ciao|oh|ao)?\s*(fla ?tech|fla)\b[ ,]*/,'');
+  if(!p||!to||p===to||p.length<4||p.split(' ').length<2&&p.length<6)return false;
+  if(/^(scrivi|manda|invia|messaggia|ricordami|aggiungi|segna|crea|nota|chiama)\b/.test(p)||/\d/.test(p)&&/euro|spes/.test(p))return false;
+  if(BR.some(b=>b.p===p))return false;
+  BR.unshift({p,t:to,a:1});
+  let n=0;BR=BR.filter(b=>{if(b.a){n++;return n<=60}return true});
+  brSave();paintBrain();toast('🟠 Ho imparato: «'+p+'» → '+to);return true}
+const brReview=()=>BR.filter(b=>b.a).length;
 async function hubCommand(raw,inner,fz){
   const t=norm(raw).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'');
-  if(!inner&&!fz&&!brainFind(t)&&!/^(scrivi|manda|mandagli|invia|messaggia|ricordami|aggiungi|segna|crea|nota|salva|imposta|cerca|googla|chiedi|genera|disegna|chiama|portami|naviga)\b/.test(t)){const ft=fixText(t,true);if(ft!==t)return await hubCommand(ft,false,fz)}
+  if(!inner&&!fz&&!chainBusy&&!brainFind(t)){const ps=chainSplit(t);if(ps.length>1){chainBusy=true;try{const out=[];for(const x of ps){out.push(await hubCommand(x,false));await tbSleep(500)}return out.filter(Boolean).join(' ')}finally{chainBusy=false}}}
   if(!inner){const bl=brainFind(t);if(bl)return await hubCommand(bl,true)}
   if(!inner&&/^(grazie|ok|va bene|perfetto|bene|ciao)$/.test(t))return'Ok.';
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
@@ -2508,6 +2635,8 @@ async function hubCommand(raw,inner,fz){
   {const w=webCommand(raw);if(w)return w}
   {const w=imgCommand(raw);if(w)return w}
   {const w=phoneCommand(raw);if(w)return w}
+  {const w=repCommand(raw);if(w)return w}
+  {const w=evAlertCommand(raw);if(w)return w}
   {const w=reminderCommand(raw);if(w)return w}
   {const w=mapCommand(raw);if(w)return w}
   if(/\b(buongiorno|briefing)\b/.test(t)&&/\b(briefing|riassunto)\b/.test(t)){briefing(true);return''}
@@ -2518,8 +2647,8 @@ async function hubCommand(raw,inner,fz){
   const ac=appCommand(t);if(ac)return ac;
   const oc=openCmd(t);if(oc)return oc;
   {const w=navCommand(raw);if(w)return w}
-  if(/\b(spotify|musica|playlist|canzone|canzoni|brano|brani|riproduci|suona|suonami|pausa|riprendi|volume|shuffle|casuale|mescola|prossima|prossimo|salta|stoppa|in coda|alla coda|ripeti la canzone|ripeti il brano|ripeti la playlist|ripeti questa|da capo|dall inizio|cambia (?:la )?(?:canzone|brano|musica))\b/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria)\b/.test(t))return await musicCommand(raw);
-  if(/^(?:(?:puoi|potresti|vorrei|per favore|dai|ora|adesso|mi|ti|ok|allora)\s+)*(metti|mettimi|mettere|suona|suonami|suonare|riproduci|fai partire|far partire|fammi sentire|ascolta|voglio sentire|voglio ascoltare|cambia con|cambia in|passa a)\b/.test(t)&&!/\d/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria|stipendio|entrata|ca)\b/.test(t))return await musicCommand(raw);
+  if(/\b(spotify|musica|playlist|canzone|canzoni|brano|brani|riproduci|suona|suonami|pausa|riprendi|volume|shuffle|casuale|mescola|prossima|prossimo|salta|stoppa|in coda|alla coda|ripeti la canzone|ripeti il brano|ripeti la playlist|ripeti questa|da capo|dall inizio|cambia (?:la )?(?:canzone|brano|musica))\b/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria)\b/.test(t)){const mr=await musicCommand(raw);if(!fz&&!inner&&/^(Non trovo "|Per la musica devo prima)/.test(mr)){const r=await fuzzyRetry(raw,t);if(r!==null)return r}return mr}
+  if(/^(?:(?:puoi|potresti|vorrei|per favore|dai|ora|adesso|mi|ti|ok|allora)\s+)*(metti|mettimi|mettere|suona|suonami|suonare|riproduci|fai partire|far partire|fammi sentire|ascolta|voglio sentire|voglio ascoltare|cambia con|cambia in|passa a)\b/.test(t)&&!/\d/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria|stipendio|entrata|ca)\b/.test(t)){const mr=await musicCommand(raw);if(!fz&&!inner&&/^(Non trovo "|Per la musica devo prima)/.test(mr)){const r=await fuzzyRetry(raw,t);if(r!==null)return r}return mr}
   if(/\bash\b|scheda|\bca\b|classe armatura|competenz|inventario|risors|dad[io] vita|ispirazione|salvezza contro la morte|sottoclasse|punti ferita|\bpf\b|focus|riposo (lungo|breve)|iniziativa|\b(tira|lancia)\b|\b\d{0,2}\s*d\s?(4|6|8|10|12|20|100)\b|\bdado\s+(a|da)\b|\bdanni?\b|ferito|\bmi curo\b/.test(t)&&!/\b(task|taks|compito|compiti|quaderno|evento|appuntamento|calendario)\b/.test(t)&&!/\b(spes\w*|euro|speso|stipendio)\b/.test(t))return await ashCommand(raw);
   if(DELV.test(t)){const r=await delCommand(raw);if(r!==null)return r}
   if(/\b(sposta|spostare|spostami|rimanda|rinvia|posticipa|anticipa)\b/.test(t))return await moveCommand(raw);
@@ -2530,6 +2659,7 @@ async function hubCommand(raw,inner,fz){
   if(/\b(meteo|tempo|piove|piover[aà]?|pioggia|ombrello|temperatura|luna|lunare|nuvol\w*|sole|freddo|caldo|gradi|neve|vento)\b/.test(t)&&!/\b(spes\w*|euro|pagat\w*|speso)\b/.test(t))return await weatherCommand(raw);
   if(!inner&&!BRFIN.test(t)&&!findAmount(t)){if(fz)return UNK;const r=await fuzzyRetry(raw,t);return r!==null?r:brainUnknown(raw)}
   if(fz)return UNK;
+  if(!inner&&!BRFIN.test(t)){const r=await fuzzyRetry(raw,t);if(r!==null)return r}
   if(!S)return'Per inserire le finanze devi prima entrare una volta in Finanze con email, password e PIN.';
   let st;try{st=await rpc('pin_status')}catch{return'Sessione scaduta: apri Finanze e rientra.'}
   if(st!=='verified')return'Apri Finanze e inserisci il PIN, poi potrò scrivere le spese da qui.';
@@ -2593,7 +2723,7 @@ spCallback().then(ok=>{if(!ok)return;const h=$('#hub');h.classList.add('open');s
 paintWake();if(wake)setTimeout(wakeStart,1500);
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 try{speechSynthesis.getVoices()}catch{}
-if(curStyle()==='rx-multi')rxMulti(true);torchInit();setInterval(tmTick,500);setInterval(rmTick,4000);rmTick();if(TM.end&&TM.end<=Date.now())setTimeout(tmFire,800);refreshRem();hubData();barInit();brPull();setInterval(brPull,120000);setTimeout(hubData,3000);setInterval(hubData,45000);
+if(curStyle()==='rx-multi')rxMulti(true);torchInit();setInterval(tmTick,500);setInterval(rmTick,4000);setInterval(evTick,30000);setInterval(()=>{repTopUp()},1800000);setTimeout(()=>{try{repTopUp();nativeSync();nativeFired();rmTick();paintBrain()}catch{}},2500);document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{nativeFired();rmTick();evTick()}catch{}}});if(TM.end&&TM.end<=Date.now())setTimeout(tmFire,800);refreshRem();hubData();barInit();brPull();setInterval(brPull,120000);setTimeout(hubData,3000);setInterval(hubData,45000);
 /* ---------- presenza: il sistema ti guarda e ti aiuta ---------- */
 let aiT=null,aiH=null,gzT=null;
 function aiSet(st){const h=$('#hub');if(h&&h.dataset.ai!==st)h.dataset.ai=st}
