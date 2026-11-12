@@ -794,10 +794,36 @@ function viewFisse(){
   else if(cs.length>=2)h+=`<section class="card"><div class="empty">Nessuna voce ripetuta in più cicli, per ora.</div></section>`;
   return h;
 }
+function statsHtml(){
+  const cs=cycles();if(!cs.length)return'';
+  const c=cs[cs.length-1],pv=cs.length>1?cs[cs.length-2]:null;
+  const byCat=x=>{const m={};for(const e of x.exp){const k=e.category||'altro';m[k]=(m[k]||0)+(+e.amount||0)}return m};
+  const a=byCat(c),b=pv?byCat(pv):{},keys=Object.keys(a).sort((x,y)=>a[y]-a[x]),mx=Math.max(1,...keys.map(k=>a[k]));
+  let h='<section class="card"><div class="lab">Statistiche · ciclo in corso</div>';
+  const days=Math.max(1,Math.floor((pd(today())-pd(c.start))/864e5)+1),avg=c.spent/days;
+  const plen=cs.length>1?Math.round(cs.slice(0,-1).reduce((t,x)=>t+(x.end?(pd(x.end)-pd(x.start))/864e5:0),0)/(cs.length-1)):30,
+    proj=avg*Math.max(plen,days);
+  h+='<div class="mini" style="margin:10px 0 0"><div class="card"><div class="lab">Media al giorno</div><div class="v">'+eur(avg)+'</div></div><div class="card"><div class="lab">A fine ciclo</div><div class="v">'+eur(proj)+'</div></div></div>';
+  h+='</section><section class="card"><div class="lab">Per categoria</div>';
+  if(!keys.length)h+='<div class="empty">Ancora nessuna spesa.</div>';
+  for(const k of keys){const d=pv?a[k]-(b[k]||0):0,dc=d>0?'var(--red)':'var(--green)';
+    h+='<div style="margin:12px 0 0"><div class="row"><span style="color:var(--text,inherit)">'+esc(k)+' <span class="dim">'+Math.round(a[k]/(c.spent||1)*100)+'%</span></span><b>'+eur(a[k])+(pv&&Math.abs(d)>=1?' <span style="font-size:12px;color:'+dc+'">'+(d>0?'▲ ':'▼ ')+eur(Math.abs(d))+'</span>':'')+'</b></div>'
+    +'<div class="bar" style="margin:6px 0 0"><i style="width:'+(a[k]/mx*100)+'%"></i></div></div>'}
+  if(pv)h+='<div class="dim" style="margin-top:12px">Le frecce confrontano con il ciclo precedente.</div>';
+  h+='</section>';
+  const mer={};for(const e of c.exp){const k=String(e.merchant||e.category||'').trim();if(k)mer[k]=(mer[k]||0)+(+e.amount||0)}
+  const top=Object.entries(mer).sort((x,y)=>y[1]-x[1]).slice(0,3);
+  if(top.length)h+='<section class="card"><div class="lab">Dove vanno più soldi</div>'+top.map(([k,v])=>'<div class="row" style="margin-top:8px"><span style="color:var(--text,inherit)">'+esc(k)+'</span><b>'+eur(v)+'</b></div>').join('')+'</section>';
+  const last=cs.slice(-6);
+  if(last.length>1){const M=Math.max(1,...last.map(x=>Math.max(x.spent,x.income))),W=300,H=120,bw=Math.floor(W/last.length)-10;
+    let g='';last.forEach((x,i)=>{const X=i*(W/last.length)+5,hs=x.spent/M*(H-24),hi=x.income/M*(H-24);
+      g+='<rect x="'+X+'" y="'+(H-14-hi)+'" width="'+bw+'" height="'+hi+'" rx="3" style="fill:var(--panel2)"/><rect x="'+X+'" y="'+(H-14-hs)+'" width="'+bw+'" height="'+hs+'" rx="3" style="fill:var(--yellow)"/><text x="'+(X+bw/2)+'" y="'+(H-1)+'" text-anchor="middle" style="font-size:10px;fill:var(--dim)">'+dshort(x.start).replace(/\s.*/,'')+'/'+(pd(x.start).getMonth()+1)+'</text>'});
+    h+='<section class="card"><div class="lab">Andamento cicli</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;margin-top:8px" role="img" aria-label="Speso per ciclo">'+g+'</svg><div class="dim">Giallo: speso. Grigio: entrato.</div></section>'}
+  return h}
 function viewCicli(){
   const cs=cycles().slice().reverse();
   if(!cs.length)return`<section class="card"><div class="lab">Cicli</div><div class="empty">Registra uno stipendio per aprire il primo ciclo.</div></section>`;
-  return cs.map(c=>`<section class="card"><div class="lab">${dshort(c.start)} → ${c.end?dshort(c.end):'oggi'}${c.current?' · in corso':''}</div>
+  return statsHtml()+'<div class="day">Cicli passati</div>'+cs.map(c=>`<section class="card"><div class="lab">${dshort(c.start)} → ${c.end?dshort(c.end):'oggi'}${c.current?' · in corso':''}</div>
   <div class="row"><span>Entrato</span><b>${eur(c.income)}</b></div><div class="row" style="margin-top:6px"><span>Speso</span><b>${eur(c.spent)}</b></div>
   <div class="row" style="margin-top:6px"><span>${c.left>=0?'Avanzato':'Sforato'}</span><b style="color:${c.left>=0?'var(--green)':'var(--red)'}">${eur(c.left)}</b></div></section>`).join('');
 }
@@ -932,7 +958,7 @@ async function command(raw){
     await api('expenses?id=eq.'+x.id,{method:'DELETE'});await loadAll();render();return'Tolta l\'ultima spesa: '+(x.merchant||x.category)+', '+say$(x.amount)+'.';
   }
   if(/\b(apri|vai|mostra|portami)\b/.test(t)){
-    const m={home:'home',principale:'home',spese:'spese',spesa:'spese',fisse:'fisse',fissa:'fisse',cicli:'cicli',ciclo:'cicli',stipendi:'cicli'};
+    const m={home:'home',principale:'home',spese:'spese',spesa:'spese',fisse:'fisse',fissa:'fisse',cicli:'cicli',ciclo:'cicli',stipendi:'cicli',statistiche:'cicli',statistica:'cicli',grafici:'cicli'};
     for(const w of t.split(' '))if(m[w]){setTimeout(closeSheet,2200);setTab(m[w]);return'Apro '+m[w]+'.'}
   }
   if((/\b(stipendio|entrata|incasso|incassato|accredito)\b/.test(t)||/mi e arrivat|ho ricevuto/.test(t))&&amt){
@@ -2222,7 +2248,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v69'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v70'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2307,8 +2333,8 @@ async function hubCommand(raw,inner){
   let st;try{st=await rpc('pin_status')}catch{return'Sessione scaduta: apri Finanze e rientra.'}
   if(st!=='verified')return'Apri Finanze e inserisci il PIN, poi potrò scrivere le spese da qui.';
   if(!D.exp.length&&!D.inc.length)await loadAll();
-  if(/\b(apri|vai|mostra|portami)\b/.test(t)&&/finanz|spese|spesa|fisse|cicli|home|principale|stipendi/.test(t)){
-    const m={spese:'spese',spesa:'spese',fisse:'fisse',cicli:'cicli',stipendi:'cicli'};let tb='home';for(const w of t.split(' '))if(m[w]){tb=m[w];break}
+  if(/\b(apri|vai|mostra|portami)\b/.test(t)&&/finanz|spese|spesa|fisse|cicli|home|principale|stipendi|statistic/.test(t)){
+    const m={spese:'spese',spesa:'spese',fisse:'fisse',cicli:'cicli',stipendi:'cicli',statistiche:'cicli',statistica:'cicli'};let tb='home';for(const w of t.split(' '))if(m[w]){tb=m[w];break}
     closeSheet();tab=tb;openApp($('#sq-finanze'),'fin');return'Apro Finanze.';
   }
   const out=await command(raw);
