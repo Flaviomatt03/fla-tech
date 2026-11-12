@@ -262,7 +262,7 @@ html[data-theme=dark] .pd.s1{background:var(--beige);border-color:var(--beige)}
 .tbgo{display:block;margin:0 auto 12px;font:900 16px Georgia,serif;text-transform:uppercase;border:4px solid #1b130d;background:#d6402f;color:#fff;border-radius:99px;padding:11px 26px;box-shadow:4px 4px 0 #1b130d;text-shadow:1px 1px 0 #1b130d;cursor:pointer}.tbgo:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #1b130d}
 .ggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.gcard{position:relative;border:0;border-radius:26px;padding:18px 14px 16px;background:var(--gc);color:#33261a;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:150px;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.10)}.gcard:active{transform:scale(.97)}.gcard svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.gcard b{font-size:16px;margin-top:auto}.gcard span{font-size:12.5px;opacity:.75;line-height:1.3}.gcard i{position:absolute;top:12px;right:12px;font-style:normal;font-size:11px;font-weight:800;background:rgba(255,255,255,.55);padding:3px 9px;border-radius:99px}
 .atile svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.t-giochi{background:#f2d675}.t-playstore{background:#c9e8d6}.t-fantacalcio{background:#b9e0a8}.t-whatsapp{background:#bfe6cf}.t-instagram{background:#f5c3d3}.t-chrome{background:#c3dcf3}.t-rubrica{background:#f8dca8}.t-galleria{background:#e0cff5}.t-camera{background:#d4d4dc}.t-chat{background:#bfe9e3}.t-note{background:#fbe9a6}.t-impostazioni{background:#cfd8e3}.t-intesa{background:#f7cfa8}.t-claude{background:#f0c9b4}.t-youtube{background:#f5c2c0}.t-tiktok{background:#e8c9e0}
+.t-giochi{background:#f2d675}.t-playstore{background:#c9e8d6}.t-calcolatrice{background:#d9d4ee}.t-sveglia{background:#f6d6b8}.t-fantacalcio{background:#b9e0a8}.t-whatsapp{background:#bfe6cf}.t-instagram{background:#f5c3d3}.t-chrome{background:#c3dcf3}.t-rubrica{background:#f8dca8}.t-galleria{background:#e0cff5}.t-camera{background:#d4d4dc}.t-chat{background:#bfe9e3}.t-note{background:#fbe9a6}.t-impostazioni{background:#cfd8e3}.t-intesa{background:#f7cfa8}.t-claude{background:#f0c9b4}.t-youtube{background:#f5c2c0}.t-tiktok{background:#e8c9e0}
 .ahint{color:var(--dim);font-size:12.5px;text-align:center;margin-top:18px;line-height:1.5}
 #appwrap.peach.on{background:linear-gradient(180deg,color-mix(in srgb,#f3b58a 38%,var(--bg)) 0,var(--bg) 360px)}
 .up{width:calc(var(--s)*.46);height:calc(var(--s)*.46);border-radius:50%;background:var(--panel2);color:var(--dim);box-shadow:0 6px 16px rgba(0,0,0,.12)}.up svg{width:56%;height:56%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.up.spin svg{animation:gspin .8s linear infinite}@keyframes gspin{to{transform:rotate(360deg)}}
@@ -384,7 +384,9 @@ body:not(.wk) #hub .eye{transform:none!important}
 :root{--sat:env(safe-area-inset-top,0px)}
 .ibar{position:absolute;top:calc(var(--sat) + 10px);left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:3;cursor:pointer}
 .ibar::after{content:'';position:absolute;left:50%;bottom:-9px;width:34px;height:4px;border-radius:2px;background:var(--line);transform:translateX(-50%)}
-.ipill{height:42px;padding:0 14px;border-radius:21px;border:1px solid var(--line);background:var(--panel);color:var(--tx);display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;white-space:nowrap}
+.tmd{font:800 56px/1.1 var(--sans);text-align:center;margin:14px 0;font-variant-numeric:tabular-nums;letter-spacing:1px}.tmdone{text-align:center;font-weight:800;color:#d6402f;font-size:18px}
+.tmchips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.tmcust{display:flex;gap:8px;margin:12px 0}.tmcust input{flex:1}.tmbtns{display:flex;gap:10px;margin-top:6px}.tmbtns .btn{flex:1}
+.ipill#ip-t{cursor:pointer}.ipill{height:42px;padding:0 14px;border-radius:21px;border:1px solid var(--line);background:var(--panel);color:var(--tx);display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;white-space:nowrap}
 .ipill[hidden]{display:none}
 .ib svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .ib.low{color:#e5484d}.ib.chg{color:#2f9d62}
@@ -392,6 +394,7 @@ body:not(.wk) #hub .eye{transform:none!important}
 #hub.dd-open .ddscrim{opacity:1;pointer-events:auto}
 .drop{position:absolute;left:0;right:0;top:0;z-index:20;display:flex;justify-content:space-around;gap:8px;padding:calc(var(--sat) + 14px) 14px 26px;background:color-mix(in srgb,var(--panel) 95%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);border-radius:0 0 28px 28px;box-shadow:0 18px 40px rgba(0,0,0,.2);transform:translateY(-108%);visibility:hidden;transition:transform .35s cubic-bezier(.3,.9,.3,1),visibility 0s .35s}
 #hub.dd-open .drop{transform:none;visibility:visible;transition:transform .35s cubic-bezier(.3,.9,.3,1),visibility 0s}
+.tbtn.tcbtn.on{background:#ffd34a;border-color:#e7a93a;color:#4a3c06;box-shadow:0 0 14px rgba(255,211,74,.7)}
 .ddi{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--dim)}
 .drop .tbtn{position:relative;top:auto;right:auto;left:auto;width:52px;height:52px}
 .grab{position:absolute;left:50%;bottom:9px;width:44px;height:5px;border-radius:3px;background:var(--line);transform:translateX(-50%);cursor:pointer}
@@ -522,10 +525,11 @@ html[data-style=reattore] .shape.ap .gr i{width:6px;height:6px;background:var(--
     <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
     <svg class="moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
   </button><span>Tema</span></div>
+    <div class="ddi"><button class="tbtn tcbtn" id="torchbtn" data-act="torch" aria-pressed="false" aria-label="Torcia"><svg viewBox="0 0 24 24"><path d="M8 3h8l-1.5 6h-5zM9.5 9h5v3l1 2v6a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 8.5 20v-6l1-2z"/><path d="M12 13v3"/></svg></button><span>Torcia</span></div>
     <span class="grab" data-act="ddclose"></span>
   </div>
   <div class="ibar" id="ibar" data-act="dd" aria-label="Ora, data e batteria. Tocca o scorri giù per i comandi">
-    <span class="ipill" id="ip-t">--:--</span><span class="ipill" id="ip-d">--</span><span class="ipill ib" id="ip-b" hidden><svg viewBox="0 0 24 24"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M21.5 10.5v3"/><rect id="ib-f" x="4" y="9" width="0" height="6" rx="1" fill="currentColor" stroke="none"/></svg><span id="ib-t">--%</span></span>
+    <span class="ipill" id="ip-t" data-act="clock" role="button" aria-label="Timer e sveglia">--:--</span><span class="ipill" id="ip-d">--</span><span class="ipill ib" id="ip-b" hidden><svg viewBox="0 0 24 24"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M21.5 10.5v3"/><rect id="ib-f" x="4" y="9" width="0" height="6" rx="1" fill="currentColor" stroke="none"/></svg><span id="ib-t">--%</span></span>
   </div>
 
   <div class="rstrip" id="rstrip" data-act="rem" hidden></div>
@@ -1616,7 +1620,7 @@ function wakeStart(){
   r.onresult=e=>{let heard='',hit=null,bye=false;
     for(let i=e.resultIndex;i<e.results.length;i++){const res=e.results[i];heard+=res[0].transcript;
       for(let k=0;k<res.length&&!bye;k++)if(/\bbuona ?notte\b/.test(norm(res[k].transcript)))bye=true;
-      for(let k=0;k<res.length&&!hit;k++){const nt=norm(res[k].transcript),m=nt.match(/\b(?:hey|ehi|ei|ey|hei|ehy|ehila|hay|eh)\b\s*(?:(?:fl|fr)[a-z]{0,6}\b)?\s*(?:tech\b)?\s*(.*)$/)||nt.match(/\b(?:ok|oh|ciao|e)\s*(?:fl|fr)[a-z]{0,6}\b\s*(?:tech\b)?\s*(.*)$/)||nt.match(/\bfla\s?tech\b\s*(.*)$/);if(m)hit=m}}
+      for(let k=0;k<res.length&&!hit;k++){const nt=norm(res[k].transcript),m=nt.match(/\b(?:hey|ehi|ei|ey|hei|ehy|ehila|hay|eh|ao|aoh|ahoh)\b\s*(?:(?:fl|fr)[a-z]{0,6}\b)?\s*(?:tech\b)?\s*(.*)$/)||nt.match(/\b(?:ok|oh|ciao|e)\s*(?:fl|fr)[a-z]{0,6}\b\s*(?:tech\b)?\s*(.*)$/)||nt.match(/\bfla\s?tech\b\s*(.*)$/);if(m)hit=m}}
     if(!$('#sheet')||$('#sheet').style.display!=='block'){const c=$('#aicap');if(c){clearInterval(aiT);clearTimeout(aiH);c.textContent='Sento: '+heard.trim().slice(-60);c.classList.add('on');aiH=setTimeout(()=>c.classList.remove('on'),4000)}}
     if(bye){clearTimeout(wakeT);wakeSet(false,'Buonanotte Flavio.');return}
     if(hit){wakeRest=hit[hit.length-1]||'';clearTimeout(wakeT);wakeT=setTimeout(wakeFire,1200)}};
@@ -1627,7 +1631,7 @@ function wakeStart(){
 function wakeSet(on,msg,silent){wake=on;lset('flat_wake',on?'on':'off');paintWake();if(on)wakeStart();else wakeHalt();if(msg){toast(msg);if(!on&&!silent)speak(msg)}}
 function toggleWake(){
   if(!SR){toast('Questo browser non supporta l\u2019ascolto vocale.');return}
-  if(wake)wakeSet(false,'Ascolto spento',true);else wakeSet(true,'Ascolto attivo: di\u2019 \u201cHey Fla\u201d con l\u2019app aperta');
+  if(wake)wakeSet(false,'Ascolto spento',true);else wakeSet(true,'Ascolto attivo: di\u2019 \u201cHey Fla\u201d o \u201cAo\u201d con l\u2019app aperta');
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden)wakeHalt();else{setTimeout(wakeStart,400);if(SP&&appOpen&&$('#mus'))setTimeout(async()=>{await spRefresh();if(spNow&&spNow.device&&/^Non trovo/.test(spMsg)&&spLast){spMsg='';try{await spPlay(spLast)}catch(e){spMsg=spErr(e)}paintLists()}},900)}});
 /* ---------- App (scorciatoie) ---------- */
@@ -1644,6 +1648,8 @@ const APPL={whatsapp:{n:'WhatsApp',re:/whats ?app|watsapp|zap/,a:'intent://send/
  youtube:{n:'YouTube',re:/you ?tube/,pk:['com.google.android.youtube'],a:'intent://www.youtube.com/#Intent;scheme=https;package=com.google.android.youtube;S.browser_fallback_url='+encodeURIComponent('https://www.youtube.com/')+';end',w:'https://www.youtube.com/'},
  tiktok:{n:'TikTok',re:/tik ?tok/,pk:['com.zhiliaoapp.musically','com.ss.android.ugc.trill'],a:'intent://www.tiktok.com/#Intent;scheme=https;package=com.zhiliaoapp.musically;S.browser_fallback_url='+encodeURIComponent('https://www.tiktok.com/')+';end',w:'https://www.tiktok.com/'},
  fantacalcio:{n:'Leghe Fantacalcio',re:/leghe|fanta ?calcio|fantacalcio/,pk:['it.quadronica.leghe'],a:'intent://leghe.fantacalcio.it/#Intent;scheme=https;package=it.quadronica.leghe;S.browser_fallback_url='+encodeURIComponent('https://leghe.fantacalcio.it/')+';end',w:'https://leghe.fantacalcio.it/'},
+ calcolatrice:{n:'Calcolatrice',re:/calcolatric\w*/,pk:['com.sec.android.app.popupcalculator','com.google.android.calculator','com.android.calculator2']},
+ sveglia:{n:'Sveglia',re:/sveglia|orologio/,pk:['com.sec.android.app.clockpackage','com.google.android.deskclock','com.android.deskclock']},
  playstore:{n:'Play Store',re:/play ?store|google play|\bplay\b/,pk:['com.android.vending'],a:'intent://play.google.com/store#Intent;scheme=https;package=com.android.vending;S.browser_fallback_url='+encodeURIComponent('https://play.google.com/store')+';end',w:'https://play.google.com/store'},
  claude:{n:'Claude',re:/\bclaude\b/,a:'intent://claude.ai/#Intent;scheme=https;package=com.anthropic.claude;S.browser_fallback_url='+encodeURIComponent('https://claude.ai/')+';end',w:'https://claude.ai/'}};
 function launchApp(id){const x=APPL[id];if(!x)return;if(window.FLAAndroid){if(x.pk&&typeof FLAAndroid.openPkgs==='function')FLAAndroid.openPkgs(id,x.pk.join(','));else FLAAndroid.openApp(id);return}const an=/Android/i.test(navigator.userAgent),u=an?(x.a||x.w):x.w;if(!u){toast(an?'Serve il launcher per aprire '+x.n:'Disponibile solo sul telefono');return}location.href=u}
@@ -1660,6 +1666,8 @@ const APPIC={whatsapp:'<svg viewBox="0 0 24 24"><path d="M4 20l1.4-4.2A8 8 0 1 1
  youtube:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="4"/><path d="M10.2 9.6v4.8l4.2-2.4z"/></svg>',
  tiktok:'<svg viewBox="0 0 24 24"><path d="M14 4v10.2a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 4c.4 2.3 1.9 3.8 4.5 4"/></svg>',
  fantacalcio:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.6 2.6-1.4 4.2H9.8L8.4 10.1z"/><path d="M12 7.5V3.6M15.6 10.1l3.7-1.2M14.2 14.3l2.3 3.2M9.8 14.3l-2.3 3.2M8.4 10.1L4.7 8.9"/></svg>',
+ calcolatrice:'<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><rect x="8" y="6" width="8" height="3.5" rx="1"/><path d="M8.5 13h1M12 13h1M15.5 13h.01M8.5 16.5h1M12 16.5h1M15.5 16.5h.01"/></svg>',
+ sveglia:'<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9.5V13l2.5 1.5M5 5L3 7M19 5l2 2"/></svg>',
  playstore:'<svg viewBox="0 0 24 24"><path d="M5.5 3.8v16.4a.8.8 0 0 0 1.2.7L19.5 13a1 1 0 0 0 0-1.7L6.7 3.1a.8.8 0 0 0-1.2.7z"/><path d="M5.7 4.2l8.2 8-8.2 7.8M13.9 12.2l2.6-2.6"/></svg>',
  claude:'<svg viewBox="0 0 24 24"><path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/></svg>'};
 async function hardUpdate(){const b=$('#up-app');if(b)b.classList.add('spin');toast('Aggiorno FLA-Tech…');
@@ -1699,7 +1707,7 @@ const ddOpen=()=>$('#hub').classList.contains('dd-open');
 function openDd(){$('#hub').classList.add('dd-open')}
 function closeDd(){$('#hub').classList.remove('dd-open')}
 function toggleDd(){ddOpen()?closeDd():openDd()}
-function tickBar(){const d=new Date(),t=$('#ip-t'),e=$('#ip-d');if(t)t.textContent=d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(e)e.textContent=d.toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'}).replace(/[.,]/g,'')}
+function tickBar(){const d=new Date(),t=$('#ip-t'),e=$('#ip-d');if(t)t.textContent=d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(e&&!(TM&&TM.end))e.textContent=d.toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'}).replace(/[.,]/g,'')}
 async function paintBat(){let l=null,ch=false;
   try{if(window.FLAAndroid&&typeof FLAAndroid.battery==='function'){const j=JSON.parse(FLAAndroid.battery());l=j.l;ch=!!j.c}else if(navigator.getBattery){const b=await navigator.getBattery();l=Math.round(b.level*100);ch=b.charging}}catch(e){}
   const el=$('#ip-b');if(!el)return;if(l==null||l<0){el.hidden=true;return}
@@ -1711,6 +1719,56 @@ function barInit(){
   h.addEventListener('touchstart',e=>{const y=e.touches[0].clientY;y0=(ddOpen()||y<120)?y:null},{passive:true});
   h.addEventListener('touchmove',e=>{if(y0==null)return;const dy=e.touches[0].clientY-y0;if(!ddOpen()&&dy>50){openDd();y0=null}else if(ddOpen()&&dy<-50){closeDd();y0=null}},{passive:true});
   h.addEventListener('touchend',()=>{y0=null},{passive:true})}
+/* ---------- torcia (serve il launcher) ---------- */
+let torchOn=false;
+function torchPaint(){const b=$('#torchbtn');if(b){b.classList.toggle('on',torchOn);b.setAttribute('aria-pressed',torchOn)}}
+function torchSet(want){const A=window.FLAAndroid;
+  if(!A||typeof A.torch!=='function'){toast(A?'Aggiorna il launcher per usare la torcia':'La torcia funziona dal launcher sul telefono');return null}
+  const on=want==null?!torchOn:!!want;let ok=false;try{ok=A.torch(on)}catch{}
+  if(!ok){toast('Torcia non disponibile');return null}torchOn=on;torchPaint();return on}
+function torchInit(){try{if(window.FLAAndroid&&typeof FLAAndroid.torchState==='function'){torchOn=!!FLAAndroid.torchState();torchPaint()}}catch{}}
+function torchCommand(t){const off=/\b(spegni|spegnere|disattiva|chiudi)\b/.test(t),on=/\b(accendi|accendere|attiva|accendimi)\b/.test(t);
+  const A=window.FLAAndroid;if(!A||typeof A.torch!=='function')return A?'Per la torcia devi aggiornare il launcher.':'La torcia funziona solo dal launcher sul telefono.';
+  const r=torchSet(off?false:on?true:null);return r==null?'Non riesco ad usare la torcia.':r?'Torcia accesa.':'Torcia spenta.'}
+const SPAL={arancione:'rx-arancione',arancio:'rx-arancione',verde:'rx-verde',rosso:'rx-rosso',rossa:'rx-rosso',giallo:'rx-giallo',gialla:'rx-giallo',viola:'rx-viola',bianco:'rx-bianco',bianca:'rx-bianco',multicolor:'rx-multi',multicolore:'rx-multi',arcobaleno:'rx-multi',celeste:'reattore',azzurro:'reattore',blu:'reattore'};
+function styleCommand(t){let id=null;for(const k in SPAL)if(new RegExp('\\b'+k+'\\b').test(t)){id=SPAL[k];break}
+  if(!id){if(/\bminimale\b/.test(t))id='minimale';else if(/\bclassico\b/.test(t))id='classico';else if(/\breattore\b/.test(t))id='reattore'}
+  if(!id)return null;setStyle(id);return'Ho cambiato lo stile: '+STILI[id].n+'.'}
+/* ---------- timer + sveglia (tocca l'ora) ---------- */
+let TM=lget('flat_timer')||{tot:0,end:0,left:0},tmAC=null,tmRing=null,tmRingT=0,tmOpen=false;
+const tmSave=()=>lset('flat_timer',TM);
+const tmLeft=()=>TM.end?Math.max(0,TM.end-Date.now()):TM.left;
+const tmFmt=ms=>{const t=Math.ceil(ms/1000),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60,z=n=>String(n).padStart(2,'0');return(h?h+':':'')+z(m)+':'+z(s)};
+function tmBeep(){try{const c=tmAC||(tmAC=new(window.AudioContext||window.webkitAudioContext)());if(c.resume)c.resume();for(let i=0;i<3;i++){const o=c.createOscillator(),g=c.createGain(),t0=c.currentTime+i*.28;o.type='square';o.frequency.value=880;g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(.35,t0+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+.2);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+.22)}}catch{}try{navigator.vibrate&&navigator.vibrate([250,120,250])}catch{}}
+function tmStopRing(){clearInterval(tmRing);tmRing=null}
+function tmFire(){TM.end=0;TM.left=0;tmSave();tmBeep();tmStopRing();tmRingT=Date.now();tmRing=setInterval(()=>{if(Date.now()-tmRingT>45000)return tmStopRing();tmBeep()},1600);
+  const d=$('#ip-d');if(d)tickBar();openClock(true)}
+function tmPill(){const d=$('#ip-d');if(!d)return;if(TM.end){d.textContent='⏱ '+tmFmt(tmLeft())}}
+function tmTick(){if(TM.end){if(Date.now()>=TM.end)return tmFire();tmPill();const e=$('#tmd');if(e)e.textContent=tmFmt(tmLeft())}}
+function tmSet(ms){TM={tot:ms,end:0,left:ms};tmSave();tickBar()}
+function tmGo(){if(TM.end){TM.left=Math.max(0,TM.end-Date.now());TM.end=0;tickBar()}else if(TM.left>0){TM.end=Date.now()+TM.left;try{tmAC=tmAC||new(window.AudioContext||window.webkitAudioContext)();if(tmAC.resume)tmAC.resume()}catch{}}tmSave();tmPill()}
+function tmReset(){TM.end=0;TM.left=TM.tot;tmSave();tickBar()}
+function openClock(fired){
+  const run=!!TM.end;
+  openSheet('<h3>Timer</h3>'+(fired?'<div class="tmdone">Timer finito!</div>':'')+'<div class="tmd" id="tmd">'+tmFmt(fired?TM.tot:tmLeft())+'</div>'+
+   '<div class="tmchips">'+[1,3,5,10,15,30].map(m=>'<button class="chipb" data-tm="p" data-m="'+m+'">'+m+' min</button>').join('')+'</div>'+
+   '<div class="tmcust"><input id="tmin" type="number" inputmode="numeric" min="1" max="600" placeholder="minuti" autocomplete="off"><button class="chipb" data-tm="c">Imposta</button></div>'+
+   '<div class="tmbtns">'+(fired?'<button class="btn pri" data-tm="stop">Ferma suono</button>':'<button class="btn pri" data-tm="go" id="tmgo">'+(run?'Pausa':'Avvia')+'</button>')+'<button class="btn" data-tm="reset">Azzera</button></div>'+
+   '<div class="lab" style="margin-top:20px">Sveglia</div><button class="btn" style="width:100%" data-tm="alarm">Apri l’app Sveglia del telefono</button><div class="hint" style="margin-top:8px">Il timer suona finché l’app è aperta. Per le sveglie di notte usa l’app Sveglia.</div>');
+  const sh=$('#sheet');sh.onclick=e=>{const b=e.target.closest('[data-tm]');if(!b)return;const a=b.dataset.tm;
+    if(a==='p'){tmStopRing();tmSet(+b.dataset.m*60000);openClock()}
+    else if(a==='c'){const v=Math.round(+($('#tmin').value||0));if(!(v>0&&v<=600))return toast('Scrivi i minuti, da 1 a 600');tmStopRing();tmSet(v*60000);openClock()}
+    else if(a==='go'){if(!TM.end&&TM.left<=0)return toast('Scegli prima una durata');tmGo();openClock()}
+    else if(a==='stop'){tmStopRing();tmReset();openClock()}
+    else if(a==='reset'){tmStopRing();tmReset();openClock()}
+    else if(a==='alarm'){closeSheet();launchApp('sveglia')}}}
+function timerCommand(t){
+  if(/\b(ferma|annulla|stoppa|spegni|cancella|elimina|azzera)\b/.test(t)){tmStopRing();tmReset();return'Timer fermato.'}
+  const m=t.match(/(\d+|[a-z]+)\s*(second\w*|minut\w*|or[ae]\b)/);let n=m?(/^\d+$/.test(m[1])?+m[1]:(U[m[1]]!=null?U[m[1]]:null)):null;
+  if(m&&/^(un|una|uno)$/.test(m[1]))n=1;
+  if(!m||n==null||n<=0){setTimeout(()=>openClock(),600);return'Apro il timer.'}
+  const u=/second/.test(m[2])?1000:/minut/.test(m[2])?60000:3600000,ms=n*u;if(ms>36000000)return'Un timer così lungo non lo so fare: massimo 10 ore.';
+  tmStopRing();tmSet(ms);tmGo();const lab=n+' '+(u===1000?(n===1?'secondo':'secondi'):u===60000?(n===1?'minuto':'minuti'):(n===1?'ora':'ore'));return'Timer di '+lab+' avviato.'}
 const GAMES=[{id:'card',n:'Card Game',d:'Fantasy contro Inferi',c:'#f2d675',run:()=>showCards(),svg:'<rect x="4" y="5" width="10" height="14" rx="2"/><rect x="10" y="5" width="10" height="14" rx="2" transform="rotate(10 15 12)"/>'}];
 /* ---------- CARD GAME: catalogo in stile anni '30 ---------- */
 const CG_INK='#1b130d',CG_CREAM='#f1e2bb';
@@ -2122,7 +2180,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v64'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v67'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2184,6 +2242,10 @@ async function hubCommand(raw,inner){
   if(!inner){const bl=brainFind(t);if(bl)return await hubCommand(bl,true)}
   if(!inner&&/^(grazie|ok|va bene|perfetto|bene|ciao)$/.test(t))return'Ok.';
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
+  if(/\b(torcia|lampadina|luce del telefono)\b/.test(t)&&!/\b(task|taks|evento|calendario|spes\w*)\b/.test(t))return torchCommand(t);
+  if(/\b(stile|reattore)\b/.test(t)&&/\b(cambia|metti|passa|usa|imposta|stile|tema)\b/.test(t)&&!/\b(ash|scheda|task|taks)\b/.test(t)){const r=styleCommand(t);if(r)return r}
+  if(/\b(aggiorna|aggiornati|aggiornami)\b/.test(t)&&/\b(app|fla|sito|tech|versione)\b/.test(t)){setTimeout(hardUpdate,900);return'Aggiorno FLA-Tech.'}
+  if(/\b(timer|conto alla rovescia)\b/.test(t)&&!/\b(task|taks|evento|calendario|spes\w*|euro)\b/.test(t))return timerCommand(t);
   const ac=appCommand(t);if(ac)return ac;
   const oc=openCmd(t);if(oc)return oc;
   if(/\b(spotify|musica|playlist|canzone|canzoni|brano|brani|riproduci|suona|suonami|pausa|riprendi|volume|shuffle|casuale|mescola|prossima|prossimo|salta|stoppa|cambia (?:la )?(?:canzone|brano|musica))\b/.test(t)&&!/\b(ash|scheda|task|taks|quaderno|evento|calendario|appuntamento|spesa|spese|euro|promemoria)\b/.test(t))return await musicCommand(raw);
@@ -2233,6 +2295,8 @@ document.addEventListener('click',async e=>{
   else if(a==='music')openApp(t,'music');
   else if(a==='apps')openApp(t,'apps');
   else if(a==='refresh'){closeDd();hardUpdate()}
+  else if(a==='clock')openClock();
+  else if(a==='torch')torchSet();
   else if(a==='toapps')showApps();
   else if(a==='brain')openBrain();
   else if(a==='rem'){closeDd();openRem()}
@@ -2256,7 +2320,7 @@ spCallback().then(ok=>{if(!ok)return;const h=$('#hub');h.classList.add('open');s
 paintWake();if(wake)setTimeout(wakeStart,1500);
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
 try{speechSynthesis.getVoices()}catch{}
-if(curStyle()==='rx-multi')rxMulti(true);refreshRem();hubData();barInit();brPull();setInterval(brPull,120000);setTimeout(hubData,3000);setInterval(hubData,45000);
+if(curStyle()==='rx-multi')rxMulti(true);torchInit();setInterval(tmTick,500);if(TM.end&&TM.end<=Date.now())setTimeout(tmFire,800);refreshRem();hubData();barInit();brPull();setInterval(brPull,120000);setTimeout(hubData,3000);setInterval(hubData,45000);
 /* ---------- presenza: il sistema ti guarda e ti aiuta ---------- */
 let aiT=null,aiH=null,gzT=null;
 function aiSet(st){const h=$('#hub');if(h&&h.dataset.ai!==st)h.dataset.ai=st}
