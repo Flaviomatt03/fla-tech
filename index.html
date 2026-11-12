@@ -1506,7 +1506,7 @@ async function taskCommand(raw){
 const SPID='bc6096fd20364a8b8c2df864d94e9a79';
 const SPSC='user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-library-read user-read-recently-played streaming user-read-email user-read-private';
 const spRedir=()=>location.origin+location.pathname.replace(/index\.html$/,'');
-let SP=lget('flat_sp'),spNow=null,spDev=[],spPl=null,spPoll=null,spMsg='',spRes=null,spBusy=false;
+let spPlHold=0,spPlWant=false;let SP=lget('flat_sp'),spNow=null,spDev=[],spPl=null,spPoll=null,spMsg='',spRes=null,spBusy=false;
 const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 async function spLogin(){
   const v=b64u(crypto.getRandomValues(new Uint8Array(48))),st=b64u(crypto.getRandomValues(new Uint8Array(12)));
@@ -1556,7 +1556,7 @@ async function spDo(fn){
       return await fn()}}
 }
 async function spRefresh(){
-  try{spNow=await spApi('/me/player');if(spVol!=null&&Date.now()<spVolHold&&spNow&&spNow.device)spNow.device.volume_percent=spVol;spMsg=spMsg&&/^Non trovo/.test(spMsg)&&spNow?'':spMsg}catch(e){if(e.message==='nologin'){spNow=null}else spMsg=spErr(e)}
+  try{const nw=await spApi('/me/player');if(nw&&Date.now()<spPlHold)nw.is_playing=spPlWant;spNow=nw;if(spVol!=null&&Date.now()<spVolHold&&spNow&&spNow.device)spNow.device.volume_percent=spVol;spMsg=spMsg&&/^Non trovo/.test(spMsg)&&spNow?'':spMsg}catch(e){if(e.message==='nologin'){spNow=null}else spMsg=spErr(e)}
   if($('#musn'))paintNow()}
 const spPP=()=>spNow&&spNow.is_playing;
 function spTitle(){const i=spNow&&spNow.item;if(!i)return null;const a=i.artists?i.artists.map(x=>x.name).join(', '):(i.show&&i.show.name)||'';const im=((i.album&&i.album.images)||i.images||[])[0];return{t:i.name,a,img:im,p:spNow.progress_ms,d:i.duration_ms}}
@@ -1631,7 +1631,7 @@ async function showMusic(){
     try{
       if(m==='login'){await spLogin();return}
       spMsg='';
-      if(m==='pp'){const was=spPP();if(spNow){spNow.is_playing=!was;paintNow()}await spDo(()=>spApi(was?'/me/player/pause':'/me/player/play','PUT'));setTimeout(spRefresh,600)}
+      if(m==='pp'){const was=spPP();spPlWant=!was;spPlHold=Date.now()+3500;if(spNow){spNow.is_playing=!was;paintNow()}await spDo(()=>spApi(was?'/me/player/pause':'/me/player/play','PUT'));setTimeout(spRefresh,600)}
       else if(m==='next'){await spDo(()=>spApi('/me/player/next','POST'));setTimeout(spRefresh,700)}
       else if(m==='prev'){await spDo(()=>spApi('/me/player/previous','POST'));setTimeout(spRefresh,700)}
       else if(m==='shuf'){await spDo(()=>spApi('/me/player/shuffle?state='+!(spNow&&spNow.shuffle_state),'PUT'));setTimeout(spRefresh,500)}
@@ -1654,7 +1654,7 @@ async function musicCommand(raw){
   const done=(msg,hl)=>{PEND={kind:'music',noOpen:true,hl:hl||'[data-hl="now"]',apply:()=>{setTimeout(spRefresh,600)}};return msg};
   try{
     if(/\b(che|quale) (canzone|brano|musica)|cosa sta suonando|cosa sento|chi canta|cosa sto ascoltando/.test(t)){await spRefresh();const n=spTitle();return done(n?'Stai ascoltando '+n.t+(n.a?', di '+n.a:'')+'.':'Non sta suonando niente.')}
-    if(/\b(pausa|ferma|fermati|stop|stoppa)\b/.test(t)){await spDo(()=>spApi('/me/player/pause','PUT'));return done('Messa in pausa.')}
+    if(/\b(pausa|ferma|fermati|stop|stoppa)\b/.test(t)){spPlWant=false;spPlHold=Date.now()+3500;await spDo(()=>spApi('/me/player/pause','PUT'));return done('Messa in pausa.')}
     if(/\b(prossim\w*|salta|avanti|skip)\b/.test(t)||/\bcambia\b/.test(t)&&/\b(canzone|brano|musica|traccia)\b/.test(t)&&!/\b(con|in|su)\s+\w/.test(t.replace(/\b(canzone|brano|musica|traccia)\b/,''))){await spDo(()=>spApi('/me/player/next','POST'));return done('Passo al prossimo brano.')}
     if(/\b(preceden\w*|indietro)\b/.test(t)){await spDo(()=>spApi('/me/player/previous','POST'));return done('Torno al brano precedente.')}
     if(/\b(shuffle|casuale|mescola)\b/.test(t)){const off=/\b(togli|disattiva|spegni|senza|non)\b/.test(t);await spDo(()=>spApi('/me/player/shuffle?state='+!off,'PUT'));return done(off?'Riproduzione casuale spenta.':'Riproduzione casuale attiva.')}
@@ -2273,7 +2273,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v78'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v79'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
