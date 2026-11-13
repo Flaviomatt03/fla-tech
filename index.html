@@ -2588,7 +2588,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v104'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v105'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2810,7 +2810,8 @@ function aiCtx(q){
     try{const c=curCycle();if(c){const cat={};for(const x of c.exp)cat[x.category||'altro']=(cat[x.category||'altro']||0)+x.amount;const top=Object.entries(cat).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>k+' '+eur(v)).join(', ');L.push('Finanze, ciclo dal '+c.start+': entrate '+eur(c.income)+', spese '+eur(c.spent)+', restano '+eur(c.left)+'. Spese per categoria: '+top)}}catch{}}
   return L.join('\n')}
 async function aiFallback(raw){
-  if(aiBusy||!S||lget('flat_ai')===false||!navigator.onLine)return null;
+  if(aiBusy||lget('flat_ai')===false||!navigator.onLine)return null;
+  if(!S)return'Per usare Haiku devi prima entrare una volta in Finanze con email e password: poi funziona anche da qui.';
   aiBusy=true;
   try{
     if(S.expires_at-60<Date.now()/1000){if(!(await refresh())){dropSession();return null}}
