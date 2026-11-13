@@ -2410,7 +2410,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v90'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v92'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2432,7 +2432,8 @@ function brainUnknown(raw){brainPend=raw;lastUnk={p:norm(raw),ts:Date.now()};pai
 function paintBrain(){const b=$('#brainbtn');if(b){b.classList.toggle('dot',!!brainPend);b.classList.toggle('rev',!brainPend&&brReview()>0)}}
 const BRFIN=/spes|stipend|entrat|euro|resta|rimane|rimasto|cicl|fiss|finanz|guadagn|annulla|ultima|totale|quanto|incass|pagat|comprat/;
 const BTG=[['Finanze','apri finanze'],['Meteo e Luna','apri meteo'],['Calendario','apri calendario'],['Quaderno','apri quaderno'],['Ash','apri ash'],['Musica','apri musica'],['App','apri le app']];
-function brainChips(){const o=BTG.slice();for(const k of Object.keys(APPL)){const n=APPL[k].n.toLowerCase();const c=[n,n+' samsung'].find(x=>APPL[k].re.test(x));if(c)o.push([APPL[k].n,'apri '+c])}return o}
+const BFN=[['Torcia accesa','accendi la torcia'],['Torcia spenta','spegni la torcia'],['Che ore sono','che ore sono'],['Che giorno è','che giorno è oggi'],['Briefing','briefing mattutino'],['Riepilogo settimana','riepilogo della settimana'],['Quali promemoria','quali promemoria ho'],['Quanto resta','quanto resta'],['Che tempo fa','che tempo fa'],['Aggiorna FLA-Tech','aggiorna fla tech']];
+function brainChips(){const o=BTG.slice().concat(BFN);for(const k of Object.keys(APPL)){const n=APPL[k].n.toLowerCase();const c=[n,n+' samsung'].find(x=>APPL[k].re.test(x));if(c)o.push([APPL[k].n,'apri '+c])}return o}
 function brainList(){return BR.length?BR.map((b,i)=>'<div class="brow'+(b.a?' auto':'')+'"><span data-bed="'+i+'"><b>«'+esc(b.p)+'»</b><br><small>→ '+esc(b.t)+(b.a?' · imparato da solo, tocca per cambiare':'')+'</small></span>'+(b.a?'<button class="bok" data-bok="'+i+'" aria-label="Va bene">✓</button>':'')+'<button data-bdel="'+i+'" aria-label="Dimentica">×</button></div>').join(''):'<div class="hint">Ancora niente. Quando non capisco una frase, la insegni qui.</div>'}
 let brainNew='';
 const BRCOL={'apri finanze':['Finanze','#f2d675'],'apri meteo':['Meteo e Luna','#d3c8f1'],'apri calendario':['Calendario','#f2b8c8'],'apri quaderno':['Quaderno','#bfe3cf'],'apri ash':['Ash','#e7d5ab'],'apri musica':['Musica','#7fc7a1'],'apri le app':['App','#f3b58a']};
@@ -2460,7 +2461,8 @@ function openBrain(){
   const ch=brainChips();
   openSheet('<h3>Cervello</h3><div class="hint">Insegnami una parola o una frase. Dimmi cosa intendi e dalla prossima volta lo so, senza aggiornare niente.</div><div class="bgraph" id="bgraph">'+brainGraph()+'</div>'+
    '<div class="lab" style="margin-top:12px">Quando dico</div><input id="bph" value="'+esc(brainPend)+'" placeholder="es. fammi vedere il conto" autocomplete="off">'+
-   '<div class="lab" style="margin-top:14px">Apri</div><div class="bchips">'+ch.map((c,i)=>'<button class="chipb" data-bt="'+i+'">'+esc(c[0])+'</button>').join('')+'</div>'+
+   '<div class="lab" style="margin-top:14px">Apri</div><div class="bchips">'+ch.map((c,i)=>/^apri /.test(c[1])?'<button class="chipb" data-bt="'+i+'">'+esc(c[0])+'</button>':'').join('')+'</div>'+
+   '<div class="lab" style="margin-top:14px">Funzioni della home</div><div class="bchips">'+ch.map((c,i)=>/^apri /.test(c[1])?'':'<button class="chipb" data-bt="'+i+'">'+esc(c[0])+'</button>').join('')+'</div>'+
    '<form id="bf"><div class="lab" style="margin-top:10px">oppure fai questo comando</div><input id="bto" placeholder="es. quanto resta" autocomplete="off"><button class="btn pri" style="margin-top:10px;width:100%">Salva</button></form>'+
    '<div class="lab" style="margin-top:18px">Cosa so già</div><div id="bl">'+brainList()+'</div><div class="syn" id="bsyn">'+brSyncTxt()+'</div>');
   brPull();
@@ -2567,6 +2569,7 @@ function reminderCommand(raw){
     if(/^\s*e\s+mezza/i.test(raw.slice(m.index+m[0].length))&&/or/i.test(m[2])){ms+=1800000;cut=m[0]+raw.slice(m.index+m[0].length).match(/^\s*e\s+mezza/i)[0]}}
   else if((m=raw.match(/\b(?:tra|fra)\s+(?:mezz[’']?\s?ora)/i))){ms=1800000;cut=m[0]}
   else if((m=raw.match(/\b(?:tra|fra)\s+(?:un[’']?\s?ora\s+e\s+mezza)/i))){ms=5400000;cut=m[0]}
+  else if((m=raw.match(/\b(?:tra|fra)\s+un[’']?\s?ora\b/i))){ms=3600000;cut=m[0]}
   if(ms){if(ms>864e5)return'Così lontano non so: massimo 24 ore.';const w=rmWhat(raw,cut);if(!w)return'Cosa devo ricordarti?';rmAdd(w,Date.now()+ms);
     const mm=Math.round(ms/60000);return'Ok, tra '+(mm<60?mm+' minuti':(mm%60?Math.floor(mm/60)+(Math.floor(mm/60)===1?' ora e ':' ore e ')+(mm%60)+' minuti':mm/60+(mm===60?' ora':' ore')))+' ti ricordo: '+w+'.'}
   m=raw.match(/\balle\s+(?:ore\s+)?(\d{1,2})(?:[:.\s](\d{2}))?\b/i);
@@ -2762,12 +2765,23 @@ async function weeklyText(){
     p.push(nx.length?'Nei prossimi sette giorni hai: '+nx.slice(0,4).map(r=>r.t+' '+(r.days===0?'oggi':r.days===1?'domani':'tra '+r.days+' giorni')).join(', ')+(nx.length>4?' e altri '+(nx.length-4):'')+'.':'Nei prossimi sette giorni non hai impegni.')}catch{}
   try{if(GOAL&&GOAL.target>0){const left=Math.max(0,GOAL.target-GOAL.saved);p.push('Obiettivo '+GOAL.name+': '+Math.round(GOAL.saved/GOAL.target*100)+' per cento'+(left?', mancano '+Math.round(left)+' euro.':'. Raggiunto!'))}}catch{}
   return p.join(' ')}
+function timeCommand(t){
+  if(/\d/.test(t)||t.split(' ').length>9)return null;
+  const now=new Date(),h=now.getHours(),m=now.getMinutes();
+  if(/\bche (ore|ora)\b|^(dimmi |dammi |leggi |leggimi |dici |vedi )?(l\W?ora|ora esatta|l\W?orario)\b|\bore sono\b|\bche ora e\b/.test(t)){
+    const mm=m?' e '+(m<10?'zero '+m:m):'';
+    if(h===0&&!m)return'È mezzanotte.';if(h===12&&!m)return'È mezzogiorno.';
+    return(h===1?'È l’una':h===0?'È mezzanotte':'Sono le '+h)+mm+'.'}
+  if(/\bche giorno\b|\bdata (di )?oggi\b|\bche data\b|\bquanti ne abbiamo\b|\bgiorno e oggi\b/.test(t)){
+    return'Oggi è '+now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})+'.'}
+  return null}
 async function hubCommand(raw,inner,fz){
   const t=norm(raw).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'');
   if(!inner&&!fz&&!chainBusy&&!brainFind(t)){const ps=chainSplit(t);if(ps.length>1){chainBusy=true;try{const out=[];for(const x of ps){out.push(await hubCommand(x,false));await tbSleep(500)}return out.filter(Boolean).join(' ')}finally{chainBusy=false}}}
   if(!inner){const bl=brainFind(t);if(bl)return await hubCommand(bl,true)}
   if(!inner&&/^(grazie|ok|va bene|perfetto|bene|ciao)$/.test(t))return'Ok.';
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
+  {const tm=timeCommand(t);if(tm)return tm}
   {const g=goalCommand(t);if(g)return g}
   {const w=waCommand(raw);if(w)return w}
   {const w=webCommand(raw);if(w)return w}
