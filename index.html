@@ -476,7 +476,9 @@ html[data-style=minimale] #hub.open .liveln{display:flex;position:absolute;left:
 html[data-style=minimale] .shape.up,html[data-style=reattore] .shape.up{width:46px;height:46px;--x:-27!important;--y:-43!important}
 html[data-style=minimale] #hub.open .shape.up,html[data-style=reattore] #hub.open .shape.up{animation:none}
 /* reattore */
-:root{--rh:200;--rs:1}
+@property --rh{syntax:'<number>';inherits:true;initial-value:200}
+@property --rs{syntax:'<number>';inherits:true;initial-value:1}
+:root{--rh:200;--rs:1;transition:--rh 1.4s ease-in-out,--rs 1.4s ease-in-out}
 html[data-rx=arancione]{--rh:28}html[data-rx=verde]{--rh:140}html[data-rx=rosso]{--rh:356}html[data-rx=giallo]{--rh:48}html[data-rx=viola]{--rh:272}html[data-rx=bianco]{--rh:210;--rs:0}
 html[data-style=reattore] #hub{background:radial-gradient(circle at 50% 47%,hsl(calc(var(--rh) + 6) calc(66% * var(--rs)) 16.3%) 0,hsl(calc(var(--rh) + 10) calc(58% * var(--rs)) 7.5%) 45%,hsl(calc(var(--rh) + 13) calc(52% * var(--rs)) 4.1%) 100%);color:hsl(calc(var(--rh) + 2) calc(79% * var(--rs)) 94.5%)}
 html[data-style=reattore] .tbtn,html[data-style=reattore] .shape.up{background:hsl(calc(var(--rh) + 7) calc(64% * var(--rs)) 11.0% / .8);border:1px solid hsl(var(--rh) calc(87% * var(--rs)) 69.6% / .45);color:hsl(calc(var(--rh) + -1) calc(100% * var(--rs)) 78.0%);box-shadow:none}
@@ -2597,7 +2599,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v109'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v110'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
