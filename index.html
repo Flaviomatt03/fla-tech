@@ -2588,7 +2588,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v103'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v104'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2801,6 +2801,32 @@ function imgCommand(raw){
   return'Apro ChatGPT con la richiesta: '+q+'.'}
 /* ---------- Capire meglio: correzione parole, sinonimi, alternative ---------- */
 const UNK={};
+/* ---------- Haiku: intelligenza per le richieste che non capisco ---------- */
+let aiBusy=false,AIH=[],aiHT=0;
+function aiCtx(q){
+  const n=new Date(),L=['Adesso: '+GIORNI[n.getDay()]+' '+n.getDate()+' '+MESI[n.getMonth()]+' '+n.getFullYear()+', ore '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')];
+  try{const r=buildRem().slice(0,10);if(r.length)L.push('Prossimi impegni: '+r.map(x=>remWhen(x)+(x.time?' '+x.time:'')+' '+(x.t||x.label||'')).join('; '));else L.push('Nessun impegno nei prossimi giorni.')}catch{}
+  if(/spes|spend|soldi|budget|euro|€|stipend|risparm|quanto|ciclo|mese|guadagn|entrat|uscit/.test(q.toLowerCase())){
+    try{const c=curCycle();if(c){const cat={};for(const x of c.exp)cat[x.category||'altro']=(cat[x.category||'altro']||0)+x.amount;const top=Object.entries(cat).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>k+' '+eur(v)).join(', ');L.push('Finanze, ciclo dal '+c.start+': entrate '+eur(c.income)+', spese '+eur(c.spent)+', restano '+eur(c.left)+'. Spese per categoria: '+top)}}catch{}}
+  return L.join('\n')}
+async function aiFallback(raw){
+  if(aiBusy||!S||lget('flat_ai')===false||!navigator.onLine)return null;
+  aiBusy=true;
+  try{
+    if(S.expires_at-60<Date.now()/1000){if(!(await refresh())){dropSession();return null}}
+    if(Date.now()-aiHT>6e5)AIH=[];
+    const r=await fetch(SB+'/functions/v1/fla-ai',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+S.access_token,'Content-Type':'application/json'},body:JSON.stringify({q:raw,ctx:aiCtx(raw),hist:AIH})});
+    if(r.status===503)return'Haiku non è ancora collegato: manca la chiave API tra i segreti della funzione su Supabase.';
+    if(r.status===429)return'Per oggi ho finito le domande intelligenti. Domani si riparte.';
+    if(!r.ok)return null;
+    const j=await r.json();let say=String(j.say||'').trim();
+    if(j.cmd){try{const res=await hubCommand(j.cmd,false);if(typeof res==='string'&&!/^Non ho capito/.test(res)&&!say)say=res}catch{}}
+    if(!say)return null;
+    AIH.push({role:'user',content:raw},{role:'assistant',content:say});AIH=AIH.slice(-6);aiHT=Date.now();
+    return say;
+  }catch{return null}finally{aiBusy=false}}
+async function aiOrUnknown(raw){const a=await aiFallback(raw);return a!==null?a:brainUnknown(raw)}
+
 const FZV=new Set(('torcia accendi accendimi spegni spegnimi timer minuti minuto secondi secondo ora ore musica metti mettimi suona suonami canzone brano playlist pausa prossima prossimo precedente volume alza abbassa calendario evento appuntamento agenda ricordami promemoria domani dopodomani oggi stasera lunedi martedi mercoledi giovedi venerdi sabato domenica meteo piove pioggia ombrello luna temperatura nuvoloso sole spesa spese stipendio entrata euro quaderno task apri vai portami naviga chiama telefona scrivi manda cerca google claude chatgpt whatsapp instagram youtube spotify tiktok calcolatrice sveglia impostazioni galleria fotocamera rubrica obiettivo briefing buongiorno buonanotte aggiorna stile reattore tema finanze finanza cicli fisse ciclo statistiche contatto contatti salva elimina cancella sposta rimanda aggiungi segna crea ash scheda dado tira lancia danni cura riposo ispirazione immagine genera disegna foto casa lavoro mappa mappa cervello minigiochi giochi app fatto resta rimane speso speso quanto ultima annulla eventi appuntamenti avvisami ripeti ripetere ripetizione ripetizioni smetti elenco prima poi anche tutti ogni giorno giorni settimana mese chiamata messaggio risposta vorrei potresti puoi dimmi dammi fammi mostrami portami dopo adesso subito').split(/\s+/).filter(Boolean));
 const FZS=[[/\bcronometro\b/g,'timer'],[/\ballarme\b/g,'sveglia'],[/\bprevisioni\b/g,'meteo'],[/\bavvisami\b/g,'ricordami'],[/\baccendimi\b/g,'accendi'],[/\bspegnimi\b/g,'spegni'],[/\bbrani\b/g,'canzone'],[/\bcanzoni\b/g,'canzone']];
 function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
@@ -2994,7 +3020,7 @@ async function hubCommand(raw,inner,fz){
   if(/\b(aggiungi|aggiungere|metti|segna|segnami|fissa|crea)\b/.test(t)&&/\b(lunedi|martedi|mercoledi|giovedi|venerdi|sabato|domenica|domani|dopodomani|oggi|giorno)\b/.test(t)&&/\b(alle|ore)\b|\b\d{1,2}[:.]\d{2}\b/.test(t)&&!/\b(euro|spes\w*|speso|pagat\w*|stipendio|entrata|incasso|incassat\w*|€)\b|€/.test(t))return calCommand(raw);
   if(/promemoria|scadenz|cosa devo fare|cosa ho da fare/.test(t))return remVoice();
   if(/\b(meteo|tempo|piove|piover[aà]?|pioggia|ombrello|temperatura|luna|lunare|nuvol\w*|sole|freddo|caldo|gradi|neve|vento)\b/.test(t)&&!/\b(spes\w*|euro|pagat\w*|speso)\b/.test(t))return await weatherCommand(raw);
-  if(!inner&&!BRFIN.test(t)&&!findAmount(t)){if(fz)return UNK;const r=await fuzzyRetry(raw,t);return r!==null?r:brainUnknown(raw)}
+  if(!inner&&!BRFIN.test(t)&&(!findAmount(t)||(!/\d/.test(t)&&guessCat(t)==='altro'))){if(fz)return UNK;const r=await fuzzyRetry(raw,t);return r!==null?r:await aiOrUnknown(raw)}
   if(fz)return UNK;
   if(!inner&&!BRFIN.test(t)){const r=await fuzzyRetry(raw,t);if(r!==null)return r}
   if(finLocked())return'Finanze è bloccata: aprila e usa l’impronta.';
@@ -3007,7 +3033,7 @@ async function hubCommand(raw,inner,fz){
     closeSheet();tab=tb;openApp($('#sq-finanze'),'fin');return'Apro Finanze.';
   }
   const out=await command(raw);
-  if(!inner&&/^Non ho capito/.test(out)){const r=await fuzzyRetry(raw,t);return r!==null?r:brainUnknown(raw)}
+  if(!inner&&/^Non ho capito/.test(out)){const r=await fuzzyRetry(raw,t);return r!==null?r:await aiOrUnknown(raw)}
   if(/^(Aggiunta spesa|Stipendio registrato|Entrata registrata|Tolta)/.test(out))PEND={kind:'fin',apply:()=>setTab('spese')};
   return out;
 }
