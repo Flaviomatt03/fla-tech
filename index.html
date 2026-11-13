@@ -526,6 +526,11 @@ html[data-style=reattore] .shape.qd .nm,html[data-style=reattore] .shape.ci .nm,
 html[data-style=reattore] .shape.qd .dt,html[data-style=reattore] .shape.ci .dt,html[data-style=reattore] .shape.re .dt{display:none}
 html[data-style=reattore] .shape.ap .gr{grid-column:2;grid-row:1;grid-template-columns:repeat(2,6px);gap:3px}
 html[data-style=reattore] .shape.ap .gr i{width:6px;height:6px;background:var(--ac)}
+html[data-rx=doom]{--rh:140;--rs:.55;--sans:Georgia,'Times New Roman',serif}
+html[data-rx=doom] #hub{background:radial-gradient(circle at 50% 45%,#2a3830 0,#111815 52%,#060908 100%)}
+html[data-rx=doom] .shape:not(.up){--ac:#B5E3C4!important;--bc:rgba(105,140,120,.5)!important;border-radius:2px!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.55),0 0 16px rgba(80,200,130,.16),0 3px 0 #000!important;font-family:Georgia,'Times New Roman',serif}
+html[data-rx=doom] .shape .nm,html[data-rx=doom] .ttl{font-family:Georgia,'Times New Roman',serif;letter-spacing:.18em}
+html[data-rx=doom] .tbtn,html[data-rx=doom] .shape.up{border-radius:6px!important;border-color:rgba(150,185,165,.55)!important}
 </style>
 </head>
 <body>
@@ -930,14 +935,14 @@ function speak(t,fb){const tok=++spTok;aiSet('speak');if(!voiceOn||!('speechSynt
   try{speechSynthesis.cancel();const parts=(t.replace(/\s+/g,' ').match(/[^.!?;:]+[.!?;:]*/g)||[t]).map(x=>x.trim()).filter(Boolean);let v=fb?null:pickVoice();if(v&&badV.has(v.name))v=itVoices().find(x=>!badV.has(x.name))||null;
     setTimeout(()=>{if(tok!==spTok)return;let started=false,failed=false;
       const retry=()=>{if(failed||tok!==spTok)return;failed=true;if(v)badV.add(v.name);speechSynthesis.cancel();if(!fb)speak(t,true);else aiSet('idle')};
-      parts.forEach((p,k)=>{const u=new SpeechSynthesisUtterance(p);u.lang='it-IT';if(v)u.voice=v;u.rate=.98;u.pitch=.9;u.volume=1;u.onstart=()=>{started=true};
+      parts.forEach((p,k)=>{const u=new SpeechSynthesisUtterance(p);u.lang='it-IT';if(v)u.voice=v;u.rate=DOOM?.86:.98;u.pitch=DOOM?.55:.9;u.volume=1;u.onstart=()=>{started=true};
         u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled')return;if(!started)retry();else if(tok===spTok)aiSet('idle')};
         if(k===parts.length-1)u.onend=()=>{if(tok===spTok)aiSet('idle')};speechSynthesis.speak(u)});
       setTimeout(()=>{if(!started&&!fb)retry()},2500)},120)}catch{aiSet('idle')}}
 function voicePicker(){const v=itVoices();const el=$('#vpick');if(!el)return;if(!v.length){el.innerHTML='<div class="hint">Nessuna voce italiana trovata su questo dispositivo.</div>';return}
   const cur=pickVoice();el.innerHTML='<div class="lab">Voce di FLA-Tech</div>'+v.map(x=>'<button type="button" class="btn vp'+(cur&&cur.name===x.name?' on':'')+'" data-vn="'+esc(x.name)+'" style="margin-bottom:6px">'+esc(x.name.replace(/Microsoft |Google /,''))+(cur&&cur.name===x.name?' ✓':'')+'</button>').join('');
   el.querySelectorAll('[data-vn]').forEach(b=>b.onclick=()=>{lset('flat_vname',b.dataset.vn);voicePicker();speak('Ciao, sono FLA-Tech. Questa è la mia voce.')})}
-function reply(t){const el=$('#vout');if(!el){speak(t);return}clearInterval(tw);el.textContent='';let i=0;tw=setInterval(()=>{el.textContent=t.slice(0,++i);if(i>=t.length)clearInterval(tw)},24);speak(t)}
+function reply(t){t=doomize(t);const el=$('#vout');if(!el){speak(t);return}clearInterval(tw);el.textContent='';let i=0;tw=setInterval(()=>{el.textContent=t.slice(0,++i);if(i>=t.length)clearInterval(tw)},24);speak(t)}
 const status=t=>{const el=$('#vst');if(el)el.textContent=t};
 function micState(on){const m=$('#micbtn');if(m)m.classList.toggle('live',on)}
 function stopListen(){try{if(rec){rec.onend=null;rec.abort()}}catch{}rec=null;micState(false)}
@@ -1794,9 +1799,26 @@ async function hardUpdate(){const b=$('#up-app');if(b)b.classList.add('spin');to
   try{const rs=await navigator.serviceWorker.getRegistrations();for(const r of rs)await r.unregister();const ks=await caches.keys();for(const k of ks)await caches.delete(k)}catch(e){}
   try{if(window.FLAAndroid&&typeof FLAAndroid.checkUpdate==='function')FLAAndroid.checkUpdate()}catch(e){}
   setTimeout(()=>{if(window.FLAAndroid&&typeof FLAAndroid.refresh==='function')FLAAndroid.refresh();else location.reload()},500)}
+/* ---------- Doom: tono da tiranno ---------- */
+let DOOM=!!lget('flat_doom');
+function doomSet(on){DOOM=!!on;lset('flat_doom',DOOM)}
+const dpick=a=>a[Math.floor(Math.random()*a.length)];
+function doomize(t){if(!DOOM||typeof t!=='string'||!t)return t;let o=t;
+  const R=[[/^Non ho capito.*$/i,()=>'DOOM non comprende le tue parole, suddito. Ripeti, e che sia chiaro.'],
+   [/^Apro (.+?)\.?$/i,(m,x)=>dpick(['DOOM spalanca '+x+'.','Inchinati: DOOM apre '+x+'.'])],
+   [/^Ok,?\s*(.?)/i,(m,c)=>dpick(['Sia fatto. ','Così DOOM ha decretato. ','Come DOOM comanda. '])+c.toUpperCase()],
+   [/^Non trovo/i,()=>'DOOM non trova']];
+  let hit=false;for(const [re,fn] of R)if(re.test(o)){o=o.replace(re,fn);hit=true;break}
+  if(!hit&&o.length<140){const r=Math.random();if(r<.4)o=dpick(['Ascolta, suddito. ','DOOM ti concede una risposta. '])+o;else if(r<.8)o=o+' '+dpick(['DOOM ha parlato.','Così è, così sarà.','Questo è il volere di DOOM.'])}
+  return o}
+function doomCommand(t){
+  if(/\b(basta|niente|senza|spegni|disattiva|toglimi|fine)\b/.test(t)){doomSet(false);return'Come desideri. Il tono normale è tornato.'}
+  if(/\b(parla|parlami|voce|tono|modalita|modalità)\b/.test(t)&&!/\b(stile|tema)\b/.test(t)){doomSet(true);return'DOOM parla. Tremate.'}
+  if(/\b(stile|tema|metti|passa|usa|attiva|imposta|cambia)\b/.test(t)){setStyle('rx-doom');return'Lo stile Doom è attivo. Inchinati.'}
+  return null}
 /* ---------- stili della home ---------- */
 const STILI={classico:{n:'Classico',d:'Le forme pastello sparse attorno al triangolo.'},reattore:{n:'Reattore',d:'Fondo scuro, il triangolo è il nucleo di un reattore e le creazioni sono pannelli con i dati.'},minimale:{n:'Minimale',d:'Forme piccole in cerchio e una riga viva con la prossima cosa da fare.'},
- 'rx-arancione':{n:'Reattore arancione',d:'Come il Reattore, con il nucleo e i bagliori arancioni.',hue:-172},'rx-verde':{n:'Reattore verde',d:'Come il Reattore, ma verde.',hue:-60},'rx-rosso':{n:'Reattore rosso',d:'Come il Reattore, ma rosso.',hue:156},'rx-giallo':{n:'Reattore giallo',d:'Come il Reattore, ma giallo.',hue:-152},'rx-viola':{n:'Reattore viola',d:'Come il Reattore, ma viola.',hue:72},'rx-bianco':{n:'Reattore bianco',d:'Come il Reattore, in bianco e grigio.',hue:0,sat:0},'rx-multi':{n:'Reattore multicolor',d:'Come il Reattore, ma il colore cambia piano piano da solo.',hue:0,multi:1}};
+ 'rx-arancione':{n:'Reattore arancione',d:'Come il Reattore, con il nucleo e i bagliori arancioni.',hue:-172},'rx-verde':{n:'Reattore verde',d:'Come il Reattore, ma verde.',hue:-60},'rx-rosso':{n:'Reattore rosso',d:'Come il Reattore, ma rosso.',hue:156},'rx-giallo':{n:'Reattore giallo',d:'Come il Reattore, ma giallo.',hue:-152},'rx-viola':{n:'Reattore viola',d:'Come il Reattore, ma viola.',hue:72},'rx-bianco':{n:'Reattore bianco',d:'Come il Reattore, in bianco e grigio.',hue:0,sat:0},'rx-multi':{n:'Reattore multicolor',d:'Come il Reattore, ma il colore cambia piano piano da solo.',hue:0,multi:1},'rx-doom':{n:'Doom',d:'Verde scuro e metallo, bordi squadrati e carattere severo. Le risposte parlano da tiranno.',hue:0,doom:1}};
 const STPREV={classico:'<svg class="pv" viewBox="0 0 72 108"><rect width="72" height="108" fill="#fff"/><path d="M36 40L50 64H22Z" fill="#a9d6ef" stroke="#a9d6ef" stroke-width="8" stroke-linejoin="round"/><rect x="6" y="12" width="20" height="20" rx="7" fill="#f2d675"/><ellipse cx="52" cy="22" rx="14" ry="10" fill="#d3c8f1"/><rect x="6" y="78" width="24" height="14" rx="7" fill="#f2b8c8"/><circle cx="54" cy="84" r="9" fill="#5fae88"/><circle cx="60" cy="52" r="7" fill="#e7d5ab"/><rect x="28" y="6" width="14" height="16" rx="4" fill="#bfe3cf"/></svg>',
 reattore:'<svg class="pv" viewBox="0 0 72 108"><rect width="72" height="108" fill="#08131E"/><circle cx="36" cy="54" r="24" fill="none" stroke="#5AC8F5" stroke-width="2" stroke-dasharray="30 5"/><circle cx="36" cy="54" r="16" fill="none" stroke="#4FB9EA" stroke-width="4" stroke-dasharray="9 3"/><path d="M36 46L42 58H30Z" fill="#CBEBFC" stroke="#CBEBFC" stroke-width="4" stroke-linejoin="round"/><path d="M5 6h28v18H5z" fill="#0F2A3F" stroke="#F5D978"/><path d="M39 6h28v18H39z" fill="#0F2A3F" stroke="#B3A4F5"/><path d="M5 84h28v14H5z" fill="#0F2A3F" stroke="#F5A3BC"/><path d="M39 84h28v14H39z" fill="#0F2A3F" stroke="#7FD1A6"/></svg>',
 minimale:'<svg class="pv" viewBox="0 0 72 108"><rect width="72" height="108" fill="#fff"/><path d="M36 42L54 70H18Z" fill="#a9d6ef" stroke="#a9d6ef" stroke-width="9" stroke-linejoin="round"/><ellipse cx="36" cy="14" rx="8" ry="6" fill="#d3c8f1"/><circle cx="12" cy="46" r="6" fill="#f2d675"/><circle cx="60" cy="46" r="6" fill="#e7d5ab"/><circle cx="14" cy="22" r="5" fill="#bfe3cf"/><circle cx="58" cy="22" r="5" fill="#f1a977"/><rect x="18" y="86" width="14" height="9" rx="4.5" fill="#f2b8c8"/><circle cx="48" cy="90" r="6" fill="#5fae88"/></svg>'};
@@ -1804,8 +1826,9 @@ function curStyle(){const d=document.documentElement,s=d.getAttribute('data-styl
 let rxT=null;
 function rxMulti(on){clearInterval(rxT);rxT=null;const d=document.documentElement;if(!on){d.style.removeProperty('--rh');return}let h=+(lget('flat_rxh')||200);d.style.setProperty('--rh',h);rxT=setInterval(()=>{if(document.hidden)return;h=(h+1)%360;d.style.setProperty('--rh',h);if(h%20===0)lset('flat_rxh',h)},120)}
 function setStyle(s){if(!STILI[s])return;const d=document.documentElement;d.removeAttribute('data-rx');rxMulti(false);
-  if(s==='classico')d.removeAttribute('data-style');else if(s.startsWith('rx-')){d.setAttribute('data-style','reattore');d.setAttribute('data-rx',s.slice(3));if(STILI[s].multi)rxMulti(true)}else d.setAttribute('data-style',s);lset('flat_style',s);hubData()}
+  if(s==='classico')d.removeAttribute('data-style');else if(s.startsWith('rx-')){d.setAttribute('data-style','reattore');d.setAttribute('data-rx',s.slice(3));if(STILI[s].multi)rxMulti(true)}else d.setAttribute('data-style',s);lset('flat_style',s);doomSet(s==='rx-doom');hubData()}
 for(const k of Object.keys(STILI))if(k.startsWith('rx-')){const st=STILI[k];STPREV[k]=STPREV.reattore.replace('<svg class="pv"','<svg class="pv" style="filter:'+(st.sat===0?'grayscale(1) brightness(1.15)':st.multi?'':'hue-rotate('+st.hue+'deg)')+'"'+(st.multi?' data-multi="1"':''))}
+STPREV['rx-doom']='<svg class="pv" viewBox="0 0 72 108"><rect width="72" height="108" fill="#0c120f"/><path d="M36 14C20 14 12 28 12 46v18c0 16 10 28 24 28s24-12 24-28V46c0-18-8-32-24-32Z" fill="#26322c" stroke="#3b6b50" stroke-width="2"/><path d="M36 34c-10 0-16 6-16 16v10c0 10 7 18 16 18s16-8 16-18V50c0-10-6-16-16-16Z" fill="#9aa8a1" stroke="#cfd9d3"/><rect x="25" y="48" width="8" height="4" fill="#0c120f"/><rect x="39" y="48" width="8" height="4" fill="#0c120f"/><path d="M36 56v10M31 70h10" stroke="#0c120f" stroke-width="2"/></svg>';
 function showStyles(){
   const cur=curStyle();
   $('#root').innerHTML='<header class="top">'+backBtn.replace('data-act="back"','data-act="toapps"')+'<div class="ttl">Cambia stile</div></header><div class="apps"><div class="stl">'+
@@ -2387,7 +2410,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v83'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v90'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2758,6 +2781,7 @@ async function hubCommand(raw,inner,fz){
   {const w=mapCommand(raw);if(w)return w}
   if(/\b(buongiorno|briefing)\b/.test(t)&&/\b(briefing|riassunto)\b/.test(t)){briefing(true);return''}
   if(/\b(torcia|lampadina|luce del telefono)\b/.test(t)&&!/\b(task|taks|evento|calendario|spes\w*)\b/.test(t))return torchCommand(t);
+  if(/\bdoom\b/.test(t)){const r=doomCommand(t);if(r)return r}
   if(/\b(stile|reattore)\b/.test(t)&&/\b(cambia|metti|passa|usa|imposta|stile|tema)\b/.test(t)&&!/\b(ash|scheda|task|taks)\b/.test(t)){const r=styleCommand(t);if(r)return r}
   if(/\b(aggiorna|aggiornati|aggiornami)\b/.test(t)&&/\b(app|fla|sito|tech|versione)\b/.test(t)){setTimeout(hardUpdate,900);return'Aggiorno FLA-Tech.'}
   if(/\b(timer|conto alla rovescia)\b/.test(t)&&!/\b(task|taks|evento|calendario|spes\w*|euro)\b/.test(t))return timerCommand(t);
