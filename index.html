@@ -749,7 +749,8 @@ let S=lget('flat_s'),D={exp:[],inc:[]},tab='home',openRow=null,voiceOn=lget('fla
 
 /* ---------- tema giorno/notte ---------- */
 function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const m=$('#tc');if(m)m.setAttribute('content',t==='dark'?'#1e2024':'#ffffff')}
-function toggleTheme(){const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';applyTheme(t);lset('flat_theme',t)}
+function toggleTheme(){const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';applyTheme(t);lset('flat_theme',t);soPair(t)}
+function soPair(t){const m=/^rx-(s[cgv])([dn])$/.exec(curStyle());if(!m)return;const w=t==='dark'?'n':'d';if(m[2]!==w&&STILI['rx-'+m[1]+w])setStyle('rx-'+m[1]+w)}
 if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)document.querySelectorAll('animate').forEach(a=>a.remove());
 
 /* ---------- toast & sheet ---------- */
@@ -1973,7 +1974,7 @@ function curStyle(){const d=document.documentElement,s=d.getAttribute('data-styl
 let rxT=null;
 function rxMulti(on){clearInterval(rxT);rxT=null;const d=document.documentElement;if(!on){d.style.removeProperty('--rh');return}let h=+(lget('flat_rxh')||200);d.style.setProperty('--rh',h);rxT=setInterval(()=>{if(document.hidden)return;h=(h+1)%360;d.style.setProperty('--rh',h);if(h%20===0)lset('flat_rxh',h)},120)}
 function setStyle(s){if(!STILI[s])return;const d=document.documentElement;d.removeAttribute('data-rx');rxMulti(false);
-  if(s==='classico')d.removeAttribute('data-style');else if(s.startsWith('rx-')){d.setAttribute('data-style','reattore');d.setAttribute('data-rx',s.slice(3));if(STILI[s].multi)rxMulti(true)}else d.setAttribute('data-style',s);lset('flat_style',s);doomSet(s==='rx-doom');if(/^rx-s[cgv]/.test(s))sgFont();hubData()}
+  if(s==='classico')d.removeAttribute('data-style');else if(s.startsWith('rx-')){d.setAttribute('data-style','reattore');d.setAttribute('data-rx',s.slice(3));if(STILI[s].multi)rxMulti(true)}else d.setAttribute('data-style',s);lset('flat_style',s);doomSet(s==='rx-doom');{const m=/^rx-s[cgv]([dn])$/.exec(s);if(m){const t=m[1]==='n'?'dark':'light';applyTheme(t);lset('flat_theme',t)}}if(/^rx-s[cgv]/.test(s))sgFont();hubData()}
 for(const k of Object.keys(STILI))if(k.startsWith('rx-')){const st=STILI[k];STPREV[k]=STPREV.reattore.replace('<svg class="pv"','<svg class="pv" style="filter:'+(st.sat===0?'grayscale(1) brightness(1.15)':st.multi?'':'hue-rotate('+st.hue+'deg)')+'"'+(st.multi?' data-multi="1"':''))}
 STPREV['rx-scd']='<svg class="pv" viewBox="0 0 72 108"><rect width="72" height="108" fill="#bcd8ff"/><rect x="6" y="8" width="29" height="18" rx="3" fill="#fff" stroke="#14224a" stroke-width="1.5"/><rect x="37" y="8" width="29" height="18" rx="3" fill="#8db8f6" stroke="#14224a" stroke-width="1.5"/><rect x="6" y="80" width="29" height="18" rx="3" fill="#F58C4B" stroke="#14224a" stroke-width="1.5"/><rect x="37" y="80" width="29" height="18" rx="3" fill="#ffe3cc" stroke="#14224a" stroke-width="1.5"/><circle cx="38" cy="56" r="15" fill="#14224a"/><circle cx="36" cy="54" r="15" fill="#F58C4B" stroke="#14224a" stroke-width="2.5"/></svg>';
 STPREV['rx-scn']='<svg class="pv" viewBox="0 0 72 108"><rect width="72" height="108" fill="#0e0f11"/><rect x="6" y="8" width="29" height="18" rx="3" fill="#1b1c1f" stroke="#fff" stroke-width="1.5"/><rect x="37" y="8" width="29" height="18" rx="3" fill="#5CC8F5" stroke="#fff" stroke-width="1.5"/><rect x="6" y="80" width="29" height="18" rx="3" fill="#fff" stroke="#fff" stroke-width="1.5"/><rect x="37" y="80" width="29" height="18" rx="3" fill="#1b1c1f" stroke="#fff" stroke-width="1.5"/><circle cx="38" cy="56" r="15" fill="#5CC8F5"/><circle cx="36" cy="54" r="15" fill="#5CC8F5" stroke="#fff" stroke-width="2.5"/></svg>';
@@ -2568,7 +2569,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v100'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v101'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
