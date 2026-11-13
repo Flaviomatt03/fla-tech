@@ -493,7 +493,7 @@ html[data-style=reattore] .tri svg:not(.aura){filter:drop-shadow(0 0 14px hsl(ca
 html[data-style=reattore] #hub.open:not([data-ai=listen]):not([data-ai=think]):not([data-ai=speak]) .aura{opacity:0}
 html[data-style=reattore] #rx{display:block;position:absolute;left:50%;top:calc(50% - 3dvh);width:min(78vw,44dvh,330px);aspect-ratio:1;transform:translate(-50%,-50%) scale(.6);opacity:0;pointer-events:none;transition:opacity .8s .5s,transform 1s .4s cubic-bezier(.34,1.3,.64,1);z-index:0;background:radial-gradient(circle,hsl(calc(var(--rh) + -3) calc(89% * var(--rs)) 65.7% / .35) 0,hsl(calc(var(--rh) + -3) calc(89% * var(--rs)) 65.7% / .1) 48%,hsl(calc(var(--rh) + -3) calc(89% * var(--rs)) 65.7% / 0) 70%)}
 html[data-style=reattore] #hub.open #rx{opacity:1;transform:translate(-50%,-50%) scale(1)}
-#rx svg{width:100%;height:100%;filter:drop-shadow(0 0 7px hsl(calc(var(--rh) + -3) calc(89% * var(--rs)) 65.7% / .75))}
+#rx svg{width:100%;height:100%;filter:drop-shadow(0 0 calc(7px + var(--spk,0) * 24px) hsl(calc(var(--rh) + -3) calc(89% * var(--rs)) calc(65.7% + var(--spk,0) * 12%) / calc(.75 + var(--spk,0) * .25)));transform:scale(calc(1 + var(--spk,0) * .04));transition:filter .12s linear,transform .12s linear}
 #rx .ra{transform-origin:150px 150px;animation:rxs 60s linear infinite}#rx .rb{transform-origin:150px 150px;animation:rxs 38s linear infinite reverse}
 @keyframes rxs{to{transform:rotate(360deg)}}
 html[data-style=reattore] #hub.open .shape:not(.up){animation:none}
@@ -1102,7 +1102,7 @@ function speak(t,fb){const tok=++spTok;aiSet('speak');if(!voiceOn||!('speechSynt
   try{speechSynthesis.cancel();const parts=(t.replace(/\s+/g,' ').match(/[^.!?;:]+[.!?;:]*/g)||[t]).map(x=>x.trim()).filter(Boolean);let v=fb?null:pickVoice();if(v&&badV.has(v.name))v=itVoices().find(x=>!badV.has(x.name))||null;
     setTimeout(()=>{if(tok!==spTok)return;let started=false,failed=false;
       const retry=()=>{if(failed||tok!==spTok)return;failed=true;if(v)badV.add(v.name);speechSynthesis.cancel();if(!fb)speak(t,true);else aiSet('idle')};
-      parts.forEach((p,k)=>{const u=new SpeechSynthesisUtterance(p);u.lang='it-IT';if(v)u.voice=v;u.rate=DOOM?.86:.98;u.pitch=DOOM?.55:.9;u.volume=1;u.onstart=()=>{started=true};
+      parts.forEach((p,k)=>{const u=new SpeechSynthesisUtterance(p);u.lang='it-IT';if(v)u.voice=v;u.rate=DOOM?.86:.98;u.pitch=DOOM?.55:.9;u.volume=1;u.onstart=()=>{started=true};u.onboundary=()=>{talkK=1};
         u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled')return;if(!started)retry();else if(tok===spTok)aiSet('idle')};
         if(k===parts.length-1)u.onend=()=>{if(tok===spTok){aiSet('idle');convoNext()}};speechSynthesis.speak(u)});
       setTimeout(()=>{if(!started&&!fb)retry()},2500)},120)}catch{aiSet('idle')}}
@@ -1123,7 +1123,7 @@ function openVoice(hub){
   wakeHalt();
   try{if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}}catch{}
   openSheet(`<h3>Voce</h3><div class="lab" id="vst">Tocca il microfono e parla</div><div class="vtr" id="vtr"></div><div class="vout" id="vout"></div>
-  <button class="btn" type="button" data-act="listen" style="margin-bottom:12px">Parla di nuovo</button>${hub?'<button class="btn" id="convbtn" type="button" data-act="convo" style="margin-bottom:12px">Conversazione</button>':''}
+  <button class="btn" type="button" data-act="listen" style="margin-bottom:12px">Parla di nuovo</button>${hub?'<button class="btn" id="convbtn" type="button" data-act="convo" style="margin-bottom:12px">Conversazione</button><button class="btn" type="button" data-act="eyes" style="margin-bottom:12px">📷 Occhi</button>':''}
   <details style="margin-bottom:10px"><summary class="lab" style="cursor:pointer">Cambia voce</summary><div id="vpick"></div></details><form id="vf" autocomplete="off"><input id="vi" placeholder="oppure scrivi un comando" enterkeyhint="send"></form>
   <div class="hint">Prova: <code>aggiungi spesa 20 benzina</code> <code>quanto resta</code> <code>quanto ho speso oggi</code> <code>stipendio 1320</code> <code>apri fisse</code> <code>annulla ultima</code></div>`.replace('<h3>Voce</h3>',hub?'<h3>Parla con me</h3>':'<h3>Voce</h3>'));
   $('#vf').onsubmit=e=>{e.preventDefault();const t=$('#vi').value.trim();$('#vi').value='';if(t){$('#vtr').textContent=t;run(t)}};
@@ -2001,7 +2001,7 @@ minimale:'<svg class="pv" viewBox="0 0 72 108"><rect width="72" height="108" fil
 function curStyle(){const d=document.documentElement,s=d.getAttribute('data-style');if(s==='reattore'){const r=d.getAttribute('data-rx');if(r&&STILI['rx-'+r])return'rx-'+r}return STILI[s]?s:'classico'}
 let rxT=null;
 function rxMulti(on){clearInterval(rxT);rxT=null;const d=document.documentElement;if(!on){d.style.removeProperty('--rh');return}let h=+(lget('flat_rxh')||200);d.style.setProperty('--rh',h);rxT=setInterval(()=>{if(document.hidden)return;h=(h+1)%360;d.style.setProperty('--rh',h);if(h%20===0)lset('flat_rxh',h)},120)}
-function setStyle(s){if(!STILI[s])return;const d=document.documentElement;d.removeAttribute('data-rx');rxMulti(false);
+function setStyle(s){if(!STILI[s])return;setTimeout(dynHome,0);const d=document.documentElement;d.removeAttribute('data-rx');rxMulti(false);
   if(s==='classico')d.removeAttribute('data-style');else if(s.startsWith('rx-')){d.setAttribute('data-style','reattore');d.setAttribute('data-rx',s.slice(3));if(STILI[s].multi)rxMulti(true)}else d.setAttribute('data-style',s);lset('flat_style',s);doomSet(s==='rx-doom');{const m=/^rx-s[cgv]([dn])$/.exec(s);if(m){const t=m[1]==='n'?'dark':'light';applyTheme(t);lset('flat_theme',t)}}if(/^rx-s[cgv]/.test(s))sgFont();hubData()}
 for(const k of Object.keys(STILI))if(k.startsWith('rx-')){const st=STILI[k];STPREV[k]=STPREV.reattore.replace('<svg class="pv"','<svg class="pv" style="filter:'+(st.sat===0?'grayscale(1) brightness(1.15)':st.multi?'':'hue-rotate('+st.hue+'deg)')+'"'+(st.multi?' data-multi="1"':''))}
 STPREV['rx-scd']='<svg class="pv" viewBox="0 0 72 108"><rect width="72" height="108" fill="#bcd8ff"/><rect x="6" y="8" width="29" height="18" rx="3" fill="#fff" stroke="#14224a" stroke-width="1.5"/><rect x="37" y="8" width="29" height="18" rx="3" fill="#8db8f6" stroke="#14224a" stroke-width="1.5"/><rect x="6" y="80" width="29" height="18" rx="3" fill="#F58C4B" stroke="#14224a" stroke-width="1.5"/><rect x="37" y="80" width="29" height="18" rx="3" fill="#ffe3cc" stroke="#14224a" stroke-width="1.5"/><circle cx="38" cy="56" r="15" fill="#14224a"/><circle cx="36" cy="54" r="15" fill="#F58C4B" stroke="#14224a" stroke-width="2.5"/></svg>';
@@ -2056,7 +2056,7 @@ function toggleDd(){ddOpen()?closeDd():openDd()}
 function tickBar(){const d=new Date(),t=$('#ip-t'),e=$('#ip-d');if(t)t.textContent=d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});if(e&&!(TM&&TM.end))e.textContent=d.toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'}).replace(/[.,]/g,'')}
 async function paintBat(){let l=null,ch=false;
   try{if(window.FLAAndroid&&typeof FLAAndroid.battery==='function'){const j=JSON.parse(FLAAndroid.battery());l=j.l;ch=!!j.c}else if(navigator.getBattery){const b=await navigator.getBattery();l=Math.round(b.level*100);ch=b.charging}}catch(e){}
-  const el=$('#ip-b');if(!el)return;if(l==null||l<0){el.hidden=true;return}
+  window.__bat={l,ch};const el=$('#ip-b');if(!el)return;if(l==null||l<0){el.hidden=true;return}
   el.hidden=false;$('#ib-t').textContent=l+'%';$('#ib-f').setAttribute('width',(13*Math.max(0,Math.min(100,l))/100).toFixed(1));el.classList.toggle('low',l<=20&&!ch);el.classList.toggle('chg',ch)}
 function barInit(){
   try{if(window.FLAAndroid&&typeof FLAAndroid.inset==='function')document.documentElement.style.setProperty('--sat',(+FLAAndroid.inset())+'px')}catch(e){}
@@ -2599,18 +2599,18 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v110'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v112'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
-let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
+let MEM=lget('flat_mem')||[],BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
 const brSave=()=>{brTs=Date.now();lset('flat_brain',BR.slice(0,300));lset('flat_brain_ts',brTs);clearTimeout(brT);brT=setTimeout(brPush,900)};
 const brSyncTxt=()=>!S?'Salvato solo su questo telefono. Entra in Finanze per sincronizzarlo.':brSync==='ok'?'Sincronizzato':brSync==='err'?'Offline: riprovo al prossimo salvataggio.':'Sincronizzo…';
 function brRepaint(){const g=$('#bgraph');if(g)g.innerHTML=brainGraph();const l=$('#bl');if(l)l.innerHTML=brainList();const y=$('#bsyn');if(y)y.textContent=brSyncTxt()}
-async function brPush(){if(!S)return;try{await api('brain?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({data:BR.slice(0,300),updated_at:new Date(brTs||Date.now()).toISOString()})});brSync='ok'}catch{brSync='err'}const y=$('#bsyn');if(y)y.textContent=brSyncTxt()}
+async function brPush(){if(!S)return;try{await api('brain?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({data:[...BR.slice(0,300),...MEM.slice(0,60).map(x=>({m:1,t:x.t,ts:x.ts}))],updated_at:new Date(brTs||Date.now()).toISOString()})});brSync='ok'}catch{brSync='err'}const y=$('#bsyn');if(y)y.textContent=brSyncTxt()}
 async function brPull(){if(!S)return;
   try{const r=await api('brain?select=data,updated_at');
     if(r&&r[0]){const rt=Date.parse(r[0].updated_at),rd=Array.isArray(r[0].data)?r[0].data:[];
-      if(rt>brTs+1500){BR=rd;brTs=rt;lset('flat_brain',BR);lset('flat_brain_ts',brTs);brSync='ok';brRepaint();return}
+      if(rt>brTs+1500){BR=rd.filter(x=>x&&!x.m&&x.p);MEM=rd.filter(x=>x&&x.m&&x.t).map(x=>({t:x.t,ts:x.ts||0}));lset('flat_mem',MEM);brTs=rt;lset('flat_brain',BR);lset('flat_brain_ts',brTs);brSync='ok';brRepaint();return}
       if(brTs>rt+1500){await brPush();return}
       brSync='ok'}else if(BR.length){await brPush();return}else brSync='ok'}catch{brSync='err'}
   const y=$('#bsyn');if(y)y.textContent=brSyncTxt()}
@@ -2812,6 +2812,33 @@ function imgCommand(raw){
   return'Apro ChatGPT con la richiesta: '+q+'.'}
 /* ---------- Capire meglio: correzione parole, sinonimi, alternative ---------- */
 const UNK={};
+/* ---------- Gli occhi di Haiku ---------- */
+let _eyes=null;
+function closeEyes(){if(_eyes){try{_eyes.stream&&_eyes.stream.getTracks().forEach(t=>t.stop())}catch{}_eyes.el.remove();_eyes=null}}
+function eyesShrink(src,w,h){const k=Math.min(1,1024/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(src,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.72).split(',')[1]}
+async function aiEyes(data,q){
+  if(!S)return'Per usare gli occhi devi prima entrare una volta in Finanze con email e password.';
+  if(S.expires_at-60<Date.now()/1000){if(!(await refresh())){dropSession();return'Sessione scaduta: rientra in Finanze.'}}
+  try{const r=await fetch(SB+'/functions/v1/fla-ai',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+S.access_token,'Content-Type':'application/json'},body:JSON.stringify({q:q+MOODQ,ctx:aiCtx(q),hist:[],img:{mt:'image/jpeg',data}})});
+    if(r.status===503)return'Haiku non è ancora collegato: manca la chiave API.';
+    if(r.status===429)return'Per oggi ho finito le domande intelligenti.';
+    if(r.status===413)return'La foto è troppo grande, riprova.';
+    if(!r.ok)return'Non sono riuscito a guardare la foto, riprova.';
+    const j=await r.json(),tg=moodTag(j.say);if(tg.mood)moodSet(tg.mood);return tg.say||'Non riesco a capire cosa c’è nella foto.'
+  }catch{return'Serve internet per guardare la foto.'}}
+async function eyes(q){
+  closeEyes();q=(q||'').trim()||'Cosa vedi? Spiegamelo in breve e dimmi se c’è qualcosa di utile da sapere.';
+  const el=document.createElement('div');el.style.cssText='position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font:600 15px system-ui';
+  el.innerHTML='<video playsinline muted autoplay style="width:100%;flex:1;min-height:0;object-fit:cover"></video><div id="eym" style="padding:12px 18px;text-align:center;max-height:34%;overflow:auto;line-height:1.35">Inquadra e tocca Scatta</div><div style="display:flex;gap:12px;padding:0 0 22px"><button id="eyx" style="padding:12px 22px;border-radius:99px;border:0;font:700 15px system-ui">Chiudi</button><button id="eyf" style="padding:12px 22px;border-radius:99px;border:0;font:700 15px system-ui">Galleria</button><button id="eys" style="padding:12px 26px;border-radius:99px;border:0;background:#fff;color:#000;font:700 15px system-ui">Scatta</button></div><input id="eyi" type="file" accept="image/*" hidden>';
+  document.body.appendChild(el);_eyes={el,stream:null};const m=t=>{const x=el.querySelector('#eym');if(x)x.textContent=t};
+  const go=async(src,w,h)=>{el.querySelectorAll('button').forEach(b=>b.disabled=true);m('Guardo…');aiSet('think');const out=await aiEyes(eyesShrink(src,w,h),q);if(!_eyes)return;m(out);speak(out);el.querySelectorAll('button').forEach(b=>b.disabled=false);const v=el.querySelector('video');try{v.play()}catch{}};
+  el.querySelector('#eyx').onclick=()=>{closeEyes();aiSet('idle')};
+  const fi=el.querySelector('#eyi');el.querySelector('#eyf').onclick=()=>fi.click();
+  fi.onchange=()=>{const f=fi.files[0];if(!f)return;const im=new Image();im.onload=()=>go(im,im.naturalWidth,im.naturalHeight);im.src=URL.createObjectURL(f)};
+  const v=el.querySelector('video');
+  try{const st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280}},audio:false});if(!_eyes)return st.getTracks().forEach(t=>t.stop());_eyes.stream=st;v.srcObject=st}catch(e){m('Fotocamera non disponibile: usa «Galleria»')}
+  el.querySelector('#eys').onclick=()=>{if(!v.videoWidth)return;go(v,v.videoWidth,v.videoHeight);v.pause()};
+}
 /* ---------- Haiku: intelligenza per le richieste che non capisco ---------- */
 let aiBusy=false,AIH=[],aiHT=0;
 function aiCtx(q){
@@ -2819,6 +2846,7 @@ function aiCtx(q){
   try{const r=buildRem().slice(0,10);if(r.length)L.push('Prossimi impegni: '+r.map(x=>remWhen(x)+(x.time?' '+x.time:'')+' '+(x.t||x.label||'')).join('; '));else L.push('Nessun impegno nei prossimi giorni.')}catch{}
   if(/spes|spend|soldi|budget|euro|€|stipend|risparm|quanto|ciclo|mese|guadagn|entrat|uscit/.test(q.toLowerCase())){
     try{const c=curCycle();if(c){const cat={};for(const x of c.exp)cat[x.category||'altro']=(cat[x.category||'altro']||0)+x.amount;const top=Object.entries(cat).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>k+' '+eur(v)).join(', ');L.push('Finanze, ciclo dal '+c.start+': entrate '+eur(c.income)+', spese '+eur(c.spent)+', restano '+eur(c.left)+'. Spese per categoria: '+top)}}catch{}}
+  if(MEM.length)L.push('Cose che Flavio mi ha chiesto di ricordare: '+MEM.map(x=>x.t).join('; ').slice(0,1500));
   try{const g=gsearch(q);if(g.length)L.push('Dati trovati nei dati di Flavio per questa richiesta: '+g.map(x=>x.t).join('; '))}catch{}
   return L.join('\n')}
 async function aiFallback(raw){
@@ -2844,6 +2872,17 @@ const MOODQ='\n(Inizia il campo "say" con un solo tag di umore tra [calmo] [feli
 let moodT=0;
 function moodSet(m){try{const rx=$('#rx');if(!rx||getComputedStyle(rx).display==='none'||!(m in MOODH))return;const r=document.documentElement.style;r.setProperty('--rh',MOODH[m]);r.setProperty('--rs',1);clearTimeout(moodT);if(m!=='calmo')moodT=setTimeout(()=>{r.removeProperty('--rh');r.removeProperty('--rs')},30000);else{r.removeProperty('--rh');r.removeProperty('--rs')}}catch{}}
 function moodTag(x){const m=/^\s*\[([a-zàèé]+)\]\s*/i.exec(x||'');if(!m)return{say:String(x||'').trim(),mood:null};return{say:x.slice(m[0].length).trim(),mood:m[1].toLowerCase()}}
+/* memoria lunga di Haiku */
+const memSave=()=>{lset('flat_mem',MEM);brSave()};
+function memCommand(t,raw){
+  let m=/^(?:ricordati|ricorda|memorizza|tieni a mente|segnati)\s+(?:che\s+)?(.{3,})$/.exec(t);
+  if(m){let x=m[1].trim();try{const rm=/^(?:(?:ehi|hey|ciao|oh)\s+)?(?:(?:fla ?tech|fla)[ ,]+)?(?:ricordati|ricorda|memorizza|tieni a mente|segnati)\s+(?:che\s+)?(.{3,})$/i.exec(String(raw||'').trim());if(rm)x=rm[1].trim().replace(/[.!?]+$/,'')}catch{}if(/\b(password|pin|iban|cvv|codice fiscale|carta di credito|numero di carta)\b/.test(x))return'Queste cose non le salvo: sono troppo delicate.';
+    if(MEM.length>=60)return'La memoria è piena: dimmi cosa dimenticare con «dimentica ...».';
+    MEM=MEM.filter(y=>norm(y.t)!==norm(x));MEM.unshift({t:x,ts:Date.now()});memSave();return'Ok, me lo ricordo: '+x+'.'}
+  m=/^(?:dimentica|scordati|cancella dalla memoria)\s+(?:che\s+)?(.{2,})$/.exec(t);
+  if(m){const k=m[1].trim(),n=MEM.length;MEM=MEM.filter(y=>!norm(y.t).includes(k));if(MEM.length===n)return'Non trovo niente su «'+k+'» nella memoria.';memSave();return'Fatto, l\u2019ho dimenticato.'}
+  if(/^(?:cosa (?:ti ricordi|ricordi|sai di me)|che cosa (?:ricordi|sai di me)|cosa hai in memoria)$/.test(t))return MEM.length?'Mi ricordo: '+MEM.slice(0,8).map(y=>y.t).join('; ')+'.':'Non mi hai ancora chiesto di ricordare niente.';
+  return null}
 async function aiPlain(q,ctx){
   if(aiBusy||!S||lget('flat_ai')===false||!navigator.onLine)return null;
   aiBusy=true;
@@ -3026,6 +3065,9 @@ async function hubCommand(raw,inner,fz){
   if(!inner&&/^(grazie|ok|va bene|perfetto|bene|ciao)$/.test(t))return'Ok.';
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
   {const tm=timeCommand(t);if(tm)return tm}
+  {const mc=memCommand(t,raw);if(mc)return mc}
+  if(/\b(occhi|inquadra|inquadrami|fotografa)\b/.test(t)||/\bcosa (vedi|c ?e|c'e|ce) (qui|qua|davanti)\b/.test(t)||/\btraduci (questo|questa|il menu)\b/.test(t)||/\bche (pianta|fiore|animale|cosa) e (questa|questo)\b/.test(t)||/\bguarda (questo|questa|qui|qua)\b/.test(t)){eyes(/\b(occhi|inquadra|inquadrami|fotografa)\b/.test(t)&&t.split(' ').length<=3?'':raw);return'Apro la fotocamera.'}
+  if(/\bhome (fissa|dinamica)\b/.test(t)||/\b(attiva|disattiva|metti|togli)\b.*\bhome\b.*\b(fissa|dinamica|automatica)\b/.test(t)){const off=/fissa|disattiva|togli/.test(t)&&!/dinamica|automatica/.test(t.replace(/disattiva|togli/,''))||/\b(disattiva|togli)\b/.test(t);lset('flat_dyn',!off);dynHome();return off?'Ok, la home resta sempre uguale.':'Ok, la home si riordina da sola secondo il momento della giornata.'}
   if(/\b(commenta|giudica|prendimi in giro|sfottimi)\b/.test(t)&&/\b(spese|settimana|soldi)\b/.test(t)){weekly(true);return''}
   {const m=/^(?:cerca|cercami|trova|ricerca)\s+(?:nei miei dati\s+|tra i miei dati\s+)?(.+)$/.exec(t);if(m){if(!D.exp||!D.exp.length){try{await ensureFin()}catch{}}const g=gsearch(m[1]);return g.length?'Ho trovato: '+g.map(x=>x.t).join('. ')+'.':'Non ho trovato niente su «'+m[1]+'».'}}
   {const g=goalCommand(t);if(g)return g}
@@ -3092,7 +3134,7 @@ document.addEventListener('click',async e=>{
   const t=e.target.closest('[data-tab],[data-act]');if(!t)return;
   if(t.dataset.tab)return setTab(t.dataset.tab);
   const a=t.dataset.act,id=t.dataset.id;
-  if(a==='tri'){const h=$('#hub');h.classList.toggle('open');if(h.classList.contains('open')){aiWake();hubData();briefing();weekly()}else{aiSet('idle');aiCap('')}}
+  if(a==='tri'){const h=$('#hub');if(!h.classList.contains('open'))dynHome();h.classList.toggle('open');if(h.classList.contains('open')){aiWake();hubData();briefing();weekly()}else{aiSet('idle');aiCap('')}}
   else if(a&&a.startsWith('goal'))goalAct(a);
   else if(a==='finanze')openApp(t,'fin');
   else if(a==='cal')openApp(t,'cal');
@@ -3118,7 +3160,7 @@ document.addEventListener('click',async e=>{
   else if(a==='inc')formIncome();
   else if(a==='menu')menu();
   else if(a==='voice')openVoice();
-  else if(a==='listen')listen();else if(a==='convo')convoToggle();
+  else if(a==='listen')listen();else if(a==='convo')convoToggle();else if(a==='eyes'){const vi=($('#vi')&&$('#vi').value||'').trim(),vt=($('#vtr')&&$('#vtr').textContent||'').trim();const q=vi||(/\?$|^(che|cosa|come|chi|traduci|quanto|dimmi)\b/i.test(vt)?vt:'');closeSheet();eyes(q)}
   else if(a==='row'){openRow=openRow===id?null:id;render()}
   else if(a==='fix'){const x=D.exp.find(y=>y.id===id);if(!x)return;try{await api('expenses?id=eq.'+id,{method:'PATCH',body:JSON.stringify({is_fixed:!x.is_fixed})});await loadAll();render()}catch(er){toast(er.message)}}
   else if(a==='del'){if(!confirm('Eliminare questa spesa?'))return;try{await api('expenses?id=eq.'+id,{method:'DELETE'});openRow=null;await loadAll();render();toast('Spesa eliminata')}catch(er){toast(er.message)}}
@@ -3131,19 +3173,49 @@ try{speechSynthesis.getVoices()}catch{}
 if(curStyle()==='rx-multi')rxMulti(true);torchInit();setInterval(tmTick,500);setInterval(rmTick,4000);setInterval(evTick,30000);setInterval(()=>{repTopUp()},1800000);setTimeout(()=>{try{repTopUp();nativeSync();nativeFired();rmTick();paintBrain()}catch{}},2500);document.addEventListener('visibilitychange',()=>{if(!document.hidden){try{nativeFired();rmTick();evTick()}catch{}}});if(TM.end&&TM.end<=Date.now())setTimeout(tmFire,800);refreshRem();hubData();barInit();brPull();setInterval(brPull,120000);setTimeout(hubData,3000);setInterval(hubData,45000);
 /* ---------- presenza: il sistema ti guarda e ti aiuta ---------- */
 let aiT=null,aiH=null,gzT=null;
-function aiSet(st){const h=$('#hub');if(h&&h.dataset.ai!==st)h.dataset.ai=st}
+function aiSet(st){const h=$('#hub');if(h&&h.dataset.ai!==st)h.dataset.ai=st;if(st==='speak')talkOn();else talkOff()}
+let talkI=0,talkL=0,talkK=0;
+function talkOn(){if(talkI)return;talkI=setInterval(()=>{const rx=$('#rx');if(!rx)return;const r=Math.random();talkL=Math.max(talkL*.55,talkK,r>.45?.25+r*.5:0);talkK=0;rx.style.setProperty('--spk',talkL.toFixed(2))},110)}
+function talkOff(){if(!talkI)return;clearInterval(talkI);talkI=0;talkL=0;talkK=0;const rx=$('#rx');if(rx)rx.style.setProperty('--spk',0)}
 function aiCap(txt,hold){
   const c=$('#aicap');if(!c)return;clearInterval(aiT);clearTimeout(aiH);
   if(!txt){c.classList.remove('on');return}
   c.textContent='';c.classList.add('on');let i=0;
   aiT=setInterval(()=>{c.textContent=txt.slice(0,++i);if(i>=txt.length){clearInterval(aiT);aiH=setTimeout(()=>c.classList.remove('on'),hold||7000)}},26)}
+/* ---------- Home che cambia col momento ---------- */
+const SLOTS=['sq','ov','mu','ap','re','qd','ci'];
+const SLOT_DEF={'sq-finanze':'sq','ov-meteo':'ov','mu-music':'mu','ap-app':'ap','re-cal':'re','qd-task':'qd','ci-ash':'ci'};
+const PRI={mattina:['re-cal','ov-meteo','qd-task','sq-finanze','ap-app','mu-music','ci-ash'],giorno:['sq-finanze','re-cal','qd-task','ov-meteo','ap-app','mu-music','ci-ash'],sera:['mu-music','ov-meteo','ap-app','ci-ash','sq-finanze','re-cal','qd-task']};
+function dynHome(){
+  try{const on=lget('flat_dyn')!==false&&document.documentElement.dataset.style==='reattore';
+    const hr=new Date().getHours(),per=hr>=6&&hr<12?'mattina':hr>=12&&hr<18?'giorno':'sera';
+    const order=on?PRI[per]:Object.keys(SLOT_DEF);
+    order.forEach((id,i)=>{const el=document.getElementById(id);if(!el)return;SLOTS.forEach(c=>el.classList.remove(c));el.classList.add(on?SLOTS[i]:SLOT_DEF[id])})}catch{}}
+setTimeout(dynHome,60);
+const SURP={any:['Lo sai che giro sempre in cerchio e non mi gira mai la testa?','Oggi mi sento particolarmente luminoso.','Se hai bisogno di qualcosa, basta chiedere. Io non mi stanco mai.','Un consiglio gratis: bevi un bicchiere d’acqua.'],mattina:['Buona giornata! Il caffè è già un buon inizio.','Mattina fresca, mente fresca: cosa facciamo per prima cosa?'],sera:['Sera tranquilla? Posso metterti un po’ di musica.','Anche oggi è andata. Ti meriti un po’ di riposo.'],fri:['È venerdì: respira, il weekend è vicino.'],mon:['È lunedì, lo so. Ce la facciamo insieme.'],sun:['Domenica: sveglia lenta e niente fretta.']};
+function aiLife(){
+  const b=window.__bat;
+  if(b&&b.l!=null&&b.l>=0&&b.l<=20&&!b.ch)return{t:'Batteria al '+b.l+' per cento: attaccami al caricatore.',m:'preoccupato'};
+  try{const bd=(CAL[today()]||[]).find(e=>/compleann/i.test(e.t));if(bd)return{t:'Oggi c’è un compleanno: '+bd.t+'. Non dimenticare gli auguri!',m:'entusiasta'}}catch{}
+  const now=Date.now(),last=lget('flat_lastopen')||0;lset('flat_lastopen',now);
+  if(last){const gap=now-last,d=Math.floor(gap/864e5);
+    if(d>=3)return{t:'Eri sparito! Sono '+d+' giorni che non ci vediamo.',m:'ironico'};
+    if(gap>20*36e5)return{t:'Finalmente, ti aspettavo.',m:'felice'}}
+  if(Math.random()<.28){const h=new Date().getHours(),w=new Date().getDay(),pool=[...SURP.any];
+    if(h>=5&&h<12)pool.push(...SURP.mattina);if(h>=19||h<4)pool.push(...SURP.sera);if(w===5)pool.push(...SURP.fri);if(w===1)pool.push(...SURP.mon);if(w===0)pool.push(...SURP.sun);
+    return{t:pool[Math.floor(Math.random()*pool.length)],m:'rilassato'}}
+  return null}
 function aiGreet(){
   const h=new Date().getHours(),g=h<5?'Ciao Flavio':h<12?'Buongiorno Flavio':h<18?'Buon pomeriggio Flavio':'Buonasera Flavio';
   paintRem();const near=REM.filter(r=>r.days<=1);let l2='';
-  if(near.length)l2=(near[0].days===0?'Oggi':'Domani')+' hai: '+near.slice(0,2).map(r=>r.t).join(' e ')+(near.length>2?' e altro.':'.');
+  const life=aiLife();
+  if(life){l2=life.t;moodSet(life.m)}
+  else if(near.length)l2=(near[0].days===0?'Oggi':'Domani')+' hai: '+near.slice(0,2).map(r=>r.t).join(' e ')+(near.length>2?' e altro.':'.');
   else{try{const c=lget('flat_wx');const n=c&&Date.now()-c.t<30*60000&&nowcast(c.j);if(n&&/Sta piovendo|in arrivo/.test(n.txt))l2=n.txt}catch{}}
   return g+'.'+(l2?' '+l2:' Tutto tranquillo.')}
-function aiWake(){aiSet('wake');setTimeout(()=>{if($('#hub').dataset.ai==='wake')aiSet('idle')},2600);aiCap(aiGreet())}
+let idleT=0;
+addEventListener('pointerdown',()=>clearTimeout(idleT),{passive:true});
+function aiWake(){clearTimeout(idleT);idleT=setTimeout(()=>{const h=$('#hub');if(h&&h.classList.contains('open')&&!appOpen){aiCap('Ci sei? Mi sto annoiando un po’…');moodSet('rilassato')}},90000);aiSet('wake');setTimeout(()=>{if($('#hub').dataset.ai==='wake')aiSet('idle')},2600);aiCap(aiGreet())}
 addEventListener('pointermove',e=>{
   const h=$('#hub');if(!h||appOpen)return;const t=$('.tri').getBoundingClientRect(),dx=e.clientX-(t.left+t.width/2),dy=e.clientY-(t.top+t.height/2),d=Math.hypot(dx,dy)||1,k=Math.min(1,d/260);
   h.style.setProperty('--gx',(dx/d*4*k).toFixed(2));h.style.setProperty('--gy',(dy/d*4*k).toFixed(2));
