@@ -641,11 +641,11 @@ html[data-rx=cal] .shape.sq{--f:1;--cx:0;--cy:-24;--h:12}
 html[data-rx=cal] .shape.ov{--f:.58;--cx:-.21;--cy:-12.75;--h:8.5}
 html[data-rx=cal] .shape.re{--f:.42;--cx:.29;--cy:-12.75;--h:8.5}
 html[data-rx=cal] .shape.qd{--f:.42;--cx:-.29;--cy:12.75;--h:8.5}
-html[data-rx=cal] .shape.mu{--f:.58;--cx:.21;--cy:12.75;--h:8.5}
-html[data-rx=cal] .shape.ap{--f:.42;--cx:-.29;--cy:24;--h:12}
-html[data-rx=cal] .shape.ci{--f:.58;--cx:.21;--cy:24;--h:12}
+html[data-rx=cal] .shape.ap{--f:.58;--cx:.21;--cy:24;--h:12}
+html[data-rx=cal] .shape.mu{--f:.42;--cx:-.29;--cy:24;--h:12}
+html[data-rx=cal] .shape.ci{--f:.58;--cx:.21;--cy:12.75;--h:8.5}
 html[data-rx=cal] .shape .nm{white-space:nowrap}
-html[data-rx=cal] .shape.ov .dt small,html[data-rx=cal] .shape.mu .dt small{display:none}html[data-rx=cal] .shape.ov .dt b,html[data-rx=cal] .shape.mu .dt b{font-size:17px}html[data-rx=cal] .shape .eq{color:var(--tac)}html[data-rx=cal] .shape .eq i{background:var(--tac)}
+html[data-rx=cal] .shape.ov .dt small{display:none}html[data-rx=cal] .shape.ov .dt b{font-size:17px}html[data-rx=cal] .shape .eq{color:var(--tac)}html[data-rx=cal] .shape .eq i{background:var(--tac)}
 html[data-rx=cal] .tri::before{width:40%;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 35% 30%,#ff8aa0,#a01a36 55%,#4a0816);box-shadow:0 0 36px rgba(220,60,90,.6);animation:calMorph 6s ease-in-out infinite}
 @keyframes calMorph{0%,100%{border-radius:50% 50% 50% 50%/60% 60% 40% 40%}33%{border-radius:60% 40% 55% 45%/50% 55% 45% 50%}66%{border-radius:45% 55% 40% 60%/55% 45% 55% 45%}}
 html[data-rx=cal] .tri::after{content:''}
@@ -2588,7 +2588,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v105'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v107'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
