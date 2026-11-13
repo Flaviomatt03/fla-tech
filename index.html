@@ -776,7 +776,7 @@ if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)doc
 let tt=null;
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',2600)}
 function openSheet(html){$('#sheet').innerHTML=html;$('#sheet').scrollTop=0;$('#sheet').style.display='block';$('#sheetbg').style.display='block'}
-function closeSheet(keep){stopListen();setTimeout(wakeStart,900);if(keep!==true)aiSet('idle');$('#sheet').classList.remove('vh');$('#sheetbg').classList.remove('vh');$('#sheet').style.display='none';$('#sheetbg').style.display='none';$('#sheet').innerHTML='';if(keep!==true){try{speechSynthesis.cancel()}catch{}}}
+function closeSheet(keep){convoOff();stopListen();setTimeout(wakeStart,900);if(keep!==true)aiSet('idle');$('#sheet').classList.remove('vh');$('#sheetbg').classList.remove('vh');$('#sheet').style.display='none';$('#sheetbg').style.display='none';$('#sheet').innerHTML='';if(keep!==true){try{speechSynthesis.cancel()}catch{}}}
 $('#sheetbg').addEventListener('click',closeSheet);
 
 /* ---------- hub e apertura app ---------- */
@@ -1096,26 +1096,32 @@ function pickVoice(){const v=itVoices();if(!v.length)return null;const sv=lget('
   const sc=x=>(/natural|neural|online/i.test(x.name)?4:0)+(/(diego|cosimo|luca|giorgio)/i.test(x.name)?5:0)+(MALE.test(x.name)&&!FEM.test(x.name)?3:0)-(FEM.test(x.name)?6:0)+(x.localService?1:0);
   return v.slice().sort((a,b)=>sc(b)-sc(a))[0]}
 let spTok=0,badV=new Set();
-function speak(t,fb){const tok=++spTok;aiSet('speak');if(!voiceOn||!('speechSynthesis' in window)){setTimeout(()=>{if(tok===spTok)aiSet('idle')},Math.min(6000,1400+t.length*40));return}
+function speak(t,fb){const tok=++spTok;aiSet('speak');if(!voiceOn||!('speechSynthesis' in window)){setTimeout(()=>{if(tok===spTok){aiSet('idle');convoNext()}},Math.min(6000,1400+t.length*40));return}
   try{speechSynthesis.cancel();const parts=(t.replace(/\s+/g,' ').match(/[^.!?;:]+[.!?;:]*/g)||[t]).map(x=>x.trim()).filter(Boolean);let v=fb?null:pickVoice();if(v&&badV.has(v.name))v=itVoices().find(x=>!badV.has(x.name))||null;
     setTimeout(()=>{if(tok!==spTok)return;let started=false,failed=false;
       const retry=()=>{if(failed||tok!==spTok)return;failed=true;if(v)badV.add(v.name);speechSynthesis.cancel();if(!fb)speak(t,true);else aiSet('idle')};
       parts.forEach((p,k)=>{const u=new SpeechSynthesisUtterance(p);u.lang='it-IT';if(v)u.voice=v;u.rate=DOOM?.86:.98;u.pitch=DOOM?.55:.9;u.volume=1;u.onstart=()=>{started=true};
         u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled')return;if(!started)retry();else if(tok===spTok)aiSet('idle')};
-        if(k===parts.length-1)u.onend=()=>{if(tok===spTok)aiSet('idle')};speechSynthesis.speak(u)});
+        if(k===parts.length-1)u.onend=()=>{if(tok===spTok){aiSet('idle');convoNext()}};speechSynthesis.speak(u)});
       setTimeout(()=>{if(!started&&!fb)retry()},2500)},120)}catch{aiSet('idle')}}
 function voicePicker(){const v=itVoices();const el=$('#vpick');if(!el)return;if(!v.length){el.innerHTML='<div class="hint">Nessuna voce italiana trovata su questo dispositivo.</div>';return}
   const cur=pickVoice();el.innerHTML='<div class="lab">Voce di FLA-Tech</div>'+v.map(x=>'<button type="button" class="btn vp'+(cur&&cur.name===x.name?' on':'')+'" data-vn="'+esc(x.name)+'" style="margin-bottom:6px">'+esc(x.name.replace(/Microsoft |Google /,''))+(cur&&cur.name===x.name?' ✓':'')+'</button>').join('');
   el.querySelectorAll('[data-vn]').forEach(b=>b.onclick=()=>{lset('flat_vname',b.dataset.vn);voicePicker();speak('Ciao, sono FLA-Tech. Questa è la mia voce.')})}
 function reply(t){t=doomize(t);const el=$('#vout');if(!el){speak(t);return}clearInterval(tw);el.textContent='';let i=0;tw=setInterval(()=>{el.textContent=t.slice(0,++i);if(i>=t.length)clearInterval(tw)},24);speak(t)}
 const status=t=>{const el=$('#vst');if(el)el.textContent=t};
+/* modalità conversazione */
+let convo=false,convoMiss=0;
+function convoBtn(){const b=$('#convbtn');if(b){b.textContent=convo?'Conversazione attiva · tocca per fermare':'Conversazione';b.classList.toggle('on',convo)}}
+function convoOff(){convo=false;convoMiss=0;convoBtn()}
+function convoNext(){if(!convo||!$('#vtr'))return;setTimeout(()=>{if(convo&&$('#vtr'))listen()},500)}
+function convoToggle(){if(convo){convoOff();stopListen();aiSet('idle');return}convo=true;convoMiss=0;convoBtn();listen()}
 function micState(on){const m=$('#micbtn');if(m)m.classList.toggle('live',on)}
 function stopListen(){try{if(rec){rec.onend=null;rec.abort()}}catch{}rec=null;micState(false)}
 function openVoice(hub){
   wakeHalt();
   try{if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}}catch{}
   openSheet(`<h3>Voce</h3><div class="lab" id="vst">Tocca il microfono e parla</div><div class="vtr" id="vtr"></div><div class="vout" id="vout"></div>
-  <button class="btn" type="button" data-act="listen" style="margin-bottom:12px">Parla di nuovo</button>
+  <button class="btn" type="button" data-act="listen" style="margin-bottom:12px">Parla di nuovo</button>${hub?'<button class="btn" id="convbtn" type="button" data-act="convo" style="margin-bottom:12px">Conversazione</button>':''}
   <details style="margin-bottom:10px"><summary class="lab" style="cursor:pointer">Cambia voce</summary><div id="vpick"></div></details><form id="vf" autocomplete="off"><input id="vi" placeholder="oppure scrivi un comando" enterkeyhint="send"></form>
   <div class="hint">Prova: <code>aggiungi spesa 20 benzina</code> <code>quanto resta</code> <code>quanto ho speso oggi</code> <code>stipendio 1320</code> <code>apri fisse</code> <code>annulla ultima</code></div>`.replace('<h3>Voce</h3>',hub?'<h3>Parla con me</h3>':'<h3>Voce</h3>'));
   $('#vf').onsubmit=e=>{e.preventDefault();const t=$('#vi').value.trim();$('#vi').value='';if(t){$('#vtr').textContent=t;run(t)}};
@@ -1129,11 +1135,12 @@ function listen(){
   let fin='',last='';
   rec.onstart=()=>{status('Ti ascolto…');micState(true);aiSet('listen');aiCap('')};
   rec.onresult=e=>{let t='';for(let i=e.resultIndex;i<e.results.length;i++){t+=e.results[i][0].transcript;if(e.results[i].isFinal)fin=t}last=t;const el=$('#vtr');if(el)el.textContent=t};
-  rec.onerror=e=>{aiSet('idle');status(e.error==='not-allowed'||e.error==='service-not-allowed'?'Microfono negato: consentilo dalle impostazioni del browser.':'Non ho sentito bene, riprova.')};
-  rec.onend=()=>{micState(false);const t=(fin||last||'').trim();if(t)run(t);else{status('Tocca il microfono e parla');aiSet('idle')}};
+  rec.onerror=e=>{aiSet('idle');if(e.error==='not-allowed'||e.error==='service-not-allowed')convoOff();status(e.error==='not-allowed'||e.error==='service-not-allowed'?'Microfono negato: consentilo dalle impostazioni del browser.':'Non ho sentito bene, riprova.')};
+  rec.onend=()=>{micState(false);const t=(fin||last||'').trim();if(t){convoMiss=0;run(t)}else{status('Tocca il microfono e parla');aiSet('idle');if(convo){if(++convoMiss>=2){convoOff();status('Conversazione finita')}else setTimeout(()=>{if(convo)listen()},300)}}};
   try{rec.start()}catch{}
 }
 async function run(t){
+  if(convo&&/^(basta|stop|fine|chiudi|ciao ciao)( la)?( conversazione)?$/.test(norm(t))){convoOff();stopListen();reply('Va bene, a dopo.');return}
   status('Elaboro…');aiSet('think');
   try{const inFin=appOpen&&appEl&&appEl.id==='sq-finanze',bt=inFin?brainFind(norm(t).replace(/^(ehi|hey|ciao|oh)?\s*(fla ?tech|fla)\b[ ,]*/,'')):null;const r=await((inFin&&!bt)?command(t):hubCommand(t));try{if(lastUnk&&typeof r==='string'&&!/^Non ho capito/.test(r)&&Date.now()-lastUnk.ts<45000&&!(inFin&&!bt)){const lu=lastUnk;lastUnk=null;autoLearn(lu.p,t)}}catch{};status('Tocca il microfono per un altro comando');reply(r);liveGo()}
   catch(e){reply(e.message==='auth'?'Sessione scaduta, rientra.':'Qualcosa è andato storto: '+e.message);liveGo()}
@@ -2017,7 +2024,7 @@ function hubSet(id,b,s){const e=document.querySelector('#'+id+' .dt');if(e)e.inn
 /* ---------- Briefing del mattino ---------- */
 async function briefing(force){
   const n=new Date(),m=n.getHours()*60+n.getMinutes();
-  if(!force){if(m<9*60+7||m>9*60+20)return;if(lget('flat_brief')===today())return}
+  if(!force){if(m<6*60||m>12*60+30)return;if(lget('flat_brief')===today())return}
   lset('flat_brief',today());
   try{await ensureFin()}catch{}
   const p=['Buongiorno Flavio.'];
@@ -2027,7 +2034,9 @@ async function briefing(force){
   try{if(D.exp&&D.exp.length){const y=new Date();y.setDate(y.getDate()-1);const sp=sum(D.exp.filter(x=>x.spent_on===ymd(y)));p.push('Ieri hai speso '+Math.round(sp)+' euro.')}
     const c=D.inc&&D.inc.length?curCycle():null;if(c)p.push('Nel ciclo ti restano '+Math.round(c.left)+' euro.')}catch{}
   try{if(GOAL&&GOAL.target>0)p.push('Obiettivo '+GOAL.name+': '+Math.round(GOAL.saved/GOAL.target*100)+' per cento.')}catch{}
-  const txt=p.join(' ');aiCap(txt,true);speak(txt)}
+  let txt=p.join(' ');
+  try{const h=await aiPlain('Fammi il buongiorno parlato: al massimo 3 frasi naturali e calde, che dicano meteo, impegni di oggi e quanto resta nel ciclo se ci sono. Non inventare nulla. Nessun comando.',txt);if(h)txt=h}catch{}
+  aiCap(txt,true);speak(txt)}
 async function hubData(){
   try{paintRem()}catch{}
   try{const c=(typeof D!=='undefined'&&D.inc&&D.inc.length)?curCycle():null;hubSet('sq-finanze',c?eur(c.left):'Finanze',c?'restano nel ciclo':'tocca per aprire')}catch{}
@@ -2588,7 +2597,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v107'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v109'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
@@ -2808,6 +2817,7 @@ function aiCtx(q){
   try{const r=buildRem().slice(0,10);if(r.length)L.push('Prossimi impegni: '+r.map(x=>remWhen(x)+(x.time?' '+x.time:'')+' '+(x.t||x.label||'')).join('; '));else L.push('Nessun impegno nei prossimi giorni.')}catch{}
   if(/spes|spend|soldi|budget|euro|€|stipend|risparm|quanto|ciclo|mese|guadagn|entrat|uscit/.test(q.toLowerCase())){
     try{const c=curCycle();if(c){const cat={};for(const x of c.exp)cat[x.category||'altro']=(cat[x.category||'altro']||0)+x.amount;const top=Object.entries(cat).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>k+' '+eur(v)).join(', ');L.push('Finanze, ciclo dal '+c.start+': entrate '+eur(c.income)+', spese '+eur(c.spent)+', restano '+eur(c.left)+'. Spese per categoria: '+top)}}catch{}}
+  try{const g=gsearch(q);if(g.length)L.push('Dati trovati nei dati di Flavio per questa richiesta: '+g.map(x=>x.t).join('; '))}catch{}
   return L.join('\n')}
 async function aiFallback(raw){
   if(aiBusy||lget('flat_ai')===false||!navigator.onLine)return null;
@@ -2816,16 +2826,40 @@ async function aiFallback(raw){
   try{
     if(S.expires_at-60<Date.now()/1000){if(!(await refresh())){dropSession();return null}}
     if(Date.now()-aiHT>6e5)AIH=[];
-    const r=await fetch(SB+'/functions/v1/fla-ai',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+S.access_token,'Content-Type':'application/json'},body:JSON.stringify({q:raw,ctx:aiCtx(raw),hist:AIH})});
+    const r=await fetch(SB+'/functions/v1/fla-ai',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+S.access_token,'Content-Type':'application/json'},body:JSON.stringify({q:raw+MOODQ,ctx:aiCtx(raw),hist:AIH})});
     if(r.status===503)return'Haiku non è ancora collegato: manca la chiave API tra i segreti della funzione su Supabase.';
     if(r.status===429)return'Per oggi ho finito le domande intelligenti. Domani si riparte.';
     if(!r.ok)return null;
-    const j=await r.json();let say=String(j.say||'').trim();
+    const j=await r.json();const tg=moodTag(j.say);let say=tg.say;if(tg.mood)moodSet(tg.mood);
     if(j.cmd){try{const res=await hubCommand(j.cmd,false);if(typeof res==='string'&&!/^Non ho capito/.test(res)&&!say)say=res}catch{}}
     if(!say)return null;
     AIH.push({role:'user',content:raw},{role:'assistant',content:say});AIH=AIH.slice(-6);aiHT=Date.now();
     return say;
   }catch{return null}finally{aiBusy=false}}
+/* umore del reattore */
+const MOODH={calmo:200,felice:48,entusiasta:28,ironico:272,preoccupato:356,rilassato:140};
+const MOODQ='\n(Inizia il campo "say" con un solo tag di umore tra [calmo] [felice] [entusiasta] [ironico] [preoccupato] [rilassato], quello che descrive come ti senti tu mentre rispondi. Esempio: "[felice] Certo!")';
+let moodT=0;
+function moodSet(m){try{const rx=$('#rx');if(!rx||getComputedStyle(rx).display==='none'||!(m in MOODH))return;const r=document.documentElement.style;r.setProperty('--rh',MOODH[m]);r.setProperty('--rs',1);clearTimeout(moodT);if(m!=='calmo')moodT=setTimeout(()=>{r.removeProperty('--rh');r.removeProperty('--rs')},30000);else{r.removeProperty('--rh');r.removeProperty('--rs')}}catch{}}
+function moodTag(x){const m=/^\s*\[([a-zàèé]+)\]\s*/i.exec(x||'');if(!m)return{say:String(x||'').trim(),mood:null};return{say:x.slice(m[0].length).trim(),mood:m[1].toLowerCase()}}
+async function aiPlain(q,ctx){
+  if(aiBusy||!S||lget('flat_ai')===false||!navigator.onLine)return null;
+  aiBusy=true;
+  try{
+    if(S.expires_at-60<Date.now()/1000){if(!(await refresh())){dropSession();return null}}
+    const r=await fetch(SB+'/functions/v1/fla-ai',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+S.access_token,'Content-Type':'application/json'},body:JSON.stringify({q:q+MOODQ,ctx,hist:[]})});
+    if(!r.ok)return null;const j=await r.json();const tg=moodTag(j.say);if(tg.mood)moodSet(tg.mood);return tg.say||null;
+  }catch{return null}finally{aiBusy=false}}
+/* ---------- Ricerca globale ---------- */
+const GS_STOP=new Set('quando quanto quanta quanti quante come dove cosa chi che per con una uno dei del della delle degli dello nel nella nelle sui sul sulla sono ho hai ha abbiamo pagato pagata speso speso cerca cercami trova ricerca mostrami dimmi fammi vedere il lo la le gli un di da in su al alle allo mio mia miei mie ultima ultimo'.split(' '));
+function gsearch(q){
+  const tk=norm(q).replace(/['’]/g,' ').split(' ').filter(w=>w.length>=3&&!GS_STOP.has(w));if(!tk.length)return[];
+  const out=[],sc=txt=>{const n=norm(txt);let k=0;for(const w of tk)if(n.includes(w.length>5?w.slice(0,-1):w))k++;return k};
+  try{for(const d of Object.keys(CAL))for(const e of CAL[d]){const k=sc(e.t);if(k)out.push({k,d,t:'Evento '+dlabel(d)+(e.time?' '+e.time:'')+': '+e.t})}}catch{}
+  try{for(const x of TK){const k=sc(x.t+' '+(x.nb||''));if(k)out.push({k,d:x.due||'0',t:'Quaderno ('+(x.nb||'Generale')+', '+(x.st==='done'?'fatta':'da fare')+'): '+x.t})}}catch{}
+  try{if(!finLocked()&&D.exp)for(const x of D.exp){const k=sc((x.merchant||'')+' '+(x.category||'')+' '+(x.note||''));if(k)out.push({k,d:x.spent_on,t:'Spesa '+dlabel(x.spent_on)+': '+(x.merchant||x.category)+' '+eur(x.amount)})}}catch{}
+  try{if(!finLocked()&&D.inc)for(const x of D.inc){const k=sc(x.source||'');if(k)out.push({k,d:x.received_on,t:'Entrata '+dlabel(x.received_on)+': '+x.source+' '+eur(x.amount)})}}catch{}
+  out.sort((a,b)=>b.k-a.k||String(b.d).localeCompare(String(a.d)));return out.slice(0,8)}
 async function aiOrUnknown(raw){const a=await aiFallback(raw);return a!==null?a:brainUnknown(raw)}
 
 const FZV=new Set(('torcia accendi accendimi spegni spegnimi timer minuti minuto secondi secondo ora ore musica metti mettimi suona suonami canzone brano playlist pausa prossima prossimo precedente volume alza abbassa calendario evento appuntamento agenda ricordami promemoria domani dopodomani oggi stasera lunedi martedi mercoledi giovedi venerdi sabato domenica meteo piove pioggia ombrello luna temperatura nuvoloso sole spesa spese stipendio entrata euro quaderno task apri vai portami naviga chiama telefona scrivi manda cerca google claude chatgpt whatsapp instagram youtube spotify tiktok calcolatrice sveglia impostazioni galleria fotocamera rubrica obiettivo briefing buongiorno buonanotte aggiorna stile reattore tema finanze finanza cicli fisse ciclo statistiche contatto contatti salva elimina cancella sposta rimanda aggiungi segna crea ash scheda dado tira lancia danni cura riposo ispirazione immagine genera disegna foto casa lavoro mappa mappa cervello minigiochi giochi app fatto resta rimane speso speso quanto ultima annulla eventi appuntamenti avvisami ripeti ripetere ripetizione ripetizioni smetti elenco prima poi anche tutti ogni giorno giorni settimana mese chiamata messaggio risposta vorrei potresti puoi dimmi dammi fammi mostrami portami dopo adesso subito').split(/\s+/).filter(Boolean));
@@ -2958,7 +2992,9 @@ async function weekly(force){
   const n=new Date();
   if(!force){if(n.getDay()!==0||n.getHours()*60+n.getMinutes()<20*60||n.getHours()*60+n.getMinutes()>20*60+30)return;if(lget('flat_weekly')===today())return}
   lset('flat_weekly',today());
-  const txt=await weeklyText();aiCap(txt,true);speak(txt)}
+  let txt=await weeklyText();
+  try{const h=await aiPlain('Commenta la mia settimana in modo ironico e affettuoso, come un amico che mi prende in giro: massimo 3 frasi, usa solo questi dati, nessun comando. Il tag di umore deve essere [ironico].',txt);if(h)txt=h}catch{}
+  aiCap(txt,true);speak(txt)}
 async function weeklyText(){
   const p=['Riepilogo della settimana.'];
   try{await ensureFin();
@@ -2988,6 +3024,8 @@ async function hubCommand(raw,inner,fz){
   if(!inner&&/^(grazie|ok|va bene|perfetto|bene|ciao)$/.test(t))return'Ok.';
   if(/\bbuona ?notte\b/.test(t)){if(wake){wakeSet(false,null);return'Buonanotte Flavio. Spengo l\u2019ascolto.'}return'Buonanotte Flavio.'}
   {const tm=timeCommand(t);if(tm)return tm}
+  if(/\b(commenta|giudica|prendimi in giro|sfottimi)\b/.test(t)&&/\b(spese|settimana|soldi)\b/.test(t)){weekly(true);return''}
+  {const m=/^(?:cerca|cercami|trova|ricerca)\s+(?:nei miei dati\s+|tra i miei dati\s+)?(.+)$/.exec(t);if(m){if(!D.exp||!D.exp.length){try{await ensureFin()}catch{}}const g=gsearch(m[1]);return g.length?'Ho trovato: '+g.map(x=>x.t).join('. ')+'.':'Non ho trovato niente su «'+m[1]+'».'}}
   {const g=goalCommand(t);if(g)return g}
   {const w=waCommand(raw);if(w)return w}
   {const w=webCommand(raw);if(w)return w}
@@ -3078,7 +3116,7 @@ document.addEventListener('click',async e=>{
   else if(a==='inc')formIncome();
   else if(a==='menu')menu();
   else if(a==='voice')openVoice();
-  else if(a==='listen')listen();
+  else if(a==='listen')listen();else if(a==='convo')convoToggle();
   else if(a==='row'){openRow=openRow===id?null:id;render()}
   else if(a==='fix'){const x=D.exp.find(y=>y.id===id);if(!x)return;try{await api('expenses?id=eq.'+id,{method:'PATCH',body:JSON.stringify({is_fixed:!x.is_fixed})});await loadAll();render()}catch(er){toast(er.message)}}
   else if(a==='del'){if(!confirm('Eliminare questa spesa?'))return;try{await api('expenses?id=eq.'+id,{method:'DELETE'});openRow=null;await loadAll();render();toast('Spesa eliminata')}catch(er){toast(er.message)}}
