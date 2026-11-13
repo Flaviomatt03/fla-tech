@@ -656,7 +656,8 @@ html[data-rx=sgd] #hub::before{background:radial-gradient(ellipse 110px 34px at 
 @keyframes sgCloud{from{transform:translateX(-9%)}to{transform:translateX(9%)}}
 html[data-rx=sgn] #hub::before{background:radial-gradient(2px 2px at 12% 14%,#fff,transparent),radial-gradient(2px 2px at 78% 10%,#cfeeff,transparent),radial-gradient(1.5px 1.5px at 32% 26%,#fff,transparent),radial-gradient(2px 2px at 90% 38%,#fff,transparent),radial-gradient(1.5px 1.5px at 8% 60%,#cfeeff,transparent),radial-gradient(2px 2px at 60% 78%,#fff,transparent),radial-gradient(1.5px 1.5px at 22% 90%,#fff,transparent),radial-gradient(2px 2px at 88% 84%,#cfeeff,transparent);animation:sgTw 4s ease-in-out infinite alternate}
 @keyframes sgTw{from{opacity:.35}to{opacity:1}}
-html[data-rx=sgd] .shapes::before,html[data-rx=sgn] .shapes::before{content:'';position:absolute;left:50%;top:calc(50% - 3dvh);width:min(78vw,300px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;opacity:0;transition:opacity 1s .6s;-webkit-mask:radial-gradient(circle,transparent 30%,#000 32%,#000 66%,transparent 68%);mask:radial-gradient(circle,transparent 30%,#000 32%,#000 66%,transparent 68%);animation:spin 50s linear infinite}
+html[data-rx=sgd] .shapes::before,html[data-rx=sgn] .shapes::before{content:'';position:absolute;left:50%;top:calc(50% - 3dvh);width:min(78vw,300px);aspect-ratio:1;margin:calc(min(78vw,300px)/-2) 0 0 calc(min(78vw,300px)/-2);border-radius:50%;opacity:0;transition:opacity 1s .6s;-webkit-mask:radial-gradient(circle,transparent 30%,#000 32%,#000 66%,transparent 68%);mask:radial-gradient(circle,transparent 30%,#000 32%,#000 66%,transparent 68%);animation:sgSpin 50s linear infinite}
+@keyframes sgSpin{to{transform:rotate(360deg)}}
 html[data-rx=sgd] .shapes::before{background:repeating-conic-gradient(rgba(255,255,255,.55) 0 5deg,transparent 5deg 15deg)}
 html[data-rx=sgn] .shapes::before{background:repeating-conic-gradient(rgba(92,200,245,.35) 0 3deg,transparent 3deg 15deg)}
 html[data-rx=sgd] #hub.open .shapes::before,html[data-rx=sgn] #hub.open .shapes::before{opacity:1}
@@ -2587,7 +2588,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v102'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v103'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
