@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Duetto</title>
+  <meta name="description" content="Spotify e YouTube nella stessa playlist">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Duetto">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://i.scdn.co">
+  <link rel="preconnect" href="https://i.ytimg.com">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5.2v13.6a1 1 0 0 0 1.52.85l11-6.8a1 1 0 0 0 0-1.7l-11-6.8A1 1 0 0 0 7.5 5.2Z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M4.5 5.6v12.8a1 1 0 0 0 1.55.83L15.5 13v5a1 1 0 0 0 1 1h1.5a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-1.5a1 1 0 0 0-1 1v5L6.05 4.77a1 1 0 0 0-1.55.83Z" fill="currentColor"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19.5 5.6v12.8a1 1 0 0 1-1.55.83L8.5 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1v5l9.45-6.23a1 1 0 0 1 1.55.83Z" fill="currentColor"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="19" cy="12" r="1.9" fill="currentColor"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="i-plus-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.7" fill="none"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.5 12.5 4 4 9-9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-check-fill" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="m7.5 12.3 3 3 6-6.3" stroke="var(--bg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.7" fill="none"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24"><path d="M4.5 4v16M9.5 4v16M14 4.6l5.6 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3" stroke="currentColor" stroke-width="2" fill="none"/><path d="m15.6 15.6 4.4 4.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-2.6-1.5L14 2.6h-4l-.5 2.4a7.6 7.6 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-.9a7.6 7.6 0 0 0 2.6 1.5l.5 2.4h4l.5-2.4a7.6 7.6 0 0 0 2.6-1.5l2.3.9 2-3.4-2-1.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M3 7h3.2c2 0 3.2 1 4.3 2.7l2.6 4.6c1.1 1.7 2.3 2.7 4.3 2.7H20M3 17h3.2c1.5 0 2.5-.6 3.3-1.6M14.3 8.6c.8-1 1.8-1.6 3.3-1.6H20M17.5 4l3 3-3 3M17.5 14l3 3-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M5 11V9.5A2.5 2.5 0 0 1 7.5 7H19m0 0-3-3m3 3-3 3M19 13v1.5a2.5 2.5 0 0 1-2.5 2.5H5m0 0 3 3m-3-3 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-queue" viewBox="0 0 24 24"><path d="M4 6h11M4 11h11M4 16h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" fill="none"/><path d="M15 14.5v5.2a1 1 0 0 0 1.5.86l3.9-2.6a1 1 0 0 0 0-1.72l-3.9-2.6A1 1 0 0 0 15 14.5Z" fill="currentColor"/></symbol>
+    <symbol id="i-next-up" viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" fill="none"/><path d="M18 11v8m-3-3 3 3 3-3" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7.5 12h9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-grip" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4h4M6.5 7l.9 12a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4l.9-12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11m0-11-11 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="i-device" viewBox="0 0 24 24"><rect x="6.5" y="3" width="11" height="18" rx="2.5" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="12" cy="15.5" r="2.2" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/></symbol>
+    <symbol id="i-sync" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 0 1-13 5.1M4.5 12a7.5 7.5 0 0 1 13-5.1M17.5 3v4h-4M6.5 21v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill="none"/><circle cx="6.5" cy="18" r="2.5" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="16.5" cy="16" r="2.5" stroke="currentColor" stroke-width="1.6" fill="none"/></symbol>
+    <symbol id="i-x-fill" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="currentColor"/><path d="m9 9 6 6m0-6-6 6" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 3.5h6l-1 6 3.5 3.5v1.5h-11V13L10 9.5l-1-6ZM12 14.5V21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+    <symbol id="i-spotify" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#1DB954"/><path d="M7 9.6c3.4-1 7.4-.7 10.3 1M7.6 12.6c2.8-.8 6-.5 8.4.9M8.2 15.4c2.2-.6 4.6-.4 6.6.7" stroke="#000" stroke-width="1.5" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="i-youtube" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4.5" fill="#FF0033"/><path d="M10 9v6l5.2-3L10 9Z" fill="#fff"/></symbol>
+  </svg>
+
+  <div id="app">
+    <main id="view" tabindex="-1"></main>
+
+    <div id="mini" class="mini glass" hidden>
+      <button class="mini-open" id="mini-open" aria-label="Apri il player">
+        <span class="slide">
+          <span class="mini-art"><img id="mini-art" alt="" width="40" height="40"></span>
+          <span class="mini-text">
+            <span id="mini-title" class="mini-title"></span>
+            <span class="mini-sub"><i id="mini-dot" class="src"></i><i id="mini-dot2" class="src youtube" hidden></i><span id="mini-artist"></span></span>
+          </span>
+        </span>
+      </button>
+      <button class="ibtn mini-play" id="mini-play" aria-label="Riproduci"><svg><use href="#i-play"/></svg></button>
+      <button class="ibtn" id="mini-next" aria-label="Successivo"><svg><use href="#i-next"/></svg></button>
+    </div>
+
+    <div id="importbar" class="importbar" inert><button class="btn accent" id="import-btn"></button></div>
+
+    <nav class="tabbar glass" aria-label="Sezioni">
+      <a href="#/" data-tab="library"><svg aria-hidden="true"><use href="#i-library"/></svg>Libreria</a>
+      <a href="#/search" data-tab="search"><svg aria-hidden="true"><use href="#i-search"/></svg>Cerca</a>
+    </nav>
+  </div>
+
+  <section id="full" class="full" aria-label="In riproduzione" inert>
+    <div class="full-in">
+      <div class="grabber" aria-hidden="true"></div>
+      <header class="full-top">
+        <button class="ibtn" data-fp="close" aria-label="Chiudi"><svg><use href="#i-down"/></svg></button>
+        <span id="fp-context" class="full-context"></span>
+        <button class="ibtn" data-fp="more" aria-label="Altro"><svg><use href="#i-more"/></svg></button>
+      </header>
+      <div class="full-art" id="fp-artbox"><img id="fp-art" alt="" draggable="false"></div>
+      <div class="full-meta">
+        <div class="full-text">
+          <div id="fp-title" class="full-title"></div>
+          <div class="full-artist"><i id="fp-dot" class="src"></i><i id="fp-dot2" class="src youtube" hidden></i><span id="fp-artist"></span></div>
+        </div>
+        <button class="ibtn" data-fp="add" aria-label="Aggiungi a playlist"><svg><use href="#i-plus-circle"/></svg></button>
+      </div>
+      <div class="scrub">
+        <div class="bar" id="fp-bar" role="slider" tabindex="0" aria-label="Posizione nel brano" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="bar-track"><div class="bar-fill" id="fp-fill"></div></div>
+          <div class="bar-knob" id="fp-knob"></div>
+        </div>
+        <div class="scrub-times"><span id="fp-pos">0:00</span><span id="fp-dur">0:00</span></div>
+      </div>
+      <div class="full-ctrl">
+        <button class="ibtn lg" data-fp="prev" aria-label="Precedente"><svg><use href="#i-prev"/></svg></button>
+        <button class="ibtn xl" data-fp="toggle" aria-label="Riproduci"><svg><use href="#i-play"/></svg></button>
+        <button class="ibtn lg" data-fp="next" aria-label="Successivo"><svg><use href="#i-next"/></svg></button>
+      </div>
+      <footer class="full-foot">
+        <button class="ibtn" data-fp="shuffle" aria-label="Casuale" aria-pressed="false"><svg><use href="#i-shuffle"/></svg></button>
+        <button class="ibtn devbtn" data-fp="device" aria-label="Dispositivo Spotify"><svg><use href="#i-device"/></svg><span id="fp-device"></span></button>
+        <button class="ibtn" data-fp="queue" aria-label="Coda"><svg><use href="#i-queue"/></svg></button>
+        <button class="ibtn" data-fp="repeat" aria-label="Ripeti" aria-pressed="false"><svg><use href="#i-repeat"/></svg><b class="one" aria-hidden="true">1</b></button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- YouTube: audio puro senza pubblicità (elemento audio). Se il server audio non risponde
+       si usa il player ufficiale, nascosto: quando iOS ne blocca l'avvio viene spostato,
+       invisibile, sopra il pulsante play, così il tocco lo sblocca. -->
+  <audio id="yt-audio" preload="auto" playsinline></audio>
+  <div id="yt-host" class="yt-host" aria-hidden="true"><div id="yt-player"></div></div>
+
+  <dialog id="sheet" class="sheet"></dialog>
+  <div id="toast" class="toast glass" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

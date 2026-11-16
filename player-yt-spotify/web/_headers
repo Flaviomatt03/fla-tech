@@ -1,0 +1,6 @@
+# Usato da Cloudflare Pages / Netlify
+/sw.js
+  Cache-Control: no-cache
+/*
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
