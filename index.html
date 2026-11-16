@@ -764,6 +764,8 @@ html[data-rx=doom3] .shape .nm{font:700 11px var(--tfont);letter-spacing:.2em;co
 @media (prefers-reduced-motion:reduce){.mk .cg,.mk .cg i,.mk .orb,.mk .fl b{animation:none}}
 .mk canvas{position:absolute;left:-25%;top:-25%;width:150%;height:150%;pointer-events:none;display:none}
 .mk.g3 canvas{display:block}.mk.g3 .cg{display:none}.mk.g3 .orb{opacity:.55}
+.hrow{display:flex;align-items:center;gap:4px}.hrow .mrow2{flex:1;min-width:0}.hx{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:var(--panel);color:inherit;font:700 15px var(--sans);cursor:pointer;transition:transform .2s}.hx:active{transform:scale(.88)}
+.msearch .hsb{flex:none;border:0;border-radius:999px;padding:9px 12px;font:700 13px var(--sans);background:var(--green);color:#06281a;cursor:pointer;margin-right:2px}.msearch .hsb.sp{background:var(--panel2);color:inherit}.mrow2 .plus{font-size:22px;color:var(--green);margin-right:4px}
 </style>
 </head>
 <body>
@@ -1816,6 +1818,112 @@ async function taskCommand(raw){
   if(!$('#tkb')&&/\b(apri|mostra|vai)\b/i.test(r)){openApp($('#qd-task'),'task');return'Apro il quaderno.'}
   return'Hai '+open.length+' task aperte. Le prime: '+open.slice(0,3).map(x=>x.t+(x.due?' ('+tkDue(x.due).toLowerCase()+')':'')).join(', ')+'.'}
 
+/* ---------- Playlist ibride (Spotify + YouTube) ---------- */
+const MP={pl:lget('flat_mp')||[],on:false,pid:'',ti:-1,cur:null,run:null,view:'',res:null,msg:'',q:'',yk:lget('flat_ytk')||'',ytPlaying:false,ytPos:0,ytDur:0,vol:100,maxProg:0,wasPl:false,k:0,tm:0,confirm:''};
+const mpSave=()=>lset('flat_mp',MP.pl);
+const mpDec=x=>{const t=document.createElement('textarea');t.innerHTML=x;return t.value};
+function mpYT(){if(!(MP.on&&MP.cur&&MP.cur.s==='yt'))return null;return{t:MP.cur.t,a:MP.cur.a||'',img:MP.cur.img?{url:MP.cur.img}:null,p:(MP.ytPos||0)*1000,d:(MP.ytDur||0)*1000}}
+const mpRepaint=()=>{if($('#musl'))paintLists();if($('#musn'))paintNow(true)};
+function mpHtml(){
+  const P=MP.pl,v=MP.view?P.find(x=>x.id===MP.view):null;
+  let h='<h4 class="mh">Playlist ibride</h4>';
+  if(MP.msg)h+='<div class="mmsg">'+esc(MP.msg)+'</div>';
+  if(!v){
+    h+='<div class="mlist">'+P.map(p=>'<button class="mrow2" data-m="hopen" data-u="'+p.id+'"><span class="th ph">♪</span><span class="mt"><b>'+esc(p.name)+(MP.on&&MP.pid===p.id?' ▸':'')+'</b><small>'+p.tr.length+' brani · '+p.tr.filter(x=>x.s==='sp').length+' Spotify · '+p.tr.filter(x=>x.s==='yt').length+' YouTube</small></span></button>').join('')+(P.length?'':'<div class="empty">Nessuna playlist ancora. Creane una e mescola brani Spotify e YouTube.</div>')+'</div>'+
+      '<form id="hnf" class="msearch" autocomplete="off"><input id="hnn" placeholder="Nome della nuova playlist" enterkeyhint="done"><button type="submit" class="msb" aria-label="Crea">+</button></form>';
+    return h}
+  h+='<div class="mfix"><button data-m="hplay" data-u="'+v.id+'">▶ Riproduci</button><button data-m="hback">‹ Tutte</button></div><h4 class="mh">'+esc(v.name)+'</h4><div class="mlist">'+
+    v.tr.map((x,i)=>'<div class="hrow"><button class="mrow2" data-m="hpt" data-u="'+i+'">'+(x.img?'<img class="th" src="'+esc(x.img)+'" alt="" loading="lazy">':'<span class="th ph">♪</span>')+'<span class="mt"><b>'+esc(x.t)+(MP.on&&MP.pid===v.id&&MP.ti===i?' ▸':'')+'</b><small>'+(x.s==='yt'?'YouTube':'Spotify')+(x.a?' · '+esc(x.a):'')+'</small></span></button><button class="hx" data-m="hup" data-u="'+i+'" aria-label="Sposta su">↑</button><button class="hx" data-m="hrm" data-u="'+i+'" aria-label="Togli">✕</button></div>').join('')+
+    (v.tr.length?'':'<div class="empty">Vuota. Cerca qui sotto e aggiungi brani.</div>')+'</div>';
+  h+='<h4 class="mh">Aggiungi brani</h4>';
+  if(!MP.yk)h+='<div class="mmsg">Per cercare su YouTube serve una chiave gratuita di Google (console.cloud.google.com → nuovo progetto → abilita YouTube Data API v3 → Credenziali → Chiave API). Incollala qui sotto: resta solo su questo telefono. I link YouTube incollati funzionano anche senza.</div><form id="hkf" class="msearch" autocomplete="off"><input id="hkq" placeholder="Chiave API di YouTube" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="submit" class="msb" aria-label="Salva">OK</button></form>';
+  h+='<form id="hsf" class="msearch" autocomplete="off"><input id="hsq" value="'+esc(MP.q||'')+'" placeholder="Cerca o incolla un link YouTube"><button type="submit" data-s="yt" class="hsb">YouTube</button>'+(SP?'<button type="submit" data-s="sp" class="hsb sp">Spotify</button>':'')+'</form>';
+  const ni=spNow&&spNow.item&&!mpYT()?spNow.item:null;
+  if(ni)h+='<button class="mrow2" data-m="hnow"><span class="th ph">+</span><span class="mt"><b>Aggiungi «'+esc(ni.name)+'»</b><small>In riproduzione su Spotify</small></span></button>';
+  if(MP.res)h+='<div class="mlist">'+(MP.res.items.length?MP.res.items.map((x,i)=>'<button class="mrow2" data-m="hadd" data-u="'+i+'">'+(x.img?'<img class="th" src="'+esc(x.img)+'" alt="" loading="lazy">':'<span class="th ph">♪</span>')+'<span class="mt"><b>'+esc(x.t)+'</b><small>'+(x.s==='yt'?'YouTube':'Spotify')+(x.a?' · '+esc(x.a):'')+'</small></span><b class="plus">+</b></button>').join(''):'<div class="empty">Nessun risultato.</div>')+'</div>';
+  h+='<div class="mfix" style="margin-top:22px"><button data-m="hdel" style="background:var(--panel2);color:inherit">'+(MP.confirm===v.id?'Tocca ancora per eliminare':'Elimina playlist')+'</button></div>';
+  return h}
+function mpClick(m,u){
+  const v=MP.pl.find(x=>x.id===MP.view);
+  if(m==='hopen'){MP.view=u;MP.res=null;MP.msg='';MP.q='';MP.confirm=''}
+  else if(m==='hback'){MP.view='';MP.res=null;MP.msg='';MP.confirm=''}
+  else if(m==='hplay'){const p=MP.pl.find(x=>x.id===u);if(p&&p.tr.length)mpPlayAt(u,0);else MP.msg='Aggiungi prima qualche brano.'}
+  else if(m==='hpt'&&v){mpPlayAt(v.id,+u);return}
+  else if(m==='hrm'&&v){v.tr.splice(+u,1);if(MP.on&&MP.pid===v.id){if(+u<MP.ti)MP.ti--;else if(+u===MP.ti){MP.cur=v.tr[MP.ti]||MP.cur}}mpSave()}
+  else if(m==='hup'&&v&&+u>0){const i=+u,t=v.tr[i];v.tr[i]=v.tr[i-1];v.tr[i-1]=t;if(MP.on&&MP.pid===v.id){if(MP.ti===i)MP.ti--;else if(MP.ti===i-1)MP.ti++}mpSave()}
+  else if(m==='hdel'&&v){if(MP.confirm===v.id){if(MP.on&&MP.pid===v.id)mpOff();MP.pl=MP.pl.filter(x=>x.id!==v.id);MP.view='';MP.confirm='';mpSave()}else MP.confirm=v.id}
+  else if(m==='hadd'&&v&&MP.res){const x=MP.res.items[+u];if(x){v.tr.push(Object.assign({},x));mpSave();toast('Aggiunto: '+x.t)}}
+  else if(m==='hnow'&&v&&spNow&&spNow.item){const i=spNow.item,im=(i.album&&i.album.images)||[];v.tr.push({s:'sp',id:i.uri,t:i.name,a:(i.artists||[]).map(a=>a.name).join(', '),img:(im[1]||im[0]||{}).url||'',d:i.duration_ms});mpSave();toast('Aggiunto: '+i.name)}
+  mpRepaint()}
+async function mpSubmit(e){
+  const f=e.target;if(!f||!f.id)return;
+  if(f.id==='hnf'){e.preventDefault();const n=$('#hnn').value.trim();if(!n)return;const p={id:'h'+Date.now().toString(36),name:n,tr:[]};MP.pl.push(p);mpSave();MP.view=p.id;MP.res=null;mpRepaint()}
+  else if(f.id==='hkf'){e.preventDefault();const k=$('#hkq').value.trim();if(k){MP.yk=k;lset('flat_ytk',k);MP.msg='';mpRepaint()}}
+  else if(f.id==='hsf'){e.preventDefault();const q=$('#hsq').value.trim(),src=(e.submitter&&e.submitter.dataset.s)||'yt';if(!q)return;MP.q=q;$('#hsq').blur();MP.msg='Cerco…';mpRepaint();
+    try{MP.res=await(src==='sp'?mpSearchSp(q):mpSearchYt(q));MP.msg=''}catch(er){MP.msg=er.message;MP.res=null}mpRepaint()}}
+async function mpSearchSp(q){const R=await spSearch(q,'track');return{items:R.tracks.map(x=>{const im=(x.album&&x.album.images)||[];return{s:'sp',id:x.uri,t:x.name,a:x.artists.map(a=>a.name).join(', '),img:(im[1]||im[0]||{}).url||'',d:x.duration_ms}})}}
+async function mpSearchYt(q){
+  const lk=q.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/)([\w-]{11})/);
+  if(lk){const id=lk[1];let t='Video YouTube',a='';try{const r=await fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent('https://www.youtube.com/watch?v='+id));if(r.ok){const j=await r.json();t=j.title||t;a=j.author_name||''}}catch{}
+    return{items:[{s:'yt',id,t,a,img:'https://i.ytimg.com/vi/'+id+'/mqdefault.jpg'}]}}
+  if(!MP.yk)throw new Error('Per cercare su YouTube serve la chiave: incollala qui sotto (una volta sola). I link funzionano anche senza.');
+  const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+new URLSearchParams({part:'snippet',type:'video',videoEmbeddable:'true',maxResults:'10',q,key:MP.yk}));
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error('YouTube: '+((j.error&&j.error.message)||('errore '+r.status)));
+  return{items:(j.items||[]).filter(x=>x.id&&x.id.videoId).map(x=>({s:'yt',id:x.id.videoId,t:mpDec(x.snippet.title),a:mpDec(x.snippet.channelTitle||''),img:'https://i.ytimg.com/vi/'+x.id.videoId+'/mqdefault.jpg'}))}}
+/* player YouTube (IFrame API) */
+let ytP=null,ytReady=false,ytQ=null,ytLoading=false;
+function ytEnsure(cb){
+  if(ytP&&ytReady){cb();return}
+  ytQ=cb;if(ytLoading)return;ytLoading=true;
+  let box=document.getElementById('ytbox');if(!box){box=document.createElement('div');box.id='ytbox';box.style.cssText='position:fixed;right:0;bottom:0;width:200px;height:200px;opacity:.02;pointer-events:none;z-index:-1;overflow:hidden';box.innerHTML='<div id="ytp"></div>';document.body.appendChild(box)}
+  window.onYouTubeIframeAPIReady=()=>{ytP=new YT.Player('ytp',{width:200,height:200,playerVars:{playsinline:1,controls:0,rel:0,origin:location.origin},events:{
+    onReady:()=>{ytReady=true;const c=ytQ;ytQ=null;if(c)c()},
+    onStateChange:e=>{const st=e.data;if(st===1)MP.ytPlaying=true;else if(st===2)MP.ytPlaying=false;else if(st===0){MP.ytPlaying=false;mpStep(1)}if(st===1||st===2)mpRepaint()},
+    onError:()=>{toast('Video non riproducibile: passo al prossimo');mpStep(1)}}})};
+  const sc=document.createElement('script');sc.src='https://www.youtube.com/iframe_api';sc.async=true;sc.onerror=()=>{ytLoading=false;MP.msg='Non riesco a caricare YouTube.';mpRepaint()};document.head.appendChild(sc)}
+function mpYtSet(on){if(!(ytP&&ytReady))return;try{if(on)ytP.playVideo();else ytP.pauseVideo()}catch{}MP.ytPlaying=on;mpRepaint()}
+const mpYtToggle=()=>mpYtSet(!MP.ytPlaying);
+function mpYtVol(d){MP.vol=Math.max(0,Math.min(100,MP.vol+d));try{if(ytP&&ytReady)ytP.setVolume(MP.vol)}catch{}paintNow(true)}
+function mpOff(){clearInterval(MP.tm);MP.tm=0;if(ytP&&ytReady){try{ytP.pauseVideo()}catch{}}MP.ytPlaying=false;MP.on=false;MP.cur=null;MP.run=null;MP.pid='';MP.ti=-1;mpRepaint()}
+async function mpPlayAt(pid,ti){
+  const pl=MP.pl.find(x=>x.id===pid),t=pl&&pl.tr[ti];if(!t)return;
+  MP.on=true;MP.pid=pid;MP.ti=ti;MP.cur=t;MP.msg='';MP.ytPos=0;MP.ytDur=0;MP.maxProg=0;MP.wasPl=false;MP.k=0;
+  if(!MP.tm)MP.tm=setInterval(mpTick,1000);
+  mpRepaint();
+  if(t.s==='yt'){
+    MP.run=null;
+    try{if(SP&&spNow&&spNow.is_playing){spPlWant=false;spPlHold=Date.now()+3500;await spApi('/me/player/pause','PUT')}}catch{}
+    MP.ytPlaying=true;ytEnsure(()=>{try{ytP.loadVideoById(t.id);ytP.setVolume(MP.vol)}catch{}});
+  }else{
+    if(ytP&&ytReady){try{ytP.pauseVideo()}catch{}}MP.ytPlaying=false;
+    const uris=[];for(let j=ti;j<pl.tr.length&&pl.tr[j].s==='sp'&&uris.length<80;j++)uris.push(pl.tr[j].id);
+    MP.run={from:ti,uris};spPlWant=true;spPlHold=Date.now()+3500;
+    try{await spPlay({uris})}catch(er){MP.msg=spErr(er);mpRepaint()}
+  }}
+function mpStep(d){
+  const pl=MP.pl.find(x=>x.id===MP.pid);if(!pl)return;
+  if(d<0&&MP.cur&&MP.cur.s==='yt'&&(MP.ytPos||0)>3){try{ytP.seekTo(0,true)}catch{}return}
+  if(d<0&&MP.cur&&MP.cur.s==='sp'&&spNow&&(spNow.progress_ms||0)>3000){spApi('/me/player/seek?position_ms=0','PUT').catch(()=>{});return}
+  const ni=MP.ti+d;
+  if(ni<0)return;
+  if(ni>=pl.tr.length){mpOff();toast('Playlist finita');return}
+  mpPlayAt(pl.id,ni)}
+let mpBusy=false;
+async function mpTick(){
+  if(!MP.on||!MP.cur||mpBusy)return;
+  const pl=MP.pl.find(x=>x.id===MP.pid);if(!pl){mpOff();return}
+  if(MP.cur.s==='yt'){if(ytP&&ytReady){try{MP.ytPos=ytP.getCurrentTime()||0;MP.ytDur=ytP.getDuration()||0}catch{}}if($('#musn'))paintNow();return}
+  if(++MP.k%2)return;
+  mpBusy=true;
+  try{await spRefresh();const it=spNow&&spNow.item;
+    if(it&&MP.run){const k=MP.run.uris.indexOf(it.uri);if(k>=0&&MP.run.from+k!==MP.ti){MP.ti=MP.run.from+k;MP.cur=pl.tr[MP.ti]||MP.cur;MP.maxProg=0;MP.wasPl=false;if($('#musl'))paintLists()}}
+    if(it&&MP.run&&MP.ti===MP.run.from+MP.run.uris.length-1){
+      MP.maxProg=Math.max(MP.maxProg,spNow.progress_ms||0);const playing=!!spNow.is_playing;
+      if(MP.wasPl&&!playing&&it.uri===MP.cur.id&&it.duration_ms-MP.maxProg<12000&&Date.now()>spPlHold){MP.wasPl=false;mpBusy=false;mpStep(1);return}
+      MP.wasPl=playing}
+  }catch{}
+  mpBusy=false}
+
 /* ---------- Musica (Spotify) ---------- */
 const SPID='bc6096fd20364a8b8c2df864d94e9a79';
 const SPSC='user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private playlist-read-collaborative user-library-read user-read-recently-played streaming user-read-email user-read-private';
@@ -1872,8 +1980,8 @@ async function spDo(fn){
 async function spRefresh(){
   try{const nw=await spApi('/me/player');if(nw&&Date.now()<spPlHold)nw.is_playing=spPlWant;spNow=nw;if(spVol!=null&&Date.now()<spVolHold&&spNow&&spNow.device)spNow.device.volume_percent=spVol;spMsg=spMsg&&/^Non trovo/.test(spMsg)&&spNow?'':spMsg}catch(e){if(e.message==='nologin'){spNow=null}else spMsg=spErr(e)}
   if($('#musn'))paintNow()}
-const spPP=()=>spNow&&spNow.is_playing;
-function spTitle(){const i=spNow&&spNow.item;if(!i)return null;const a=i.artists?i.artists.map(x=>x.name).join(', '):(i.show&&i.show.name)||'';const im=((i.album&&i.album.images)||i.images||[])[0];return{t:i.name,a,img:im,p:spNow.progress_ms,d:i.duration_ms}}
+const spPP=()=>mpYT()?MP.ytPlaying:(spNow&&spNow.is_playing);
+function spTitle(){const y=mpYT();if(y)return y;const i=spNow&&spNow.item;if(!i)return null;const a=i.artists?i.artists.map(x=>x.name).join(', '):(i.show&&i.show.name)||'';const im=((i.album&&i.album.images)||i.images||[])[0];return{t:i.name,a,img:im,p:spNow.progress_ms,d:i.duration_ms}}
 const spImg=(arr,round)=>arr&&arr.length?'<img class="th'+(round?' rd':'')+'" src="'+esc((arr[arr.length>1?arr.length-1:0]).url)+'" alt="" loading="lazy">':'<span class="th ph'+(round?' rd':'')+'">♪</span>';
 let vinBase=0,vinStart=null;const VINP=5;
 function vinStyle(){const now=Date.now(),pl=!!spPP();
@@ -1882,8 +1990,8 @@ function vinStyle(){const now=Date.now(),pl=!!spPP();
   return'animation-delay:-'+off+'s;animation-play-state:'+(pl?'running':'paused')}
 function nowHtml(){
   if(SP&&SP.sv!==2&&!spMobile())return'<div class="mlogin"><div class="eq big"><i></i><i></i><i></i><i></i><i></i></div><h3>Aggiorna il collegamento</h3><p>Per ascoltare direttamente da questo browser serve un nuovo consenso a Spotify. Una volta sola.</p><button class="mgo" data-m="login">Collega Spotify</button></div>';
-  if(!SP)return'<div class="mlogin"><div class="eq big"><i></i><i></i><i></i><i></i><i></i></div><h3>Collega Spotify</h3><p>Un solo accesso. Poi scegli le playlist qui o dai comandi a voce da Parla con me.</p><button class="mgo" data-m="login">Collega Spotify</button></div>';
-  const n=spTitle(),dev=spNow&&spNow.device,vol=dev&&dev.volume_percent;
+  if(!SP&&!mpYT()&&!MP.pl.length)return'<div class="mlogin"><div class="eq big"><i></i><i></i><i></i><i></i><i></i></div><h3>Collega Spotify</h3><p>Un solo accesso. Poi scegli le playlist qui o dai comandi a voce da Parla con me.</p><button class="mgo" data-m="login">Collega Spotify</button></div>';
+  const n=spTitle(),dev=mpYT()?{name:'YouTube · questo telefono',volume_percent:MP.vol}:(spNow&&spNow.device),vol=dev&&dev.volume_percent;
   return'<div class="mnow" data-hl="now"><div class="mcov"><div class="vin" style="'+vinStyle()+'">'+(n&&n.img?'<img src="'+esc(n.img.url)+'" alt="">':'<span class="vph">♪</span>')+'<i class="vhole"></i></div><i class="vshine"></i></div>'+
     '<div class="mmeta"><div class="mtt"><b>'+esc(n?n.t:'Niente in riproduzione')+'</b>'+(spPP()?'<span class="eq"><i></i><i></i><i></i><i></i></span>':'')+'</div><span>'+esc(n?n.a:'Apri Spotify su un dispositivo e scegli una playlist')+'</span></div>'+
     (n&&n.d?'<div class="mbar"><i style="width:'+Math.min(100,Math.round(n.p/n.d*100))+'%"></i></div>':'<div class="mbar"><i style="width:0"></i></div>')+
@@ -1892,6 +2000,7 @@ function nowHtml(){
 function trRow(m,u,img,t,sub,round){return'<button class="mrow2" data-m="'+m+'" data-u="'+esc(u)+'">'+spImg(img,round)+'<span class="mt"><b>'+esc(t)+'</b><small>'+esc(sub)+'</small></span><svg class="mp" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>'}
 function listsHtml(){
   let h='';if(spMsg)h+='<div class="mmsg">'+esc(spMsg)+(/^Non trovo un dispositivo/.test(spMsg)?'<div class="mfix"><button data-m="openapp">Apri Spotify</button>'+(spLast?'<button data-m="retry">Riprova</button>':'')+'</div>':'')+'</div>';
+  h+=mpHtml();
   if(!SP)return h;
   if(spRes){const R=spRes;h+='<h4 class="mh">Risultati</h4><div class="mlist">'+
     R.tracks.map(x=>trRow('tr',x.uri,x.album&&x.album.images,x.name,x.artists.map(a=>a.name).join(', '))).join('')+
@@ -1940,7 +2049,11 @@ async function showMusic(){
   $('#root').innerHTML='<header class="top">'+backBtn+'<div class="ttl">Musica</div><div class="hbtns"><button class="pill" data-act="hubvoice">Voce</button></div></header><div class="mus" id="mus"><div id="musn">'+nowHtml()+'</div>'+(SP?'<form id="musf" class="msearch" autocomplete="off"><input id="musq" placeholder="Cerca brano, artista o playlist" enterkeyhint="search"><button type="submit" class="msb" aria-label="Cerca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg></button></form>':'')+'<div id="musl">'+listsHtml()+'</div></div>';
   const R=$('#mus');
   R.onclick=async e=>{const b=e.target.closest('[data-m]');if(!b)return;const m=b.dataset.m,u=b.dataset.u;
-    if(m==='vup'||m==='vdn'){spVolStep(m==='vup'?10:-10);return}
+    if(m==='vup'||m==='vdn'){if(mpYT())mpYtVol(m==='vup'?10:-10);else spVolStep(m==='vup'?10:-10);return}
+    if(/^h/.test(m)){mpClick(m,u);return}
+    if(MP.on&&(m==='next'||m==='prev')){mpStep(m==='next'?1:-1);return}
+    if(MP.on&&m==='pp'&&MP.cur&&MP.cur.s==='yt'){mpYtToggle();return}
+    if(/^(tr|ctx|liked)$/.test(m))mpOff();
     if(spBusy)return;spBusy=true;try{if(spPlayer&&spPlayer.activateElement)spPlayer.activateElement()}catch{}
     try{
       if(m==='login'){await spLogin();return}
@@ -1958,12 +2071,21 @@ async function showMusic(){
       else if(m==='dev'){spDevId=u;lset('flat_spdev',u);try{await spApi('/me/player','PUT',{device_ids:[u],play:!!spPP()})}catch(e){}spMsg='';setTimeout(spRefresh,900);await spLoadDev()}
     }catch(er){spMsg=spErr(er);if(er.message==='nologin')showMusic();else if(er.status===404&&(m==='tr'||m==='ctx')&&/^spotify:/.test(u||'')){spBusy=false;paintLists();toast('Apro Spotify sul brano: premi play lì');setTimeout(()=>{location.href=u},600);return}}
     spBusy=false;paintLists()};
+  R.addEventListener('submit',mpSubmit);
   const f=$('#musf');if(f)f.onsubmit=async e=>{e.preventDefault();const q=$('#musq').value.trim();if(!q)return;$('#musq').blur();f.classList.add('busy');try{spRes=await spSearch(q);spMsg=''}catch(er){spMsg=spErr(er)}f.classList.remove('busy');paintLists();const h=$('#musl .mh');if(h)h.scrollIntoView({behavior:'smooth',block:'start'})};
   clearInterval(spPoll);
   if(SP){spInitPlayer();spLoadPl();spLoadDev();spRefresh();let tk=0;spPoll=setInterval(()=>{if(!document.hidden&&appOpen){spRefresh();if(++tk%3===0)spLoadDev()}},5000)}
 }
 async function musicCommand(raw){
   const t=norm(raw);
+  if(MP.on&&MP.cur&&MP.cur.s==='yt'){
+    if(/\b(pausa|ferma|fermati|stop|stoppa)\b/.test(t)){mpYtSet(false);return'Messa in pausa.'}
+    if(/\b(riprendi|riparti|continua)\b/.test(t)){mpYtSet(true);return'Riprendo.'}
+    if(/\b(prossim\w*|salta|avanti|skip)\b/.test(t)){mpStep(1);return'Passo al prossimo brano.'}
+    if(/\b(preceden\w*|indietro)\b/.test(t)){mpStep(-1);return'Torno indietro.'}
+    if(/\b(che|quale) (canzone|brano|musica)|cosa sta suonando|cosa sento/.test(t))return'Stai ascoltando '+MP.cur.t+(MP.cur.a?', di '+MP.cur.a:'')+'.'}
+  {const hp=/\b(metti|mettimi|suona|suonami|riproduci|fai partire|ascolta)\b/.test(t)&&MP.pl.find(x=>x.tr.length&&t.includes(norm(x.name)));
+   if(hp){mpPlayAt(hp.id,0);PEND={kind:'music',noOpen:true,hl:'[data-hl="now"]',apply:()=>{}};return'Faccio partire la playlist '+hp.name+'.'}}
   if(!SP){PEND={kind:'music',apply:null};return'Per la musica devo prima collegare Spotify: ti apro Musica, tocca Collega Spotify.'}
   const done=(msg,hl)=>{PEND={kind:'music',noOpen:true,hl:hl||'[data-hl="now"]',apply:()=>{setTimeout(spRefresh,600)}};return msg};
   try{
@@ -2698,7 +2820,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v120'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v121'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let MEM=lget('flat_mem')||[],BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
