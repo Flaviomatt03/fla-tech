@@ -1837,7 +1837,7 @@ function mpHtml(){
     (v.tr.length?'':'<div class="empty">Vuota. Cerca qui sotto e aggiungi brani.</div>')+'</div>';
   h+='<h4 class="mh">Aggiungi brani</h4>';
   if(!MP.yk)h+='<div class="mmsg">Per cercare su YouTube serve una chiave gratuita di Google (console.cloud.google.com → nuovo progetto → abilita YouTube Data API v3 → Credenziali → Chiave API). Incollala qui sotto: resta solo su questo telefono. I link YouTube incollati funzionano anche senza.</div><form id="hkf" class="msearch" autocomplete="off"><input id="hkq" placeholder="Chiave API di YouTube" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="submit" class="msb" aria-label="Salva">OK</button></form>';
-  h+='<form id="hsf" class="msearch" autocomplete="off"><input id="hsq" value="'+esc(MP.q||'')+'" placeholder="Cerca o incolla un link YouTube"><button type="submit" data-s="yt" class="hsb">YouTube</button>'+(SP?'<button type="submit" data-s="sp" class="hsb sp">Spotify</button>':'')+'</form>';
+  h+='<form id="hsf" class="msearch" autocomplete="off"><input id="hsq" value="'+esc(MP.q||'')+'" placeholder="Cerca (Spotify + YouTube) o incolla un link"><button type="submit" data-s="all" style="display:none" tabindex="-1" aria-hidden="true"></button><button type="submit" data-s="yt" class="hsb">YouTube</button><button type="submit" data-s="sp" class="hsb sp">Spotify</button></form>';
   const ni=spNow&&spNow.item&&!mpYT()?spNow.item:null;
   if(ni)h+='<button class="mrow2" data-m="hnow"><span class="th ph">+</span><span class="mt"><b>Aggiungi «'+esc(ni.name)+'»</b><small>In riproduzione su Spotify</small></span></button>';
   if(MP.res)h+='<div class="mlist">'+(MP.res.items.length?MP.res.items.map((x,i)=>'<button class="mrow2" data-m="hadd" data-u="'+i+'">'+(x.img?'<img class="th" src="'+esc(x.img)+'" alt="" loading="lazy">':'<span class="th ph">♪</span>')+'<span class="mt"><b>'+esc(x.t)+'</b><small>'+(x.s==='yt'?'YouTube':'Spotify')+(x.a?' · '+esc(x.a):'')+'</small></span><b class="plus">+</b></button>').join(''):'<div class="empty">Nessun risultato.</div>')+'</div>';
@@ -1859,8 +1859,16 @@ async function mpSubmit(e){
   const f=e.target;if(!f||!f.id)return;
   if(f.id==='hnf'){e.preventDefault();const n=$('#hnn').value.trim();if(!n)return;const p={id:'h'+Date.now().toString(36),name:n,tr:[]};MP.pl.push(p);mpSave();MP.view=p.id;MP.res=null;mpRepaint()}
   else if(f.id==='hkf'){e.preventDefault();const k=$('#hkq').value.trim();if(k){MP.yk=k;lset('flat_ytk',k);MP.msg='';mpRepaint()}}
-  else if(f.id==='hsf'){e.preventDefault();const q=$('#hsq').value.trim(),src=(e.submitter&&e.submitter.dataset.s)||'yt';if(!q)return;MP.q=q;$('#hsq').blur();MP.msg='Cerco…';mpRepaint();
-    try{MP.res=await(src==='sp'?mpSearchSp(q):mpSearchYt(q));MP.msg=''}catch(er){MP.msg=er.message;MP.res=null}mpRepaint()}}
+  else if(f.id==='hsf'){e.preventDefault();const q=$('#hsq').value.trim(),src=(e.submitter&&e.submitter.dataset.s)||'all';if(!q)return;MP.q=q;$('#hsq').blur();MP.msg='Cerco…';mpRepaint();
+    try{MP.res=await mpSearchAll(q,src);MP.msg=''}catch(er){MP.msg=er.message;MP.res=null}mpRepaint()}}
+async function mpSearchAll(q,src){
+  if(src==='yt')return mpSearchYt(q);
+  if(src==='sp'){if(!SP)throw new Error('Spotify non è collegato: esci da questa playlist e tocca Collega Spotify in alto.');return mpSearchSp(q)}
+  const jobs=[];if(SP)jobs.push(mpSearchSp(q));jobs.push(mpSearchYt(q));
+  const rs=await Promise.allSettled(jobs),ok=rs.filter(r=>r.status==='fulfilled');
+  if(!ok.length)throw rs[0].reason;
+  const a=ok.map(r=>r.value.items),out=[];for(let i=0;a.some(x=>i<x.length);i++)for(const x of a)if(x[i])out.push(x[i]);
+  return{items:out}}
 async function mpSearchSp(q){const R=await spSearch(q,'track');return{items:R.tracks.map(x=>{const im=(x.album&&x.album.images)||[];return{s:'sp',id:x.uri,t:x.name,a:x.artists.map(a=>a.name).join(', '),img:(im[1]||im[0]||{}).url||'',d:x.duration_ms}})}}
 async function mpSearchYt(q){
   const lk=q.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/)([\w-]{11})/);
@@ -2820,7 +2828,7 @@ async function moveCommand(raw){
   if(!w.d)return'Per una task dimmi il giorno di scadenza.';
   const x=a.o.x;commit('task','[data-hl="t-'+x.id+'"]',()=>{x.due=w.d;tkPut(x);if($('#tkb'))paintTk()});
   return'Scadenza della task "'+x.t+'": '+tkDue(w.d).toLowerCase()+'.'}
-document.getElementById('vtag').textContent='v121'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
+document.getElementById('vtag').textContent='v122'+(window.FLAAndroid&&FLAAndroid.ver?' · L'+FLAAndroid.ver():'');
 /* ---------- Parla con me (dall'hub) ---------- */
 /* ---------- cervello: impara le parole che gli insegni ---------- */
 let MEM=lget('flat_mem')||[],BR=lget('flat_brain')||[],brainPend='',brTs=lget('flat_brain_ts')||0,brT=null,brSync='off';
